@@ -2,6 +2,7 @@ const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
 const User = require('./../models/users.model');
 const Admin = require('./../models/admins.model');
+const Inscription = require('./../models/inscriptions.model');
 
 const catchAsync = require('./../utils/catchAsync');
 const Email = require('./../utils/email');
@@ -52,9 +53,11 @@ const createSendToken = (user, statusCode, req, res) => {
     });
 };
 
-/* The above code is checking if the user is logged in. If the user is logged in, the user is allowed
-to access the protected route. If the user is not logged in, the user is not allowed to access the
-protected route. */
+/**
+ * The above code is checking if the user is logged in. If the user is logged in, the user is allowed
+ * to access the protected route. If the user is not logged in, the user is not allowed to access the
+ * protected route.
+ */
 exports.protect = catchAsync(async (req, res, next) => {
     // 1) Getting the token and check if its there
     // We will be receiving the token in a header in the request.
@@ -70,11 +73,11 @@ exports.protect = catchAsync(async (req, res, next) => {
     } else if (req.cookies.jwt) {
         token = req.cookies.jwt;
     }
-
+    console.log(token);
     if (!token) {
         return next(
             new AppError(
-                'No haz iniciado sesion, por favor inicia sesion antes de ingresar.',
+                'No has iniciado sesión, por favor inicia sesión antes de ingresar.',
                 401
             ) //401 means not authorized
         );
@@ -118,7 +121,16 @@ exports.signUpUser = catchAsync(async (req, res, next) => {
         passwordConfirm: req.body.passwordConfirm,
     });
 
-    await new Email(newUser, process.env.LANDING_URL).sendWelcome();
+    try {
+        await new Email(newUser, process.env.LANDING_URL).sendWelcome();
+    } catch (error) {
+        return next(
+            new AppError(
+                'Hemos tenido problemas enviando un correo de bienvenida.',
+                500
+            )
+        );
+    }
 
     return createSendToken(newUser, 201, req, res);
 });
@@ -132,14 +144,30 @@ exports.signUpAdmin = catchAsync(async (req, res, next) => {
         passwordConfirm: req.body.passwordConfirm,
     });
 
-    await new Email(newUser, process.env.LANDING_URL).sendWelcome();
+    try {
+        await new Email(newUser, process.env.LANDING_URL).sendWelcome();
+    } catch (error) {
+        return next(
+            new AppError(
+                'Hemos tenido problemas enviando un correo de bienvenida.',
+                500
+            )
+        );
+    }
 
-    return createSendToken(newUser, 201, req, res);
+    // After signup a verified admin must approve the new admin
+    res.status(200).json({
+        status: 'success',
+        message:
+            'Te has registrado con éxito, espera a que un administrador verifique tu perfil.',
+    });
 });
 
-/* Checking if the user is logged in. If the user is logged in, the user is allowed
-to access the protected route. If the user is not logged in, the user is not allowed to access the
-protected route. */
+/**
+ * Checking if the user is logged in. If the user is logged in, the user is allowed
+ * to access the protected route. If the user is not logged in, the user is not allowed to access the
+ * protected route.
+ */
 exports.loginUser = catchAsync(async (req, res, next) => {
     const { email, password } = req.body;
 
@@ -147,7 +175,7 @@ exports.loginUser = catchAsync(async (req, res, next) => {
         // After calling next we want the function to end and send an error.
         return next(
             new AppError(
-                'Por favor ingrese un email y contraseña validos.',
+                'Por favor ingrese un email y contraseña válidos.',
                 400
             )
         );
@@ -164,9 +192,11 @@ exports.loginUser = catchAsync(async (req, res, next) => {
     createSendToken(user, 201, req, res);
 });
 
-/* Checking if the admin is logged in. If the user is logged in, the user is allowed
-to access the protected route. If the user is not logged in, the user is not allowed to access the
-protected route. */
+/**
+ * Checking if the admin is logged in. If the user is logged in, the user is allowed
+ * to access the protected route. If the user is not logged in, the user is not allowed to access the
+ * protected route.
+ */
 exports.loginAdmin = catchAsync(async (req, res, next) => {
     const { email, password } = req.body;
 
@@ -174,19 +204,29 @@ exports.loginAdmin = catchAsync(async (req, res, next) => {
         // After calling next we want the function to end and send an error.
         return next(
             new AppError(
-                'Por favor ingrese un email y contraseña validos.',
+                'Por favor ingrese un email y contraseña válidos.',
                 400
             )
         );
     }
 
-    // 2 Check is user exists.
-    const user = await Admin.findOne({ email }).select('+password'); // adding a + to the field set as selected false means we will retrieve it
+    // 2 Check is user exists and has been verified.
+    const user = await Admin.findOne({ email }).select(
+        '+password +hasVerification'
+    ); // adding a + to the field set as selected false means we will retrieve it
 
     if (!user || !(await user.correctPassword(password, user.password))) {
         return next(new AppError('Email o contraseña incorrectos.', 401));
     }
 
+    if (!user.hasVerification) {
+        return next(
+            new AppError(
+                'No haz sido verificado, espera a que un administrador verifique tu perfil.',
+                401
+            )
+        );
+    }
     // 3 Send JWT to user.
     createSendToken(user, 201, req, res);
 });
@@ -199,9 +239,11 @@ exports.logout = (req, res, next) => {
     res.status(200).json({ status: 'success' });
 };
 
-/* The above code is checking if the user is logged in. If the user is logged in, the user is allowed
-to access the protected route. If the user is not logged in, the user is not allowed to access the
-protected route. */
+/**
+ * The above code is checking if the user is logged in. If the user is logged in, the user is allowed
+ * to access the protected route. If the user is not logged in, the user is not allowed to access the
+ * protected route.
+ */
 exports.protect = catchAsync(async (req, res, next) => {
     // 1) Getting the token and check if its there
     let token;
@@ -219,7 +261,7 @@ exports.protect = catchAsync(async (req, res, next) => {
     if (!token) {
         return next(
             new AppError(
-                'No haz iniciado sesion, por favor inicia sesion para obtener acceso.',
+                'No has iniciado sesión, por favor inicia sesión para obtener acceso.',
                 401
             )
         );
@@ -234,7 +276,7 @@ exports.protect = catchAsync(async (req, res, next) => {
     if (!user && !admin) {
         return next(
             new AppError(
-                'El usuario con el que intentas ingresar ta no existe.',
+                'El usuario con el que intentas ingresar ya no existe.',
                 401
             )
         );
@@ -249,7 +291,7 @@ exports.protect = catchAsync(async (req, res, next) => {
         // iat - issued at
         return next(
             new AppError(
-                'Haz cambiado recientemente tu contraseña. Inicia sesion de nuevo.',
+                'Has cambiado recientemente tu contraseña. Inicia sesión de nuevo.',
                 401
             )
         );
@@ -274,13 +316,48 @@ exports.getMe = catchAsync(async (req, res, next) => {
     next();
 });
 
+/* Setting the user id to the params id. */
+exports.getMyCourses = catchAsync(async (req, res, next) => {
+    const userId = req.user._id;
+
+    const results = await Inscription.aggregate([
+        {
+            $match: {
+                user: userId,
+            },
+        },
+        {
+            $lookup: {
+                from: 'courses',
+                localField: 'course',
+                foreignField: '_id',
+                as: 'course',
+            },
+        },
+        {
+            $unwind: '$course',
+        },
+    ]);
+
+    const courses = results.map((ins) => ins.course);
+
+    // 3 respond with update
+    res.status(200).json({
+        status: 'success',
+        results: courses.length,
+        data: {
+            documents: courses,
+        },
+    });
+});
+
 /* Updating the user or admin. */
 exports.editMe = catchAsync(async (req, res, next) => {
     // 1 Check for password
     if (req.body.password || req.body.passwordConfirm) {
         return next(
             new AppError(
-                'Para cambiar tu contraseña debes usar otra ruta. Usa esta funcion solo para cabiar tu perfil.',
+                'Para cambiar tu contraseña debes usar otra ruta. Usa esta función solo para cambiar tu perfil.',
                 400
             )
         );
@@ -304,13 +381,36 @@ exports.editMe = catchAsync(async (req, res, next) => {
     });
 });
 
+/* Deletes the user by its id*/
+exports.deleteMe = catchAsync(async (req, res, next) => {
+    let userActive = req.userType == 'User' ? req.user : req.admin;
+    let Model = req.userType == 'User' ? User : Admin;
+
+    if (req.userType != 'User') {
+        return next(
+            new AppError('Esta función es sólo para borrar usuarios.', 400)
+        );
+    }
+
+    // 2 Update document
+    const user = await Model.findByIdAndDelete(userActive._id);
+
+    // 3 respond with update
+    res.status(200).json({
+        status: 'success',
+        data: {
+            user,
+        },
+    });
+});
+
 /* Restricting the user to a certain role. */
 exports.restrictTo = (...roles) => {
     return (req, res, next) => {
         if (!roles.includes(req.userType)) {
             next(
                 new AppError(
-                    'No cuentas con los permisos para realizar esta accion.',
+                    'No cuentas con los permisos para realizar esta acción.',
                     403
                 )
             );

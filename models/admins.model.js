@@ -14,7 +14,7 @@ const adminSchema = new mongoose.Schema({
         lowercase: true,
         unique: true,
         trim: true,
-        validate: [validator.isEmail, 'Necesitas un correo vallido.'],
+        validate: [validator.isEmail, 'Necesitas un correo válido.'],
     },
     password: {
         type: String,
@@ -34,10 +34,18 @@ const adminSchema = new mongoose.Schema({
             message: 'Por favor ingresa la misma contraseña.',
         },
     },
+    hasVerification: {
+        type: Boolean,
+        select: false,
+        default: false,
+    },
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,
 });
+
+// Indexing admin properties for optimized search 
+adminSchema.index({ email: 1 });
 
 // MIDDLEWARES
 /* This is a middleware that runs before the save() or create() method. It hashes the password and sets

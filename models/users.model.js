@@ -29,12 +29,14 @@ const userSchema = new mongoose.Schema({
         lowercase: true,
         unique: [true, 'Este correo ya esta en uso. Elige otro.'],
         trim: true,
-        validate: [validator.isEmail, 'Necesitas un correo vallido.'],
+        validate: [validator.isEmail, 'Necesitas un correo válido.'],
     },
-    topics: {
-        type: mongoose.Schema.ObjectId,
-        ref: 'Topics',
-    },
+    topics: [
+        {
+            type: mongoose.Schema.ObjectId,
+            ref: 'Topics',
+        },
+    ],
     job: {
         type: String,
     },
@@ -47,11 +49,14 @@ const userSchema = new mongoose.Schema({
                 'Secundaria',
                 'Preparatoria',
                 'Universidad',
+                'Maestria',
+                'Doctorado',
             ],
         },
     },
     postalCode: {
         type: Number,
+        required: [true, 'Por favor ingresa un código postal.'],
     },
     password: {
         type: String,
@@ -76,9 +81,14 @@ const userSchema = new mongoose.Schema({
     passwordResetExpires: Date,
 });
 
+// Indexing program properties for optimized search
+userSchema.index({ email: 1 });
+
 // MIDDLEWARES
-/* This is a middleware that runs before the save() or create() method. It hashes the password and sets
-the passwordConfirm to undefined. */
+/**
+ * This is a middleware that runs before the save() or create() method. It hashes the password and sets
+ * the passwordConfirm to undefined.
+ */
 userSchema.pre('save', async function (next) {
     if (this.isModified('password')) {
         this.password = await bcrypt.hash(this.password, 12);
@@ -88,8 +98,10 @@ userSchema.pre('save', async function (next) {
     return next();
 });
 
-/* This is a middleware that runs before the save() or create() method. Checks if the password has changed
-and updates the passwordChangedAt attribute. */
+/**
+ * This is a middleware that runs before the save() or create() method. Checks if the password has changed
+ * and updates the passwordChangedAt attribute.
+ */
 userSchema.pre('save', async function (next) {
     if (!this.isModified('password') || this.isNew) return next();
     else {
@@ -140,6 +152,46 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
     // false means the password did not change
     return false;
 };
+
+/**
+ * When a user is deleted, their payments as well as course inscriptions are also deleted,
+ * updating the capacity of the course.
+ */
+userSchema.pre('remove', async function (next) {
+    const Course = require('./courses.model');
+    const Payment = require('./payments.model');
+    const Inscription = require('./inscriptions.model');
+
+    // search the inscriptions of the user
+    const inscriptions = await Inscription.find({ user: this._id });
+
+    // search the list of pending payments of the user
+    const pendingPayments = await Payment.find({
+        user: this._id,
+        status: 'Pendiente',
+    });
+    // for each one, we look for the corresponding course and update the capacity
+    for (const payment of pendingPayments) {
+        const course = await Course.findById(payment.course);
+        if (course) {
+            await Course.findOneAndUpdate(
+                { _id: course._id },
+                { capacity: course.capacity + 1 }
+            );
+        }
+        // remove the payment
+        await payment.remove();
+    }
+
+    // remove all the payments related with user inscriptions
+    for (const inscription of inscriptions) {
+        await Payment.deleteMany({ inscription: inscription._id });
+    }
+
+    // remove the inscription
+    await Inscription.deleteMany({ user: this._id });
+    return next();
+});
 
 const User = mongoose.model('User', userSchema);
 

@@ -3,7 +3,6 @@ const filesController = require('../controllers/files.controller');
 
 const router = express.Router();
 
-// RUTAS
 const {
     createProgram,
     getProgram,
@@ -11,15 +10,32 @@ const {
     updateProgram,
     deleteProgram,
 } = require(`${__dirname}/../controllers/program.controller.js`);
+const {
+    protect,
+    restrictTo,
+} = require(`${__dirname}/../controllers/authentication.controller.js`);
+const fileParser = require('../utils/multipartParser');
 
 router
     .route('/')
     .get(getAllPrograms)
     .post(
-        createProgram,
-        filesController.uploadProgramImage,
-        filesController.formatProgramImage
+        protect,
+        restrictTo('Admin'),
+        fileParser,
+        filesController.formatProgramImage,
+        createProgram
     );
-router.route('/:id').get(getProgram).patch(updateProgram).delete(deleteProgram);
+router
+    .route('/:id')
+    .get(getProgram)
+    .patch(
+        protect,
+        restrictTo('Admin'),
+        fileParser,
+        filesController.formatProgramImage,
+        updateProgram
+    )
+    .delete(protect, restrictTo('Admin'), deleteProgram);
 
 module.exports = router;

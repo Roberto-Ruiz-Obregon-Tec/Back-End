@@ -25,7 +25,8 @@ class APIFeatures {
         // ADVANCED FILTERING
         let queryString = JSON.stringify(queryObj);
         queryString = queryString.replace(
-            /\b(gte|gt|lte|lt)\b/g,
+            // To allow more mongoose commands add the name of the command to the regular expression
+            /\b(gte|gt|lte|lt|regex|in)\b/g,
             (match) => `$${match}`
         );
 
@@ -60,7 +61,6 @@ class APIFeatures {
             const fields = this.queryString.fields.split(',').join(' ');
             this.query.select(fields);
         }
-        this.query.select('-__v');
 
         return this;
     }

@@ -26,7 +26,7 @@ const forgotPassword = async (Model, email, req, userType) => {
     // 3 send it back as an email
     const resetURL = `${req.protocol}://${req.get(
         'host'
-    )}/retrievePassword/${userType}/${resetToken}`;
+    )}/api/retrievePassword/${userType}/${resetToken}`;
 
     // si falla queremos eliminar la token
     try {
@@ -36,7 +36,7 @@ const forgotPassword = async (Model, email, req, userType) => {
         user.passwordResetToken = undefined;
         await user.save({ validateBeforeSave: false });
         throw new AppError(
-            'Hubo un error enviando el correo de confirmacion. Intenta de nuevo',
+            'Hubo un error enviando el correo de confirmación. Intenta de nuevo',
             500
         );
     }
@@ -80,9 +80,11 @@ exports.forgotPasswordAdmin = catchAsync(async (req, res, next) => {
     });
 });
 
-/* This is the code that is executed when the user clicks on the link in the email. It is a GET request
-to the server. The server then checks if the token is valid and if it is, it allows the user to
-change their password. */
+/*
+ * This is the code that is executed when the user clicks on the link in the email. It is a GET request
+ * to the server. The server then checks if the token is valid and if it is, it allows the user to
+ * change their password. 
+*/
 exports.resetPasswordAdmin = catchAsync(async (req, res, next) => {
     await resetPassword(
         req.params.id,
@@ -94,7 +96,7 @@ exports.resetPasswordAdmin = catchAsync(async (req, res, next) => {
     res.status(200).json({
         status: 'success',
         message:
-            'Contraseña cambiada con exito. Quiza debas iniciar sesion de nuevo',
+            'Contraseña cambiada con éxito. Quizá debas iniciar sesión de nuevo',
     });
 });
 
@@ -108,9 +110,11 @@ exports.forgotPasswordUser = catchAsync(async (req, res, next) => {
     });
 });
 
-/* This is the code that is executed when the user clicks on the link in the email. It is a GET request
-to the server. The server then checks if the token is valid and if it is, it allows the user to
-change their password. */
+/**
+ *  This is the code that is executed when the user clicks on the link in the email. It is a GET request
+ * to the server. The server then checks if the token is valid and if it is, it allows the user to
+ * change their password. 
+*/
 exports.resetPasswordUser = catchAsync(async (req, res, next) => {
     await resetPassword(
         req.params.id,
@@ -122,6 +126,6 @@ exports.resetPasswordUser = catchAsync(async (req, res, next) => {
     res.status(200).json({
         status: 'success',
         message:
-            'Contraseña cambiada con exito. Quiza debas iniciar sesion de nuevo',
+            'Contraseña cambiada con éxito. Quizá debas iniciar sesión de nuevo',
     });
 });

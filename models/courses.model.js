@@ -14,13 +14,15 @@ const courseSchema = new mongoose.Schema(
         description: {
             type: String,
         },
-        topics: {
-            type: [mongoose.Schema.ObjectId],
-            ref: 'Course',
-        },
+        topics: [
+            {
+                type: mongoose.Schema.ObjectId,
+                ref: 'Topics',
+            },
+        ],
         // people/corps who are teaching the course
-        teachers: {
-            type: [String],
+        teacher: {
+            type: String,
             required: [true, 'Es necesario asignar profesores al curso'],
         },
         // course beginning date
@@ -33,17 +35,10 @@ const courseSchema = new mongoose.Schema(
             type: Date,
             required: [true, 'Fecha fin requerida'],
         },
-        // // TO-DO? course hours do they change schedules?
-        // schedule: {
-        //     type: String,
-        // },
-        // session time span in minutes
-        duration: {
-            type: Number,
-            validate: {
-                validator: (value) => value > 0 && Number.isInteger(value),
-                message: 'La duración debe de ser un número entero positivo',
-            },
+        // TO-DO? course hours do they change schedules?
+        schedule: {
+            type: String,
+            required: [true, 'Necesitas ingresar el horario del curso'],
         },
         // additional class material
         accessLink: {
@@ -53,19 +48,7 @@ const courseSchema = new mongoose.Schema(
                     /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(value),
                 message: (props) => `${props.value} no es una URL válida`,
             },
-        },
-        // access code/password assigned to the course
-        accessCode: {
-            type: String,
-        },
-        // link to zoom meeting
-        zoomLink: {
-            type: String,
-            validate: {
-                validator: (value) =>
-                    /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(value),
-                message: (props) => `${props.value} no es una URL válida`,
-            },
+            default: 'https://zoom.us/',
         },
         // remote, presential, etc.
         modality: {
@@ -78,12 +61,20 @@ const courseSchema = new mongoose.Schema(
         },
         postalCode: {
             type: String,
+            required: [true, 'Un curso debe tener un código postal.'],
+        },
+        address: {
+            type: String,
         },
         // free or paid
         status: {
             type: String,
             required: [true, 'El curso debe ser gratuito o de pago'],
             enum: { values: ['Gratuito', 'Pagado'] },
+        },
+        // bank account that will receive the payment
+        bankAccount: {
+            type: String,
         },
         // inscription cost for course access
         cost: {
@@ -105,12 +96,22 @@ const courseSchema = new mongoose.Schema(
             type: Number,
             default: 10,
             validate: {
-                validator: (value) => value > 0,
+                validator: (value) => value >= 0,
             },
+        },
+        bank: {
+            type: String,
+            default: 'Sin banco especificado',
         },
     },
     { timestamps: true }
 );
+
+// Indexing course properties for optimized search
+courseSchema.index({ status: 1 });
+courseSchema.index({ modality: 1 });
+courseSchema.index({ courseName: 1 });
+courseSchema.index({ postalCode: 1 });
 
 // date validation
 courseSchema.pre('validate', function () {
@@ -120,6 +121,25 @@ courseSchema.pre('validate', function () {
             400
         );
     }
+});
+
+/**
+ * In this case, when a course is removed, all payments and inscriptions related to it will also be deleted
+ * inscriptions related to it will also be deleted
+ */
+courseSchema.pre('findByIdAndDelete', async function (next) {
+    const Inscription = require('./inscriptions.model');
+    const Payment = require('./payments.model');
+    // delete the payments related with this course
+    await Payment.deleteMany({
+        course: this._id,
+    });
+    // delete every inscription related with this course id
+    await Inscription.deleteMany({
+        course: this._id,
+    });
+    // then the course is going to be deleted too
+    return next();
 });
 
 const Course = mongoose.model('Course', courseSchema);

@@ -9,6 +9,7 @@ const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const compression = require('compression');
+const dotenv = require('dotenv');
 
 // APP ERROR
 const AppError = require('./utils/appError');
@@ -23,23 +24,21 @@ const topicsRouter = require('./routes/topics.route');
 const programRouter = require('./routes/program.route');
 const adminRouter = require('./routes/admin.route');
 const viewRouter = require('./routes/views.route');
+const emailRouter = require('./routes/emails.route');
+const aggregationsRouter = require('./routes/aggregations.route');
 
 const app = express();
 
+// Read env variables and save them
+dotenv.config({ path: './config.env' });
+
 app.enable('trust proxy');
+app.use(cors());
+app.options('*', cors());
 
 // ENGINE IN CASE WE DECIDE TO USE A TEMPLATE ENGINE
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
-
-app.use(
-    cors({
-        origin: true,
-        credentials: true,
-    })
-);
-
-app.options('*', cors());
 
 // SERVING STATIC FILES
 app.use(express.static(path.join(__dirname, 'public')));
@@ -64,8 +63,8 @@ app.use(
 );
 
 // BODY PARSER
-app.use(express.json({ limit: '10kb' }));
-app.use(express.urlencoded({ extnded: true, limt: '10kb' }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Defend against nossql injection
@@ -84,7 +83,7 @@ app.use(compression());
 
 // LIMMIT REQUESTS
 const limiter = rateLimit({
-    max: 100,
+    max: 1000,
     windowMs: 60 * 60 * 1000,
     handler: function (req, res, next) {
         return next(
@@ -107,6 +106,8 @@ app.use('/v1/course', courseRouter);
 app.use('/v1/topics', topicsRouter);
 app.use('/v1/program', programRouter);
 app.use('/v1/admin', adminRouter);
+app.use('/v1/emails', emailRouter);
+app.use('/v1/aggregations', aggregationsRouter);
 app.use('/', viewRouter);
 
 // ERROR HANDLER FOR UNHANDLED ROUTES

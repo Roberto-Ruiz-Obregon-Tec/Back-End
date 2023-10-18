@@ -8,6 +8,11 @@ const firebase = require('../config/db'); // reference to our db
 require('firebase/storage'); // must be required for this to work
 const storage = firebase.storage().ref(); // create a reference to storage
 global.XMLHttpRequest = require('xhr2');
+const limits = {
+files: 1, // allow only 1 file per request
+fileSize: 10000 * 10000, // 10 MB (max file size)
+};
+
 
 /**
  *
@@ -17,8 +22,7 @@ global.XMLHttpRequest = require('xhr2');
  * - It uploads a file to storage on Firebase
  * - It accepts an object as an argument with the
  *   "originalname" and "buffer" as keys
- */
-
+*/
 const uploadImage = async (file, resource) => {
     let { originalname, buffer } = file;
 
@@ -46,7 +50,7 @@ const uploadImage = async (file, resource) => {
 /**
  * This function creates a multer object that will be used to upload images to the server.
  * @returns an object with two properties: storage and filter.
- */
+*/
 const createUpload = () => {
     const multerStorage = multer.memoryStorage();
 
@@ -62,8 +66,20 @@ const createUpload = () => {
                 false
             );
         }
+        if (file.size <= limits.fileSize){
+            cb(null, true);
+        } else {
+            cb(
+                new AppError(
+                    'La imagen pesa más de 10 MB. Intenta de nuevo.',
+                    404
+                ),
+                false
+            );
+        }
     };
-    return multer({ storage: multerStorage, filter: multerFilter });
+
+    return multer({ storage: multerStorage, filter: multerFilter, limits: limits });
 };
 
 /* A middleware that is used to format the image before it is uploaded to the server. */
@@ -87,6 +103,16 @@ exports.formatProgramImage = catchAsync(async (req, res, next) => {
 });
 
 /* A middleware that is used to format the image before it is uploaded to the server. */
+exports.formatEmailImage = catchAsync(async (req, res, next) => {
+    if (!req.file) return next();
+
+    // FORMAT file
+    req.body.imageUrl = await uploadImage(req.file, 'email');
+
+    next();
+});
+
+/* A middleware that is used to format the image before it is uploaded to the server. */
 exports.formatPaymentImage = catchAsync(async (req, res, next) => {
     if (!req.file) return next();
 
@@ -95,10 +121,11 @@ exports.formatPaymentImage = catchAsync(async (req, res, next) => {
 
     next();
 });
-
 /* Creating a multer object that will be used to upload images to the server. */
 exports.uploadCourseImage = createUpload().single('courseImage');
 /* Creating a multer object that will be used to upload images to the server. */
 exports.uploadProgramImage = createUpload().single('programImage');
+/* Creating a multer object that will be used to upload images to the server. */
+exports.uploadEmailImage = createUpload().single('emailImage');
 /* Creating a multer object that will be used to upload images to the server. */
 exports.uploadPaymentImage = createUpload().single('paymentImage');
