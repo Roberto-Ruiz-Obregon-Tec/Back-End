@@ -13,7 +13,7 @@ const programSchema = new mongoose.Schema(
         },
         category: {
             type: String,
-            enum: { values: ['Beca', 'Evento', 'Apoyo', 'Programa', 'Otro'] },
+            enum: { values: ['Beca', 'Apoyo', 'Programa', 'Otro'] },
             required: [true, 'Es necesaria una categoría'],
         },
         imageUrl: {
