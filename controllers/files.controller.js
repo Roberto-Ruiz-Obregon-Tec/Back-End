@@ -103,6 +103,16 @@ exports.formatProgramImage = catchAsync(async (req, res, next) => {
 });
 
 /* A middleware that is used to format the image before it is uploaded to the server. */
+exports.formatEventImage = catchAsync(async (req, res, next) => {
+    if (!req.file) return next();
+
+    // FORMAT file
+    req.body.imageUrl = await uploadImage(req.file, 'event');
+
+    next();
+});
+
+/* A middleware that is used to format the image before it is uploaded to the server. */
 exports.formatEmailImage = catchAsync(async (req, res, next) => {
     if (!req.file) return next();
 
