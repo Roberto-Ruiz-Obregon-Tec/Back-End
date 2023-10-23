@@ -3,10 +3,6 @@ const validator = require('validator');
 const AppError = require('../utils/appError');
 
 const scholarshipSchema = new mongoose.Schema({
-    _id: {
-        type: mongoose.Schema.ObjectId,
-        required: true,
-    },
     name: {
         type: String,
         required: [true, 'Nombre de la beca requerido'],
@@ -40,7 +36,7 @@ const scholarshipSchema = new mongoose.Schema({
         type: Date,
         required: [true, 'Fecha de fin requerida'],
     }
-});
+}, { timestamps: true });
 
 // date validation
 courseSchema.pre('validate', function () {

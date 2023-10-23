@@ -13,7 +13,7 @@ const focusScholarshipSchema = new mongoose.Schema({
         ref: 'Focus',
         required: [true, 'Campo de enfoque necesario'],
     }
-});
+}, { timestamps: true });
 
 // Indexing focusScholarship properties for optimized search
 focusScholarshipSchema.index({ scholarship: 1 });

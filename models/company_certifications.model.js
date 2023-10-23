@@ -13,7 +13,7 @@ const companyCertificationsSchema = new mongoose.Schema({
         ref: 'Certification',
         required: [true, 'Campo de certificación necesario'],
     }
-});
+}, { timestamps: true });
 
 // Indexing companyCertifications properties for optimized search
 companyCertificationsSchema.index({ company: 1 });
