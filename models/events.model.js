@@ -24,8 +24,13 @@ const eventSchema = new mongoose.Schema(
 			required: [true, 'Fecha fin requerida'],
 		},
 		imageUrl: {
-			type: String,
-		},
+            type: String,
+            required: [true, 'Tu curso debe contar con una imagen'],
+            validate: {
+                validator: (value) =>
+                    /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(value),
+            },
+        },
 	}
 );
 
