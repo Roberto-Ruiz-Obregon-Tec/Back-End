@@ -23,6 +23,9 @@ const eventSchema = new mongoose.Schema(
 			type: Date,
 			required: [true, 'Fecha fin requerida'],
 		},
+		imageUrl: {
+			type: String,
+		},
 	}
 );
 
