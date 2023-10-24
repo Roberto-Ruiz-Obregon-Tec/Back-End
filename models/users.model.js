@@ -1,3 +1,4 @@
+
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
@@ -5,67 +6,77 @@ const crypto = require('crypto');
 const { bool } = require('sharp');
 
 /* Creating a schema for the user name */
-const nameSchema = new mongoose.Schema({
-    firstName: String,
-    lastName: String,
-});
+const nameSchema = new mongoose.Schema(
+    {
+        firstName: String,
+        lastName: String,
+    }
+);
 
-const companySchema = new mongoose.Schema({
-    company: String,
-    sociallyResponsible: Boolean,
-});
+const personalCompanySchema = new mongoose.Schema(
+    {
+        company: String,
+        sociallyResponsible: Boolean,
+    }
+);
 
 /* Creating a schema for the user model. */
-const userSchema = new mongoose.Schema({
-    name: {
-        type: nameSchema,
-        required: [true, 'Introduce tu nombre y apellidos'],
-    },
-    age: {
-        type: Number,
-        min: 0,
-        required: [true, 'Introduce tu edad'],
-    },
-    gender: {
-        type: String,
-        required: [true, 'Introduce tu sexo'],
-        enum: ['Hombre', 'Mujer', 'Otro'],
-    },
-    email: {
-        type: String,
-        required: [true, 'Introduce tu correo'],
-        lowercase: true,
-        unique: [true, 'El correo ingresado ya pertenece a otra cuenta'],
-        trim: true,
-        validate: [validator.isEmail, 'Introduce un correo válido.'],
-    },
+const userSchema = new mongoose.Schema(
+    {
+        name: {
+            type: nameSchema,
+            required: [true, 'Ingresa tu nombre y apellido'],
+        },
+        
+        age: {
+            type: Number,
+            min: 0,
+            required: [true, 'Ingresa tu edad'],
+        },
+        
+        gender: {
+            type: String,
+            enum: ['Hombre', 'Mujer', 'Otro'],
+            required: [true, 'Ingresa tu sexo']
+        },
+        
+        email: {
+            type: String,
+            required: [true, 'Ingresa tu correo'],
+            lowercase: true,
+            unique: [true, 'El correo ingresado ya pertenece a otra cuenta'],
+            trim: true,
+            validate: [validator.isEmail, 'Introduce un correo válido'],
+        },
 
-    occupation: {
-        type: String,
-        required: [true, 'Ingresa tu ocupacion'],
-    },
+        occupation: {
+            type: String,
+            required: [true, 'Ingresa tu ocupación'],
+        },
 
-    company: {
-        type: companySchema,
-        required: false
-    },
+        company: {
+            type: personalCompanySchema,
+            required: false
+        },
 
-    postalCode: {
-        type: Number,
-        required: [true, 'Ingresa tu código postal.'],
-    },
-    password: {
-        type: String,
-        required: [true, 'Ingresa una contraseña.'],
-        // Using select prevents the field from being retrieved
-        minlength: [8, 'Tu contraseña debe contar con al menos 8 caracteres.'],
-    },
-    // The profile picture will be stored in firebase and accesed with an URL
-    profilePicture: {
-        type: String,
-        required: false,
-    },
-}, {timestamps: true});
+        postalCode: {
+            type: Number,
+            required: [true, 'Ingresa tu código postal'],
+        },
+        
+        password: {
+            type: String,
+            required: [true, 'Ingresa una contraseña'],
+            // Using select prevents the field from being retrieved
+            minlength: [8, 'Tu contraseña debe contar con al menos 8 caracteres'],
+        },
+        // The profile picture will be stored in firebase and accesed with an URL
+        profilePicture: {
+            type: String,
+            required: false,
+        },
+    }, {timestamps: true}
+);
 
 
 // Indexing program properties for optimized search

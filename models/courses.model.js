@@ -1,47 +1,94 @@
+
 const mongoose = require('mongoose');
-const validator = require('validator');
-const bcrypt = require('bcryptjs');
-const crypto = require('crypto');
 const AppError = require('../utils/appError');
 
-const courseSchema = new mongoose.Schema(
+const courseSchema =  new mongoose.Schema(
     {
-        courseName: {
+        name: {
             type: String,
-            required: [true, 'Nombre de curso requerido'],
+            required: [true, 'Ingresa el nombre del curso'],
         },
-        // what is the course about
+        
         description: {
             type: String,
+            required: [true, 'Ingresa la descripción del curso'],
         },
-        topics: [
-            {
-                type: mongoose.Schema.ObjectId,
-                ref: 'Topics',
-            },
-        ],
-        // people/corps who are teaching the course
-        teacher: {
+        
+        speaker: {
             type: String,
-            required: [true, 'Es necesario asignar profesores al curso'],
+            required: [true, 'Ingresa el ponente del curso'],
         },
-        // course beginning date
+        
         startDate: {
             type: Date,
-            required: [true, 'Fecha de inicio requerida'],
+            required: [true, 'Ingresa la fecha de incio del curso'],
         },
-        // course final date
+        
         endDate: {
             type: Date,
-            required: [true, 'Fecha fin requerida'],
-        },
-        // TO-DO? course hours do they change schedules?
+            required: [true, 'Ingresa la fecha de fin del curso'],
+        }, 
+        
         schedule: {
             type: String,
-            required: [true, 'Necesitas ingresar el horario del curso'],
+            required: [true, 'Ingresa el horario del curso'],
         },
-        // additional class material
-        accessLink: {
+        
+        modality: {
+            type: String,
+            enum: ['Remoto', 'Presencial'],
+            required: [true, 'Ingresa la modalidad del curso (Remoto o Presencial)']
+        },
+        
+        postalCode: {
+            type: String,
+            required: [true, 'Ingresa el código postal'],
+        },
+        
+        location: {
+            type: String,
+            required: [true, 'Ingresa la ubicación del curso']
+        },
+        
+        status: {
+            type: String,
+            enum: ['Gratuito', 'De pago'],
+            required: [true, 'Ingresa si el curso es Gratuito o De pago'],
+        },
+        
+        cost: {
+            type: Number,
+            validate: {
+                validator: (cost) => cost >= 0,
+            },
+        },
+        
+        courseImage: {
+            type: String,
+            required: [true, 'Ingresa la imagen del curso'],
+            validate: {
+                validator: (value) =>
+                    /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(value),
+            },
+        },
+        
+        capacity: {
+            type: Number,
+            default: 0,
+            validate: {
+                validator: (value) => value >= 0,
+            },
+        },
+        
+        rating: {
+            type: Number,
+            default: 0,
+            validate: {
+                validator: (value) => value >= 0,
+            },
+        },
+        
+        meetingCode: {
             type: String,
             validate: {
                 validator: (value) =>
@@ -50,72 +97,23 @@ const courseSchema = new mongoose.Schema(
             },
             default: 'https://zoom.us/',
         },
-        // remote, presential, etc.
-        modality: {
+        
+        accessCode: {
             type: String,
-            enum: { values: ['Remoto', 'Presencial'] },
-            required: [
-                true,
-                'Modalidad del curso debe ser presencial o remoto',
-            ],
-        },
-        postalCode: {
-            type: String,
-            required: [true, 'Un curso debe tener un código postal.'],
-        },
-        address: {
-            type: String,
-        },
-        // free or paid
-        status: {
-            type: String,
-            required: [true, 'El curso debe ser gratuito o de pago'],
-            enum: { values: ['Gratuito', 'Pagado'] },
-        },
-        // bank account that will receive the payment
-        bankAccount: {
-            type: String,
-        },
-        // inscription cost for course access
-        cost: {
-            type: Number,
-            validate: {
-                validator: (cost) => cost >= 0 && Number.isInteger(cost),
-                message: 'El curso debe costar 0 o más',
-            },
-        },
-        imageUrl: {
-            type: String,
-            required: [true, 'Tu curso debe contar con una portada'],
-            validate: {
-                validator: (value) =>
-                    /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(value),
-            },
-        },
-        capacity: {
-            type: Number,
-            default: 10,
-            validate: {
-                validator: (value) => value >= 0,
-            },
-        },
-        bank: {
-            type: String,
-            default: 'Sin banco especificado',
         },
     },
-    { timestamps: true }
+    { timestamps: true}
 );
 
 // Indexing course properties for optimized search
-courseSchema.index({ status: 1 });
-courseSchema.index({ modality: 1 });
-courseSchema.index({ courseName: 1 });
-courseSchema.index({ postalCode: 1 });
+courseSchema.index({ estatus: 1 });
+courseSchema.index({ modalidad: 1 });
+courseSchema.index({ nombre_curso: 1 });
+courseSchema.index({ codigo_postal_curso: 1 });
 
 // date validation
 courseSchema.pre('validate', function () {
-    if (this.endDate < this.startDate) {
+    if (this.fecha_fin < this.fecha_inicio) {
         throw new AppError(
             'La fecha final debe ser menor a la fecha inicial',
             400
@@ -142,6 +140,5 @@ courseSchema.pre('findByIdAndDelete', async function (next) {
     return next();
 });
 
-const Course = mongoose.model('Course', courseSchema);
 
-module.exports = Course;
+module.exports = mongoose.model('Course', courseSchema);

@@ -1,34 +1,43 @@
+
 const mongoose = require('mongoose');
 const AppError = require('../utils/appError');
 
 const programSchema = new mongoose.Schema(
     {
-        nombre: {
+        name: {
             type: String,
-            required: [true, 'Es necesario que el programa tenga nombre'],
+            required: [true, 'Ingresa el nombre del programa'],
         },
-        fecha_inicio: {
+
+        startDate: {
             type: Date,
-            required: [true, 'Es necesario que el programa tenga una fecha de inicio'],
+            required: [true, 'Ingresa la fecha de inicio del programa'],
         },
-        fecha_fin: {
+        
+        endDate: {
             type: Date,
-            required: [true, 'Es necesario que el programa tenga una fecha de fin'],
+            required: [true, 'Ingresa la fecha de fin del programa'],
         },
-        fecha_limite: {
-            type: Date
+        
+        deadlineDate: {
+            type: Date,
+            required: [true, 'Ingresa la fecha límite del programa'],
         },
-        url_imagen_curso: {
-            type: String
-        },
-        codigo_postal_curso: {
-            type: String
-        },
-        descripcion: {
+        
+        programImage: {
             type: String,
+            required: [true, 'Ingresa la imagen del programa'],
+        },
+        
+        postalCode: {
+            type: Number
+        },
+        
+        description: {
+            type: String,
+            required: [true, 'Ingresa la descripción del programa'],
         }
-    },
-    { timestamps: true }
+    }, { timestamps: true }
 );
 
 
@@ -40,5 +49,4 @@ programSchema.pre('validate', function () {
     }
 });
 
-const Program = mongoose.model('Program', programSchema);
-module.exports = Program;
+module.exports = mongoose.model('Program', programSchema);

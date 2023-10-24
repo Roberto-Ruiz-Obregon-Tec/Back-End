@@ -1,19 +1,22 @@
+
 const mongoose = require('mongoose');
 
-const userRolSchema = new mongoose.Schema({
-    idUser: {
-        type: mongoose.SchemaTypes.ObjectId,
-        ref: 'User',
-        required: true
-    },
+const userRolSchema = new mongoose.Schema(
+    {
+        user: {
+            type: mongoose.SchemaTypes.ObjectId,
+            ref: 'User',
+            required: [true, 'Campo de usuario necesario'],
+        },
 
-    idRol : {
-        type: mongoose.SchemaTypes.ObjectId,
-        ref: 'Rol',
-        required: true
-    },
+        rol : {
+            type: mongoose.SchemaTypes.ObjectId,
+            ref: 'Rol',
+            required: [true, 'Campo de rol necesario'],
+        }
 
-}, {timestamps: true});
+    }, {timestamps: true}
+);
 
 
 module.exports = mongoose.model('UserRol', userRolSchema);

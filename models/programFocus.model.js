@@ -1,23 +1,22 @@
+
 const mongoose = require('mongoose');
 
-const enfoqueProgramaSchema = new mongoose.Schema(
+const programFocusSchema = new mongoose.Schema(
     {
-        enfoque: {
+        focus: {
             type: mongoose.Schema.ObjectId,
-            ref: 'Enfoque',
+            ref: 'Focus',
             required: [true, 'Campo de enfoque necesario'],
         },
-        empresa: {
+        
+        company: {
             type: mongoose.Schema.ObjectId,
-            ref: 'Programa',
+            ref: 'Program',
             required: [true, 'Campo de programa necesario'],
-        },
+        }
     
-    }, 
+    },
     { timestamps: true }
 );
 
-
-const EnfoqueEmpresa = mongoose.model('Enfoque_Programa', enfoqueProgramaSchema);
-
-module.exports = EnfoqueEmpresa;
+module.exports = mongoose.model('programFocus', programFocusSchema);
