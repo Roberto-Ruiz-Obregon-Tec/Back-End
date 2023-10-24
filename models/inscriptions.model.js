@@ -6,16 +6,19 @@ const inscriptionSchema = new mongoose.Schema({
         ref: 'User',
         required: [true, 'Campo de usuario necesario'],
     },
-    course: {
+    taller: {
         type: mongoose.Schema.ObjectId,
-        ref: 'Course',
-        required: [true, 'Campo de curso necesario'],
+        ref: 'Taller',
+        required: [true, 'Campo de taller necesario'],
+    },
+    status: {
+        type: String,
+    },
+    comprobante: {
+        type: String,
     },
 }, { timestamps: true });
 
-// Indexing inscription properties for optimized search 
-inscriptionSchema.index({ user: 1 });
-inscriptionSchema.index({ course: 1 });
 
 const Inscription = mongoose.model('Inscription', inscriptionSchema);
 
