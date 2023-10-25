@@ -12,11 +12,13 @@ const paymentSchema = new mongoose.Schema(
             ref: 'User',
             required: [true, 'Usuario necesario'],
         },
+
         course: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Course',
             required: [true, 'Curso necesario'],
         },
+
         // TODO: que este campo sea read_only desde el front ybi que lo rellene el controlador dependiendo de lo que diga Stripe
         status: {
             type: String,
@@ -24,6 +26,7 @@ const paymentSchema = new mongoose.Schema(
             required: [true, 'Status required'],
             default: 'Pendiente',
         },
+
         billImageURL: {
             type: String,
             validate: {
@@ -32,7 +35,7 @@ const paymentSchema = new mongoose.Schema(
                 message: (props) => `${props.value} no es una URL válida`,
             },
             required: [true, 'Se necesita un comprobante de pago.'],
-        },
+        }
         // TODO: see how integrating with Stripe will affect this model
     },
     { timestamps: true }
