@@ -24,7 +24,7 @@ const scholarshipSchema = new mongoose.Schema(
             type: String,
             required: [true, 'Ingresa la ubicación en la que se ofrece la beca'],
         },
-        
+
         email: {
             type: String,
             required: [true, 'Ingresa el email de contacto del patrocinador de la beca'],
@@ -35,7 +35,18 @@ const scholarshipSchema = new mongoose.Schema(
             type: String,
             required: [true, 'Ingresa el teléfono de contacto del patrocinador de la beca'],
         },
-        
+
+        image: {
+            type: String,
+            required: [true, 'Ingresa la portada para la beca'],
+        },
+
+        // Population sector that the scholarship covers
+        sector: {
+            type: String,
+            default: ''
+        },
+
         startDate: {
             type: Date,
             required: [true, 'Ingresa la fecha de inicio de la beca'],
@@ -56,6 +67,20 @@ courseSchema.pre('validate', function () {
             400
         );
     }
+});
+
+// Override the function 'toJSON' to present the data to the client
+// Removes unnecessary properties '__v' and the creation timestamps
+// and changes the '_id' to 'id' with its string representation
+scholarshipSchema.set('toJSON', {
+    virtuals: true,
+    transform: (doc, ret, options) => {
+        delete ret.__v;
+        ret.id = ret._id.toString();
+        delete ret._id;
+        delete ret.updatedAt;
+        delete ret.createdAt;
+    },
 });
 
 module.exports = mongoose.model('Scholarship', scholarshipSchema);
