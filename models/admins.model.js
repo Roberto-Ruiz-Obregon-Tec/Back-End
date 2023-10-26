@@ -3,46 +3,53 @@ const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 
-const adminSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: [true, 'Por favor dinos tu nombre!'],
-    },
-    email: {
-        type: String,
-        required: [true, 'Por favor dinos tu correo!'],
-        lowercase: true,
-        unique: true,
-        trim: true,
-        validate: [validator.isEmail, 'Necesitas un correo válido.'],
-    },
-    password: {
-        type: String,
-        required: [true, 'Por favor provee una contraseña.'],
-        // Using select prevents the field from being retrieved
-        minlength: [8, 'Tu contraseña debe contar con al menos 8 caracteres.'],
-        select: false,
-    },
-    passwordConfirm: {
-        type: String,
-        required: [true, 'Por favor confirma tu contraseña.'],
-        validate: {
-            // queremos contraseñas iguales
-            validator: function (value) {
-                return value === this.password;
-            },
-            message: 'Por favor ingresa la misma contraseña.',
+const adminSchema = new mongoose.Schema(
+    {
+        name: {
+            type: String,
+            required: [true, 'Por favor dinos tu nombre!'],
         },
-    },
-    hasVerification: {
-        type: Boolean,
-        select: false,
-        default: false,
-    },
-    passwordChangedAt: Date,
-    passwordResetToken: String,
-    passwordResetExpires: Date,
-});
+
+        email: {
+            type: String,
+            required: [true, 'Por favor dinos tu correo!'],
+            lowercase: true,
+            unique: true,
+            trim: true,
+            validate: [validator.isEmail, 'Necesitas un correo válido.'],
+        },
+
+        password: {
+            type: String,
+            required: [true, 'Por favor provee una contraseña.'],
+            // Using select prevents the field from being retrieved
+            minlength: [8, 'Tu contraseña debe contar con al menos 8 caracteres.'],
+            select: false,
+        },
+
+        passwordConfirm: {
+            type: String,
+            required: [true, 'Por favor confirma tu contraseña.'],
+            validate: {
+                // queremos contraseñas iguales
+                validator: function (value) {
+                    return value === this.password;
+                },
+                message: 'Por favor ingresa la misma contraseña.',
+            },
+        },
+
+        hasVerification: {
+            type: Boolean,
+            select: false,
+            default: false,
+        },
+        
+        passwordChangedAt: Date,
+        passwordResetToken: String,
+        passwordResetExpires: Date,
+    }
+);
 
 // Indexing admin properties for optimized search 
 adminSchema.index({ email: 1 });

@@ -6,7 +6,7 @@ const topicsSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Se necesita al menos un interés'],
         unique: [true, 'Este interés ya existe. Elige otro.'],
-    },
+    }
 });
 
 

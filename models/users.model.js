@@ -1,85 +1,83 @@
+
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const { bool } = require('sharp');
+
+/* Creating a schema for the user name */
+const nameSchema = new mongoose.Schema(
+    {
+        firstName: String,
+        lastName: String,
+    }
+);
+
+const personalCompanySchema = new mongoose.Schema(
+    {
+        company: String,
+        sociallyResponsible: Boolean,
+    }
+);
 
 /* Creating a schema for the user model. */
-const userSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: [true, 'Por favor dinos tu nombre!'],
-    },
-    age: {
-        type: Number,
-        min: 0,
-        required: [true, 'Por favor, escribe tu edad'],
-    },
-    emailAgreement: {
-        type: Boolean,
-        default: true,
-    },
-    gender: {
-        type: String,
-        required: [true, 'Por favor, selecciona tu sexo'],
-        enum: ['Hombre', 'Mujer', 'Prefiero no decir'],
-    },
-    email: {
-        type: String,
-        required: [true, 'Por favor dinos tu correo!'],
-        lowercase: true,
-        unique: [true, 'Este correo ya esta en uso. Elige otro.'],
-        trim: true,
-        validate: [validator.isEmail, 'Necesitas un correo válido.'],
-    },
-    topics: [
-        {
-            type: mongoose.Schema.ObjectId,
-            ref: 'Topics',
+const userSchema = new mongoose.Schema(
+    {
+        name: {
+            type: nameSchema,
+            required: [true, 'Ingresa tu nombre y apellido'],
         },
-    ],
-    job: {
-        type: String,
-    },
-    educationLevel: {
-        type: String,
-        enum: {
-            values: [
-                'Ninguno',
-                'Primaria',
-                'Secundaria',
-                'Preparatoria',
-                'Universidad',
-                'Maestria',
-                'Doctorado',
-            ],
+        
+        age: {
+            type: Number,
+            min: 0,
+            required: [true, 'Ingresa tu edad'],
         },
-    },
-    postalCode: {
-        type: Number,
-        required: [true, 'Por favor ingresa un código postal.'],
-    },
-    password: {
-        type: String,
-        required: [true, 'Por favor provee una contraseña.'],
-        // Using select prevents the field from being retrieved
-        minlength: [8, 'Tu contraseña debe contar con al menos 8 caracteres.'],
-        select: false,
-    },
-    passwordConfirm: {
-        type: String,
-        required: [true, 'Por favor confirma tu contraseña.'],
-        validate: {
-            // queremos contraseñas iguales
-            validator: function (value) {
-                return value === this.password;
-            },
-            message: 'Por favor ingresa la misma contraseña.',
+        
+        gender: {
+            type: String,
+            enum: ['Hombre', 'Mujer', 'Otro'],
+            required: [true, 'Ingresa tu sexo']
         },
-    },
-    passwordChangedAt: Date,
-    passwordResetToken: String,
-    passwordResetExpires: Date,
-});
+        
+        email: {
+            type: String,
+            required: [true, 'Ingresa tu correo'],
+            lowercase: true,
+            unique: [true, 'El correo ingresado ya pertenece a otra cuenta'],
+            trim: true,
+            validate: [validator.isEmail, 'Introduce un correo válido'],
+        },
+
+        occupation: {
+            type: String,
+            required: [true, 'Ingresa tu ocupación'],
+        },
+
+        company: {
+            type: personalCompanySchema,
+            required: false
+        },
+
+        postalCode: {
+            type: Number,
+            required: [true, 'Ingresa tu código postal'],
+        },
+        
+        password: {
+            type: String,
+            required: [true, 'Ingresa una contraseña'],
+            // Using select prevents the field from being retrieved
+            minlength: [8, 'Tu contraseña debe contar con al menos 8 caracteres'],
+        },
+        // The profile picture will be stored in firebase and accesed with an URL
+        profilePicture: {
+            type: String,
+            required: false,
+        },
+    }, {timestamps: true}
+);
+
 
 // Indexing program properties for optimized search
 userSchema.index({ email: 1 });
@@ -193,6 +191,4 @@ userSchema.pre('remove', async function (next) {
     return next();
 });
 
-const User = mongoose.model('User', userSchema);
-
-module.exports = User;
+module.exports = mongoose.model('User', userSchema)
