@@ -13,7 +13,6 @@ const programSchema = new mongoose.Schema(
             type: Date,
             required: [true, 'Ingresa la fecha de inicio del programa'],
         },
-        
         endDate: {
             type: Date,
             required: [true, 'Ingresa la fecha de fin del programa'],
