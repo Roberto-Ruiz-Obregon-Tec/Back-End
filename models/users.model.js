@@ -87,6 +87,19 @@ userSchema.index({ email: 1 });
  * This is a middleware that runs before the save() or create() method. It hashes the password and sets
  * the passwordConfirm to undefined.
  */
+
+userSchema.set('toJSON', {
+    virtuals: true,
+    transform: (doc, ret, options) => {
+        delete ret.__v;
+        ret.id = ret._id.toString();
+        delete ret._id;
+        delete ret.updatedAt;
+        delete ret.createdAt;
+    },
+});
+
+
 userSchema.pre('save', async function (next) {
     if (this.isModified('password')) {
         this.password = await bcrypt.hash(this.password, 12);
