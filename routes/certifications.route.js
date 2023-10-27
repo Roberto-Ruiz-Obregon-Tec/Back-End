@@ -1,9 +1,10 @@
 const express = require('express');
+
 const router = express.Router();
 
 const {
     getAllCertifications,
-} = (`${__dirname}/../controllers/certifications.controller.js`);
+} = require(`${__dirname}/../controllers/certifications.controller.js`);
 
 const {
     protect,
