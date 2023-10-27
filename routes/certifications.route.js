@@ -11,7 +11,7 @@ const {
     restrictTo,
 } = require(`${__dirname}/../controllers/authentication.controller.js`);
 
-router.use(protect);
-router.route('/certifications').get(restrictTo('User'), getAllCertifications);
+//router.use(protect);
+router.route('/').get(getAllCertifications);
 
 module.exports = router;

@@ -27,6 +27,7 @@ const eventsRouter = require('./routes/events.route');
 const viewRouter = require('./routes/views.route');
 const emailRouter = require('./routes/emails.route');
 const aggregationsRouter = require('./routes/aggregations.route');
+const certificationsRouter = require('./routes/certifications.route');
 
 const app = express();
 
@@ -111,6 +112,7 @@ app.use('/v1/admin', adminRouter);
 app.use('/v1/emails', emailRouter);
 app.use('/v1/aggregations', aggregationsRouter);
 app.use('/', viewRouter);
+app.use('/v1/certifications', certificationsRouter);
 
 // ERROR HANDLER FOR UNHANDLED ROUTES
 app.all('*', (req, res, next) => {
