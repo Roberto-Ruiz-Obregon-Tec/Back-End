@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 
-const informacionFundacionSchema = new mongoose.Schema({
+const foundationInformationSchema = new mongoose.Schema({
     nombre: {
         type: String,
         required: [true, 'El nombre de la empresa es obligatorio']
@@ -45,4 +45,4 @@ const informacionFundacionSchema = new mongoose.Schema({
 );
 
 
-module.exports = mongoose.model('InformacionFundacion', informacionFundacionSchema);;
+module.exports = mongoose.model('FoundationInformation', foundationInformationSchema);
