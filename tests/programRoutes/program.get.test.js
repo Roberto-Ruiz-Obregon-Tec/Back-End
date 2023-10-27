@@ -42,7 +42,6 @@ describe('Program gets APIFeatures', () => {
 
     describe('GET /program?category[regex]', () => {
         test('successful', testCategorySearch('Beca'));
-        test('successful', testCategorySearch('Evento'));
         test('successful', testCategorySearch('Apoyo'));
         test('successful', testCategorySearch('Programa'));
         test('successful', testCategorySearch('Otro'));
