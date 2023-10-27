@@ -2,27 +2,27 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 
 const foundationInformationSchema = new mongoose.Schema({
-    nombre: {
+    name: {
         type: String,
-        required: [true, 'El nombre de la empresa es obligatorio']
+        required: [true, 'Ingresa el nombre de la empresa']
     },
     email: {
         type: String,
-        required: [true, 'El correo electrónico de la empresa es obligatorio'],
+        required: [true, 'Ingresa el correo electrónico de la empresa'],
         validate: [validator.isEmail, 'Email inválido'],
         unique: true // Unico en la BD
     },
-    telefono: {
+    phone: {
         type: String,
-        required: [true, 'El número de teléfono de la empresa es obligatorio']
+        required: [true, 'Ingresa el número de teléfono de la empresa']
     },
-    descripcion: {
+    description: {
         type: String,
-        required: [true, 'La descripción de la empresa es obligatoria']
+        required: [true, 'Ingresa la descripción de la empresa']
     },
-    ubicacion: {
+    location: {
         type: String,
-        required: [true, 'La ubicación de la empresa es obligatoria']
+        required: [true, 'Ingresa la ubicación de la empresa']
     },
     facebook: {
         type: String,
