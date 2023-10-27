@@ -3,4 +3,3 @@ const factory = require('./handlerFactory.controller');
 
 // read certifications
 exports.getAllCertifications = factory.getAll(certifications);
-exports.getCertification = factory.getOne(certifications);
