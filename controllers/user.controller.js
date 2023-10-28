@@ -5,7 +5,9 @@ const factory = require('./handlerFactory.controller');
 const User = require('../models/users.model');
 const UserRol = require('../models/userRol.model');
 const UserFocus = require('../models/userFocus.model');
-const Focus = require('../models/focus.model');
+const Focus = require('../models/focus.model'); // Para referencia al modelo focus
+const Rol = require('../models/rols.model'); // Para referencia la modelo rol
+
 
 exports.getAllUsers = factory.getAll(User);
 exports.getUser = factory.getOne(User, ['topics']);
@@ -21,20 +23,44 @@ exports.getAllUsers = catchAsync(async (req, res, next) => {
       .paginate();
     const users = await userFeatures.query;
 
+    // Manejo de filtros por interes (focus) y rol
+    const req_focus= req.body.focus || [];
+    const req_rol = req.body.rol || "";
 
-    for(let i = 0; i < users.length; i++){
+    for(let i = users.length - 1; i >= 0; i--){
       const userFocus = []
+    
 
-      const rol = await UserRol.findOne({user: users[i]._id}, {rol: 1, _id: 0});
-      const focus = await UserFocus.find({user: users[i]._id}, {focus: 1, _id: 0}).populate("focus");
+      const rol = await UserRol.findOne({user: users[i]._id}, {rol: 1, _id: 0}).populate('rol');
+      const focus = await UserFocus.find({user: users[i]._id}, {focus: 1, _id: 0}).populate('focus');
 
       const mapFocus = focus.map((f) => {userFocus.push(f.focus.name)})
 
-      users[i] = {...users[i]._doc, "rol": rol.rol}
-      users[i] = {...users[i], "focus": userFocus}
+      if (rol === null) {
+        users[i] = {...users[i]._doc, "rol": "Sin rol asignado"};
+      } else {
+        users[i] = {...users[i]._doc, "rol": rol.rol.name};
+      }
+
+      users[i] = {...users[i], "focus": userFocus};
+
+      if (req_rol !== "" && users[i].rol != req_rol) {
+        users.splice(i, 1);
+      }
+
+      if (req_focus.length === 0) continue;
+      
+      let focusFilter = false;
+
+      req_focus.filter( (f) => {
+        focusFilter = (userFocus.includes(f))? true : focusFilter;
+      })
+
+      if (!focusFilter || userFocus.length === 0) users.splice(i, 1);
+      
+      
     }
 
-    console.log(users)
 
     res.status(200).json({
       status: 'success',
