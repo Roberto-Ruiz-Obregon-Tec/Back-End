@@ -96,14 +96,17 @@ exports.getAll = (Model, popOptions) =>
     catchAsync(async (req, res) => {
         let filter = {};
         let query = Model.find(filter);
+        
         if (popOptions) {
             query.populate(popOptions);
         }
+        
         const features = new APIFeatures(query, req.query)
             .filter()
             .sort()
             .limitFields()
             .paginate();
+        
         const documents = await features.query;
 
         res.status(200).json({

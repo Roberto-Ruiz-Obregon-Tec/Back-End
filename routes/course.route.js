@@ -11,17 +11,25 @@ const {
     deleteCourse,
     inscriptionByCourse,
 } = require(`${__dirname}/../controllers/course.controller.js`);
+
 const {
+    // Inicio de sesión correcto: Bearer token
     protect,
+    // RBAC: Verificar que el servicio esté asociado al rol del usuario
     restrictTo,
 } = require(`${__dirname}/../controllers/authentication.controller.js`);
+
 const fileParser = require('../utils/multipartParser');
 
 router.route('/getInscriptions/:id').get(inscriptionByCourse);
 
 router
     .route('/')
-    .get(getAllCourses)
+    .get(
+        //protect, // Validar inicio de sesión
+        //restrictTo('Consultar cursos'), // Validar servicio asociado al rol
+        getAllCourses
+    )
     .post(
         protect,
         restrictTo('Admin'),
@@ -29,9 +37,14 @@ router
         filesController.formatCourseImage,
         createCourse
     );
+    
 router
     .route('/:id')
-    .get(getCourse)
+    .get(
+        //protect, // SE PUEDEN VER SIN AUTENTICARSE?
+        //restrictTo('Admin'), // PENDIENTE
+        getCourse
+    )
     .patch(
         protect,
         restrictTo('Admin'),
