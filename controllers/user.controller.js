@@ -24,39 +24,41 @@ exports.getAllUsers = catchAsync(async (req, res, next) => {
     const users = await userFeatures.query;
 
     // Manejo de filtros por interes (focus) y rol
-    const req_focus= req.body.focus || [];
+    const req_focus = req.body.focus || [];
     const req_rol = req.body.rol || "";
 
     for(let i = users.length - 1; i >= 0; i--){
       const userFocus = []
     
 
-      const rol = await UserRol.findOne({user: users[i]._id}, {rol: 1, _id: 0}).populate('rol');
-      const focus = await UserFocus.find({user: users[i]._id}, {focus: 1, _id: 0}).populate('focus');
+      const rol = await UserRol.findOne({user: users[i]._id}, {rol: 1, _id: 0}).populate('rol'); // Obtener el nombre del rol asociado al usuario
+      const focus = await UserFocus.find({user: users[i]._id}, {focus: 1, _id: 0}).populate('focus'); // Obtener la lista de intereses (focus) asociados al usuario
 
-      const mapFocus = focus.map((f) => {userFocus.push(f.focus.name)})
+      const mapFocus = focus.map((f) => {userFocus.push(f.focus.name)}) // Almacenando los nombres de los intereses en la lista userFocus
 
-      if (rol === null) {
+      if (rol === null) { // Si el usuario no tiene rol
         users[i] = {...users[i]._doc, "rol": "Sin rol asignado"};
-      } else {
+      } else { // Agregando el campo de rol
         users[i] = {...users[i]._doc, "rol": rol.rol.name};
       }
 
-      users[i] = {...users[i], "focus": userFocus};
+      users[i] = {...users[i], "focus": userFocus}; // Agregamos la lista de intereses
 
-      if (req_rol !== "" && users[i].rol != req_rol) {
-        users.splice(i, 1);
+      if (req_rol !== "" && users[i].rol != req_rol) {  // Si no coinicde el filtro de rol con el del usuario
+        users.splice(i, 1); // Eliminamos el registro
       }
 
-      if (req_focus.length === 0) continue;
+      if (req_focus.length === 0) continue; // Si no hay filtro por intereses no hacemos nada
       
-      let focusFilter = false;
+      let focusFilter = false; 
 
-      req_focus.filter( (f) => {
+      req_focus.filter( (f) => { // Buscamos si los intereses del filtro coinciden con los del usuario
         focusFilter = (userFocus.includes(f))? true : focusFilter;
       })
 
-      if (!focusFilter || userFocus.length === 0) users.splice(i, 1);
+      if (!focusFilter || userFocus.length === 0) { // Si no coinicden los filtro de interes con los del usuario
+        users.splice(i, 1);  // Eliminamos el registro
+      }
       
       
     }
