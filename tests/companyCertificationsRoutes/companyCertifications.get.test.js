@@ -12,10 +12,10 @@ beforeAll(async () => {
 	await connectDB();
 });
 
-// afterAll(async () => {
-//     await dropCollections();
-//     await dropDB();
-// });
+afterAll(async () => {
+    await dropCollections();
+    await dropDB();
+});
 
 describe('GET /company-certifications', () => {
     test('returns 200 for successful get', async () => {
