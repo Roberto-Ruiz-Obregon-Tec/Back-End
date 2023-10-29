@@ -1,12 +1,17 @@
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
-const User = require('./../models/users.model');
-const Admin = require('./../models/admins.model');
 const Inscription = require('./../models/inscriptions.model');
 
 const catchAsync = require('./../utils/catchAsync');
 const Email = require('./../utils/email');
 const AppError = require('./../utils/appError');
+
+const Admin = require('./../models/admins.model');
+const User = require('./../models/users.model');
+const UserRol = require('../models/userRol.model')
+const Rol = require('../models/rols.model');
+const RolService = require('../models/rolService.model');
+const Service = require('../models/services.models');
 
 /**
  * This function takes an id as an argument and returns a signed JWT token with the id as the payload
@@ -407,9 +412,12 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
 });
 
 /* Restricting the user to a certain role. */
-exports.restrictTo = (...roles) => {
-    return (req, res, next) => {
-        if (!roles.includes(req.userType)) {
+exports.restrictTo = (service) => {
+    return catchAsync(async(req, res, next) => {
+        const idService = await Service.findOne({name: service}, {_id : 1});
+        const roles = await RolService.find({service: idService.service.id});
+        
+        if (!roles.includes(req.rolId)) {
             next(
                 new AppError(
                     'No cuentas con los permisos para realizar esta acción.',
@@ -418,5 +426,5 @@ exports.restrictTo = (...roles) => {
             );
         }
         next();
-    };
+    });
 };
