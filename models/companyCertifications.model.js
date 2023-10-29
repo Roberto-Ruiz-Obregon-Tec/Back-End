@@ -18,7 +18,7 @@ const companyCertificationSchema = new mongoose.Schema(
 );
 
 // Indexing companyCertifications properties for optimized search
-companyCertificationsSchema.index({ company: 1 });
-companyCertificationsSchema.index({ certification: 1 });
+companyCertificationSchema.index({ company: 1 });
+companyCertificationSchema.index({ certification: 1 });
 
 module.exports = mongoose.model('CompanyCertification', companyCertificationSchema);
