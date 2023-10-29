@@ -16,7 +16,7 @@ const courseSchema =  new mongoose.Schema(
         
         speaker: {
             type: String,
-            required: [true, 'Ingresa el ponente del curso'],
+            required: [true, 'Ingresa el nombre del ponente del curso'],
         },
         
         startDate: {
@@ -41,13 +41,11 @@ const courseSchema =  new mongoose.Schema(
         },
         
         postalCode: {
-            type: String,
-            required: [true, 'Ingresa el código postal'],
+            type: Number
         },
         
         location: {
-            type: String,
-            required: [true, 'Ingresa la ubicación del curso']
+            type: String
         },
         
         status: {
@@ -58,9 +56,10 @@ const courseSchema =  new mongoose.Schema(
         
         cost: {
             type: Number,
+            default: 0,
             validate: {
                 validator: (cost) => cost >= 0,
-            },
+            }
         },
         
         courseImage: {
@@ -90,28 +89,23 @@ const courseSchema =  new mongoose.Schema(
         
         meetingCode: {
             type: String,
+            default: 'https://zoom.us/',
             validate: {
                 validator: (value) =>
                     /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(value),
                 message: (props) => `${props.value} no es una URL válida`,
-            },
-            default: 'https://zoom.us/',
+            }
         },
         
         accessCode: {
             type: String,
+            default: ""
         },
     },
     { timestamps: true}
 );
 
-// Indexing course properties for optimized search
-courseSchema.index({ estatus: 1 });
-courseSchema.index({ modalidad: 1 });
-courseSchema.index({ nombre_curso: 1 });
-courseSchema.index({ codigo_postal_curso: 1 });
-
-// date validation
+// Validación de fechas
 courseSchema.pre('validate', function () {
     if (this.fecha_fin < this.fecha_inicio) {
         throw new AppError(
@@ -119,6 +113,20 @@ courseSchema.pre('validate', function () {
             400
         );
     }
+});
+
+// Override the function 'toJSON' to present the data to the client
+// Removes unnecessary properties '__v' and the creation timestamps
+// and changes the '_id' to 'id' with its string representation
+courseSchema.set('toJSON', {
+    virtuals: true,
+    transform: (doc, ret, options) => {
+        delete ret.__v;
+        ret.id = ret._id.toString();
+        delete ret._id;
+        delete ret.updatedAt;
+        delete ret.createdAt;
+    },
 });
 
 /**
