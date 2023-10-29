@@ -37,7 +37,7 @@ router.patch('/auth/updateme', editMe);
 router.get('/auth/deleteme', deleteMe);
 router.get('/auth/logout', logout);
 
-//router.use(protect, restrictTo('Admin'));
+router.use(protect, restrictTo('Consultar usuarios'));
 router.route('/').get(getAllUsers).post(createUser);
 
 
