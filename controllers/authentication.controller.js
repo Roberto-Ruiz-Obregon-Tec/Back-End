@@ -110,11 +110,11 @@ exports.protect = catchAsync(async (req, res, next) => {
         );
     }
     
-    // 5) Next is called and the req accesses the protected route
+    // 5) Storing client info and calling Next to access the protected route
     req.client = client;
     
     const rol = await UserRol.findOne({user: client._id}, {rol: 1}).populate('rol');
-    req.rolId = rol._id
+    req.rolId = rol.rol._id
     req.rol = rol.rol.name
 
     next();
@@ -182,9 +182,10 @@ exports.signUpAdmin = catchAsync(async (req, res, next) => {
  * protected route.
  */
 exports.loginUser = catchAsync(async (req, res, next) => {
-    const { email, password } = req.body;
+    const req_email = req.body.email;
+    const req_password = req.body.password;
 
-    if (!email || !password) {
+    if (!req_email || !req_password) {
         // After calling next we want the function to end and send an error.
         return next(
             new AppError(
@@ -195,11 +196,9 @@ exports.loginUser = catchAsync(async (req, res, next) => {
     }
 
     // 2 Check is user exists.
-    const user = await User.findOne({ email }).select('+password'); // adding a + to the field set as selected false means we will retrieve it
-    console.log('User ', user)
-    console.log('Password: ', password)
-    console.log('User.password: ', user.password)
-    if (!user || !(await user.correctPassword(password, user.password))) {
+    const user = await User.findOne({email: {$eq: req_email}})
+
+    if (!user || !(await user.correctPassword(req_password, user.password))) {
         return next(new AppError('Email o contraseña incorrectos.', 401));
     }
 
@@ -351,10 +350,10 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
 /* Restricting the user to a certain role. */
 exports.restrictTo = (service) => {
     return catchAsync(async(req, res, next) => {
-        const idService = await Service.findOne({name: service}, {_id : 1});
-        const roles = await RolService.find({service: idService.service.id});
-        
-        if (!roles.includes(req.rolId)) {
+        const idService = await Service.findOne({name: service}, {_id : 1}); // id asociado al servicio
+        const roles = await RolService.findOne({service: idService._id}); // roles asociados al servicio
+
+        if (!roles.rol.includes(req.rolId)) { // Verificamos que el usuario tenga acceso al servicio
             next(
                 new AppError(
                     'No cuentas con los permisos para realizar esta acción.',
@@ -362,6 +361,7 @@ exports.restrictTo = (service) => {
                 )
             );
         }
+        
         next();
     });
 };
