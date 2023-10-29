@@ -26,4 +26,4 @@ serviceSchema.set('toJSON', {
     },
 });
 
-module.exports = mongoose.Schema('Service', serviceSchema);
+module.exports = mongoose.model('Service', serviceSchema);
