@@ -10,9 +10,6 @@ const focusSchema = new mongoose.Schema(
     }, {timestamps: true}
 );
 
-// Override the function 'toJSON' to present the data to the client
-// Removes unnecessary properties '__v' and the creation timestamps
-// and changes the '_id' to 'id' with its string representation
 focusSchema.set('toJSON', {
     virtuals: true,
     transform: (doc, ret, options) => {

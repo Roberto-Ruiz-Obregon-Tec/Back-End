@@ -32,7 +32,7 @@ exports.getAllCourses = catchAsync(async (req, res, next) => {
         const cFocus = await CourseFocus.find({course: documents[i]._id}, {focus:1}).populate("focus"); // Obtenemos los focus asociados
 
         let focus = []
-        if(cFocus[0].focus){ // Si existen focus asociados entonces...
+        if(cFocus.length > 0) { // Si existen focus asociados entonces...
             cFocus.forEach( f => { 
                 focus.push(f.focus.name) // Almacenamos el nombre
                 filter = (reqFocus.includes(f.focus.name))?true:filter // Seguimos verificando si hay coincidencias de filtros
@@ -62,7 +62,7 @@ exports.getCourse = catchAsync(async (req, res, next) => {
         const cFocus = await CourseFocus.find({course: document[0]._id}, {focus:1}).populate("focus"); // Obtenemos los focus asociados
 
         let focus = []
-        if(cFocus[0].focus) cFocus.forEach( f => { focus.push(f.focus.name) }) // Si existen focus asociados, almacenamos su nombre
+        if(cFocus.length > 0) cFocus.forEach( f => { focus.push(f.focus.name) }) // Si existen focus asociados, almacenamos su nombre
 
         document[0] = {...document[0]._doc, "focus": focus}
     }

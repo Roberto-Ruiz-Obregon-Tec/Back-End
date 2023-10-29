@@ -14,4 +14,4 @@ const rolSchema = new mongoose.Schema(
     }, {timestamps: true}
 )
 
-module.exports = mongoose.Schema('Rol', rolSchema);
+module.exports = mongoose.model('Rol', rolSchema);

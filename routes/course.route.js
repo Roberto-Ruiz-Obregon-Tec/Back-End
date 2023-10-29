@@ -26,8 +26,8 @@ router.route('/getInscriptions/:id').get(inscriptionByCourse);
 router
     .route('/')
     .get(
-        //protect, // Validar inicio de sesión
-        //restrictTo('Consultar cursos'), // Validar servicio asociado al rol
+        protect, // Validar inicio de sesión
+        restrictTo('Consultar cursos'), // Validar servicio asociado al rol
         getAllCourses
     )
     .post(
@@ -41,8 +41,8 @@ router
 router
     .route('/:id')
     .get(
-        //protect, // SE PUEDEN VER SIN AUTENTICARSE?
-        //restrictTo('Admin'), // PENDIENTE
+        protect, // Validar inicio de sesión
+        restrictTo('Consultar cursos'), // Validar servicio asociado al rol
         getCourse
     )
     .patch(
