@@ -18,4 +18,15 @@ const rolServiceSchema = new mongoose.Schema(
     }, {timestamps: true}
 );
 
+rolServiceSchema.set('toJSON', {
+    virtuals: true,
+    transform: (doc, ret, options) => {
+        delete ret.__v;
+        ret.id = ret._id.toString();
+        delete ret._id;
+        delete ret.updatedAt;
+        delete ret.createdAt;
+    },
+});
+
 module.exports = mongoose.model('RolService', rolServiceSchema);
