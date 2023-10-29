@@ -12,15 +12,12 @@ const { request } = require('express');
 const { populate } = require('../models/inscriptions.model');
 const { user } = require('firebase-functions/v1/auth');
 
-exports.getCourse = factory.getOne(Course); 
 exports.updateCourse = factory.updateOne(Course);
 exports.deleteCourse = factory.deleteOne(Course);
 
 exports.getAllCourses = catchAsync(async (req, res, next) => {
-    const data = []
-    let reqFocus = req.body.focus
-
-    if(!reqFocus) reqFocus = []
+    const data = [] // Documentos a retornar
+    let reqFocus = req.body.focus || [] // Filtros de focus (en caso de no existir, lista vacía)
     
     const features = new APIFeatures(Course.find(), req.query)
         .filter()
@@ -28,19 +25,21 @@ exports.getAllCourses = catchAsync(async (req, res, next) => {
         .limitFields()
         .paginate();
 
-    const documents = await features.query;
+    const documents = await features.query; // Cursos que cumplen con los filtros de los params del URL
 
-    for(let i = 0; i < documents.length; i++) {
-        let filter = (reqFocus.length == 0)?true:false
-        const cFocus = await CourseFocus.find({course: documents[i]._id}, {focus:1}).populate("focus");
+    for(let i = 0; i < documents.length; i++) { // Iteramos sobre cada curso
+        let filter = (reqFocus.length == 0)?true:false // Para verificar si cumple con los filtros de focus
+        const cFocus = await CourseFocus.find({course: documents[i]._id}, {focus:1}).populate("focus"); // Obtenemos los focus asociados
 
         let focus = []
-        cFocus.forEach( f => { 
-            focus.push(f.focus.name) 
-            filter = (reqFocus.includes(f.focus.name))?true:filter
-        })
+        if(cFocus[0].focus){ // Si existen focus asociados entonces...
+            cFocus.forEach( f => { 
+                focus.push(f.focus.name) // Almacenamos el nombre
+                filter = (reqFocus.includes(f.focus.name))?true:filter // Seguimos verificando si hay coincidencias de filtros
+            })
+        }
 
-        if(filter) data.push({...documents[i]._doc, "focus": focus})
+        if(filter) data.push({...documents[i]._doc, "focus": focus}) // Si coincide con algún focus solicitado se almacena
     }
 
     res.status(200).json({
@@ -49,6 +48,30 @@ exports.getAllCourses = catchAsync(async (req, res, next) => {
         data: data,
     });
 });
+
+exports.getCourse = catchAsync(async (req, res, next) => {
+        const features = new APIFeatures(Course.findOne({ _id: req.params.id }), req.query)
+        .filter()
+        .sort()
+        .limitFields()
+        .paginate();
+
+    const document = await features.query; // Información del curso especificado en los params del URL
+
+    if(document.length > 0) { // Si hay un documento...
+        const cFocus = await CourseFocus.find({course: document[0]._id}, {focus:1}).populate("focus"); // Obtenemos los focus asociados
+
+        let focus = []
+        if(cFocus[0].focus) cFocus.forEach( f => { focus.push(f.focus.name) }) // Si existen focus asociados, almacenamos su nombre
+
+        document[0] = {...document[0]._doc, "focus": focus}
+    }
+
+    res.status(200).json({
+        status: 'success',
+        data: document,
+    });
+}); 
 
 /** 
  * A function that creates a course and sends an email to all the users that are interested in the
