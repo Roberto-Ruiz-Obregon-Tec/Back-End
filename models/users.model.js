@@ -5,27 +5,18 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const { bool } = require('sharp');
 
-/* Creating a schema for the user name */
-const nameSchema = new mongoose.Schema(
-    {
-        firstName: String,
-        lastName: String,
-    }
-);
-
-const personalCompanySchema = new mongoose.Schema(
-    {
-        company: String,
-        sociallyResponsible: Boolean,
-    }
-);
 
 /* Creating a schema for the user model. */
 const userSchema = new mongoose.Schema(
     {
-        name: {
-            type: nameSchema,
-            required: [true, 'Ingresa tu nombre y apellido'],
+        firstName: {
+            type: String,
+            required: [true, 'Ingresa tu nombre'],
+        },
+
+        lastName: {
+            type: String,
+            required: [true, 'Ingresa tu apellido'],
         },
         
         age: {
@@ -55,7 +46,12 @@ const userSchema = new mongoose.Schema(
         },
 
         company: {
-            type: personalCompanySchema,
+            type: String,
+            required: false
+        },
+
+        sociallyResponsibleCompany: {
+            type: Boolean,
             required: false
         },
 
