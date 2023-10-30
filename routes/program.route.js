@@ -16,12 +16,11 @@ const {
 } = require(`${__dirname}/../controllers/authentication.controller.js`);
 const fileParser = require('../utils/multipartParser');
 
-router
-    .route('/')
+router.use(protect, restrictTo('Consultar proyectos'));
+router.route('/')
     .get(getAllPrograms)
     .post(
         protect,
-        restrictTo('Admin'),
         fileParser,
         filesController.formatProgramImage,
         createProgram
@@ -31,11 +30,11 @@ router
     .get(getProgram)
     .patch(
         protect,
-        restrictTo('Admin'),
+        restrictTo('Consultar proyectos'),
         fileParser,
         filesController.formatProgramImage,
         updateProgram
     )
-    .delete(protect, restrictTo('Admin'), deleteProgram);
+    .delete(protect, restrictTo('Consultar proyectos'), deleteProgram);
 
 module.exports = router;

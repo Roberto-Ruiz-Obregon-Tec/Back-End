@@ -9,7 +9,7 @@ const programFocusSchema = new mongoose.Schema(
             required: [true, 'Campo de enfoque necesario'],
         },
         
-        company: {
+        program: {
             type: mongoose.Schema.ObjectId,
             ref: 'Program',
             required: [true, 'Campo de programa necesario'],
@@ -18,5 +18,16 @@ const programFocusSchema = new mongoose.Schema(
     },
     { timestamps: true }
 );
+
+programFocusSchema.set('toJSON', {
+    virtuals: true,
+    transform: (doc, ret, options) => {
+        delete ret.__v;
+        ret.id = ret._id.toString();
+        delete ret._id;
+        delete ret.updatedAt;
+        delete ret.createdAt;
+    },
+});
 
 module.exports = mongoose.model('programFocus', programFocusSchema);
