@@ -16,7 +16,7 @@ exports.updateUser = factory.updateOne(User);
 exports.deleteUser = factory.deleteOne(User);
 
 exports.getAllUsers = catchAsync(async (req, res, next) => {
-    const userFeatures = new APIFeatures(User.find(), req.query)
+    const userFeatures = new APIFeatures(User.find({}, {password: 0}), req.query)
       .filter()
       .sort()
       .limitFields()
