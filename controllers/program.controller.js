@@ -1,7 +1,8 @@
 const factory = require('./handlerFactory.controller');
 const Program = require('../models/programs.model');
 const ProgramFocus = require('../models/programFocus.model');
-
+const catchAsync = require('../utils/catchAsync');
+const APIFeatures = require('../utils/apiFeatures');
 exports.getAllPrograms = factory.getAll(Program);
 exports.getProgram = factory.getOne(Program);
 exports.createProgram = factory.createOne(Program);
@@ -26,7 +27,7 @@ exports.getAllPrograms = catchAsync(async (req, res, next) => {
 
         const mapFocus = focus.map((f) => { programFocus.push(f.focus.name) }) // Almacenando los nombres de los intereses en la lista programaFocus
 
-        programs[i] = { ...programs[i], "focus": programFocus}; // Agregamos la lista de intereses
+        programs[i] = { ...programs[i]._doc, "focus": programFocus}; // Agregamos la lista de intereses
 
         if (req_focus.length === 0) continue; // Si no hay filtro por intereses no hacemos nada
 
