@@ -43,9 +43,10 @@ exports.getAllUsers = catchAsync(async (req, res, next) => {
       }
 
       users[i] = {...users[i], "focus": userFocus}; // Agregamos la lista de intereses
-
+      
       if (req_rol !== "" && users[i].rol != req_rol) {  // Si no coinicde el filtro de rol con el del usuario
         users.splice(i, 1); // Eliminamos el registro
+        continue;
       }
 
       if (req_focus.length === 0) continue; // Si no hay filtro por intereses no hacemos nada
