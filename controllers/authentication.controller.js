@@ -122,19 +122,40 @@ exports.protect = catchAsync(async (req, res, next) => {
 
 /* Creating a new user. */
 exports.signUpUser = catchAsync(async (req, res, next) => {
-    const newUser = await User.create({
-        name: req.body.name,
-        age: req.body.age,
-        gender: req.body.gender,
-        job: req.body.job,
-        educationLevel: req.body.educationLevel,
-        postalCode: req.body.postalCode,
-        email: req.body.email,
-        password: req.body.password,
-        passwordConfirm: req.body.passwordConfirm,
-    });
+    const {
+        firstName,
+        lastName,
+        age,
+        gender,
+        email,
+        occupation,
+        company,
+        sociallyResponsibleCompany,
+        postalCode,
+        password,
+        profilePicture,
+    } = req.body;
 
-    try {
+    console.log(req.body);
+
+    const newUser = await User.create({
+        firstName,
+        lastName,
+        age,
+        gender,
+        email,
+        occupation,
+        company,
+        sociallyResponsibleCompany,
+        postalCode,
+        password,
+        profilePicture});
+        
+
+
+
+
+    /*try {
         await new Email(newUser, process.env.LANDING_URL).sendWelcome();
     } catch (error) {
         return next(
@@ -143,7 +164,7 @@ exports.signUpUser = catchAsync(async (req, res, next) => {
                 500
             )
         );
-    }
+    } */
 
     return createSendToken(newUser, 201, req, res);
 });
