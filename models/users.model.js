@@ -42,7 +42,7 @@ const userSchema = new mongoose.Schema(
 
         occupation: {
             type: String,
-            required: [true, 'Ingresa tu ocupación'],
+            required: [false, 'Ingresa tu ocupación'],
         },
 
         company: {
@@ -165,6 +165,7 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
  * When a user is deleted, their payments as well as course inscriptions are also deleted,
  * updating the capacity of the course.
  */
+
 userSchema.pre('remove', async function (next) {
     const Course = require('./courses.model');
     const Payment = require('./payments.model');
