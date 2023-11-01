@@ -1,5 +1,6 @@
 const factory = require('./handlerFactory.controller');
-const Scholarship = require('../models/scholarship.model');
+const Scholarship = require('../models/scholarships.model');
+const catchAsync = require('../utils/catchAsync');
 
 exports.getAllScholarship = factory.getAll(Scholarship);
 exports.getScholarship = factory.getOne(Scholarship);
@@ -14,7 +15,6 @@ exports.getContactInfo = catchAsync(async (req, res, next) => {
         return next(new AppError('No se encontró una beca con ese ID.', 404));
     }
 
-    // Supongamos que los datos de contacto están en los campos 'email' y 'phone'
     const contactInfo = {
         email: scholarship.email,
         phone: scholarship.phone,

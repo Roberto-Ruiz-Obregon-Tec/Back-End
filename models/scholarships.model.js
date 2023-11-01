@@ -58,7 +58,7 @@ const scholarshipSchema = new mongoose.Schema(
 );
 
 // date validation
-courseSchema.pre('validate', function () {
+scholarshipSchema.pre('validate', function () {
     if (this.endDate < this.startDate) {
         throw new AppError(
             'La fecha final debe ser menor a la fecha inicial',
