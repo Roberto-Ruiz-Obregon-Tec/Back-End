@@ -1,4 +1,3 @@
-
 const mongoose = require('mongoose');
 const validator = require('validator');
 const AppError = require('../utils/appError');
@@ -41,10 +40,9 @@ const scholarshipSchema = new mongoose.Schema(
             required: [true, 'Ingresa la portada para la beca'],
         },
 
-        // Population sector that the scholarship covers
         sector: {
             type: String,
-            default: ''
+            default: 'Ingresa el sector que cubre la beca'
         },
 
         startDate: {
