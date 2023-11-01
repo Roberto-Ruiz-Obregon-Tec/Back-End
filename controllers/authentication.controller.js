@@ -49,6 +49,14 @@ const createSendToken = (user, statusCode, req, res) => {
     // Remove password from output
     user.password = undefined;
 
+    // Ios only
+    if(req.headers["user-platform"] == 'ios')
+    return res.status(statusCode).json({
+        status: 'success',
+        token,
+        data: user,
+    });
+
     res.status(statusCode).json({
         status: 'success',
         token,
@@ -136,8 +144,6 @@ exports.signUpUser = catchAsync(async (req, res, next) => {
         profilePicture,
     } = req.body;
 
-    console.log(req.body);
-
     const newUser = await User.create({
         firstName,
         lastName,
@@ -150,10 +156,6 @@ exports.signUpUser = catchAsync(async (req, res, next) => {
         postalCode,
         password,
         profilePicture});
-        
-
-
-
 
     /*try {
         await new Email(newUser, process.env.LANDING_URL).sendWelcome();
@@ -307,6 +309,14 @@ exports.getMyCourses = catchAsync(async (req, res, next) => {
 
     const courses = results.map((ins) => ins.course);
 
+    // Ios only
+    if(req.headers["user-platform"] == 'ios')
+    return res.status(200).json({
+        status: 'success',
+        results: courses.length,
+        data: courses,
+    });
+
     // 3 respond with update
     res.status(200).json({
         status: 'success',
@@ -337,6 +347,14 @@ exports.editMe = catchAsync(async (req, res, next) => {
         runValidators: true,
     });
 
+    // Ios only
+    if(req.headers["user-platform"] == 'ios')
+        return res.status(200).json({
+            status: 'success',
+            data: user,
+        });
+
+
     // 3 respond with update
     res.status(200).json({
         status: 'success',
@@ -358,6 +376,14 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
 
     // 2 Update document
     const user = await User.findByIdAndDelete(userActive._id);
+
+    // Ios only
+    if(req.headers["user-platform"] == 'ios')
+        return res.status(200).json({
+            status: 'success',
+            data: user,
+        });
+
 
     // 3 respond with update
     res.status(200).json({
