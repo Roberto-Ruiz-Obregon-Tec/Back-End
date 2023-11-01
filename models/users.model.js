@@ -126,8 +126,8 @@ userSchema.methods.correctPassword = async function (
     userPassword
 ) {
     // This refers to the document. Since select is false we dont have access to password.
-   // return await bcrypt.compare(candidatePassword, userPassword);
-   return await candidatePassword === userPassword;
+   return await bcrypt.compare(candidatePassword, userPassword);
+   // return await candidatePassword === userPassword;
 };
 
 /* Creating a password reset token and saving it in the database. */
