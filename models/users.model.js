@@ -18,7 +18,16 @@ const userSchema = new mongoose.Schema(
             type: String,
             required: [true, 'Ingresa tu apellido'],
         },
-        
+
+        email: {
+            type: String,
+            required: [true, 'Ingresa tu correo'],
+            lowercase: true,
+            unique: [true, 'El correo ingresado ya pertenece a otra cuenta'],
+            trim: true,
+            validate: [validator.isEmail, 'Introduce un correo válido'],
+        },
+
         age: {
             type: Number,
             min: 0,
@@ -31,20 +40,22 @@ const userSchema = new mongoose.Schema(
             required: [true, 'Ingresa tu sexo']
         },
         
-        email: {
-            type: String,
-            required: [true, 'Ingresa tu correo'],
-            lowercase: true,
-            unique: [true, 'El correo ingresado ya pertenece a otra cuenta'],
-            trim: true,
-            validate: [validator.isEmail, 'Introduce un correo válido'],
-        },
-
+        
         occupation: {
             type: String,
             required: [false, 'Ingresa tu ocupación'],
         },
 
+        postalCode: {
+            type: Number,
+            required: [true, 'Ingresa tu código postal'],
+        },
+
+        interests: {
+            type: String,
+        },
+        
+        
         company: {
             type: String,
             required: false
@@ -55,11 +66,11 @@ const userSchema = new mongoose.Schema(
             required: false
         },
 
-        postalCode: {
-            type: Number,
-            required: [true, 'Ingresa tu código postal'],
+        profilePicture: {
+            type: String,
+            required: false,
         },
-        
+
         password: {
             type: String,
             required: [true, 'Ingresa una contraseña'],
@@ -67,10 +78,7 @@ const userSchema = new mongoose.Schema(
             minlength: [8, 'Tu contraseña debe contar con al menos 8 caracteres'],
         },
         // The profile picture will be stored in firebase and accesed with an URL
-        profilePicture: {
-            type: String,
-            required: false,
-        },
+        
     }, {timestamps: true}
 );
 
