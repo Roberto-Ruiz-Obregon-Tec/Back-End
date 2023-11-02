@@ -128,33 +128,18 @@ exports.protect = catchAsync(async (req, res, next) => {
 
 /* Creating a new user. */
 exports.signUpUser = catchAsync(async (req, res, next) => {
-    const {
-        firstName,
-        lastName,
-        age,
-        gender,
-        email,
-        occupation,
-        company,
-        sociallyResponsibleCompany,
-        postalCode,
-        password,
-        profilePicture,
-    } = req.body;
+    const parsedJSON = {};
 
-    const newUser = await User.create({
-        firstName,
-        lastName,
-        age,
-        gender,
-        email,
-        occupation,
-        company,
-        sociallyResponsibleCompany,
-        postalCode,
-        password,
-        profilePicture
-    });
+    for (let i = 0; i < Object.keys(req.body).length; i++){ 
+        const key = Object.keys(req.body)[i];
+        const value = req.body[key];
+
+        if (value === undefined || value === null) continue;
+
+        parsedJSON[key] = value;
+    }
+
+    const newUser = await User.create(parsedJSON);
 
     // Link to rol user
     const nRol = new UserRol({
@@ -180,25 +165,18 @@ exports.signUpUser = catchAsync(async (req, res, next) => {
 
 /* Creating a new admin. */
 exports.signUpAdmin = catchAsync(async (req, res, next) => {
-    const {
-        firstName,
-        lastName,
-        age,
-        gender,
-        email,
-        postalCode,
-        password,
-    } = req.body;
+    const parsedJSON = {};
 
-    const newUser = await User.create({
-        firstName,
-        lastName,
-        age,
-        gender,
-        email,
-        postalCode,
-        password,
-    });
+    for (let i = 0; i < Object.keys(req.body).length; i++){ 
+        const key = Object.keys(req.body)[i];
+        const value = req.body[key];
+
+        if (value === undefined || value === null) continue;
+
+        parsedJSON[key] = value;
+    }
+
+    const newUser = await User.create(parsedJSON);
 
     // Link to rol admin
     const nRol = new UserRol({
