@@ -30,6 +30,7 @@ const aggregationsRouter = require('./routes/aggregations.route');
 const certificationsRouter = require('./routes/certifications.route');
 const foundationInformationRouter = require('./routes/foundationInformation.route');
 const companyCertificationsRouter = require('./routes/companyCertifications.route');
+const scholarshipsRouter = require('./routes/scholarships.route');
 
 const app = express();
 
@@ -117,6 +118,7 @@ app.use('/', viewRouter);
 app.use('/v1/certifications', certificationsRouter);
 app.use('/v1/informacion-fundacion', foundationInformationRouter);
 app.use('/v1/company-certifications', companyCertificationsRouter);
+app.use('/v1/scholarships', scholarshipsRouter);
 
 // ERROR HANDLER FOR UNHANDLED ROUTES
 app.all('*', (req, res, next) => {
