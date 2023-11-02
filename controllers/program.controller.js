@@ -41,7 +41,14 @@ exports.getAllPrograms = catchAsync(async (req, res, next) => {
             programs.splice(i, 1);  // Eliminamos el registro
         }
     }
-
+    
+    // Ios only
+    if(req.headers["user-platform"] == 'ios')
+    return res.status(200).json({
+        status: 'success',
+        results: programs.length,
+        data: programs,
+    });
 
     res.status(200).json({
         status: 'success',
