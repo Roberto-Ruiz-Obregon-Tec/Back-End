@@ -6,10 +6,8 @@ const catchAsync = require('./../utils/catchAsync');
 const Email = require('./../utils/email');
 const AppError = require('./../utils/appError');
 
-const Admin = require('./../models/admins.model');
 const User = require('./../models/users.model');
 const UserRol = require('../models/userRol.model')
-const Rol = require('../models/rols.model');
 const RolService = require('../models/rolService.model');
 const Service = require('../models/services.models');
 
@@ -130,32 +128,26 @@ exports.protect = catchAsync(async (req, res, next) => {
 
 /* Creating a new user. */
 exports.signUpUser = catchAsync(async (req, res, next) => {
-    const {
-        firstName,
-        lastName,
-        age,
-        gender,
-        email,
-        occupation,
-        company,
-        sociallyResponsibleCompany,
-        postalCode,
-        password,
-        profilePicture,
-    } = req.body;
+    const parsedJSON = {};
 
-    const newUser = await User.create({
-        firstName,
-        lastName,
-        age,
-        gender,
-        email,
-        occupation,
-        company,
-        sociallyResponsibleCompany,
-        postalCode,
-        password,
-        profilePicture});
+    for (let i = 0; i < Object.keys(req.body).length; i++){ 
+        const key = Object.keys(req.body)[i];
+        const value = req.body[key];
+
+        if (value === undefined || value === null) continue;
+
+        parsedJSON[key] = value;
+    }
+
+    const newUser = await User.create(parsedJSON);
+
+    // Link to rol user
+    const nRol = new UserRol({
+        user: newUser._id,
+        rol: "R001"
+    });
+
+    await nRol.save();
 
     /*try {
         await new Email(newUser, process.env.LANDING_URL).sendWelcome();
@@ -173,29 +165,43 @@ exports.signUpUser = catchAsync(async (req, res, next) => {
 
 /* Creating a new admin. */
 exports.signUpAdmin = catchAsync(async (req, res, next) => {
-    const newUser = await Admin.create({
-        name: req.body.name,
-        email: req.body.email,
-        password: req.body.password,
-        passwordConfirm: req.body.passwordConfirm,
+    const parsedJSON = {};
+
+    for (let i = 0; i < Object.keys(req.body).length; i++){ 
+        const key = Object.keys(req.body)[i];
+        const value = req.body[key];
+
+        if (value === undefined || value === null) continue;
+
+        parsedJSON[key] = value;
+    }
+
+    const newUser = await User.create(parsedJSON);
+
+    // Link to rol admin
+    const nRol = new UserRol({
+        user: newUser._id,
+        rol: "R002"
     });
 
-    try {
-        await new Email(newUser, process.env.LANDING_URL).sendWelcome();
-    } catch (error) {
-        return next(
-            new AppError(
-                'Hemos tenido problemas enviando un correo de bienvenida.',
-                500
-            )
-        );
-    }
+    await nRol.save();
+
+    // try {
+    //     await new Email(newUser, process.env.LANDING_URL).sendWelcome();
+    // } catch (error) {
+    //     return next(
+    //         new AppError(
+    //             'Hemos tenido problemas enviando un correo de bienvenida.',
+    //             500
+    //         )
+    //     );
+    // }
 
     // After signup a verified admin must approve the new admin
     res.status(200).json({
         status: 'success',
         message:
-            'Te has registrado con éxito, espera a que un administrador verifique tu perfil.',
+            '¡Has registrado una cuenta de administrador con éxito!',
     });
 });
 
@@ -248,18 +254,18 @@ exports.loginAdmin = catchAsync(async (req, res, next) => {
     }
 
     // 2 Check is user exists and has been verified.
-    const user = await Admin.findOne({ email }).select(
-        '+password +hasVerification'
-    ); // adding a + to the field set as selected false means we will retrieve it
+    const user = await User.findOne({email: {$eq: email}})
 
     if (!user || !(await user.correctPassword(password, user.password))) {
         return next(new AppError('Email o contraseña incorrectos.', 401));
     }
 
-    if (!user.hasVerification) {
+    const rol = await UserRol.findOne({user: user._id});
+    
+    if (!rol || rol.rol !== "R002") {
         return next(
             new AppError(
-                'No haz sido verificado, espera a que un administrador verifique tu perfil.',
+                'No tienes permiso para iniciar sesión en esta plataforma.',
                 401
             )
         );
