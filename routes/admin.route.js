@@ -17,15 +17,15 @@ const {
     editMe,
     protect,
 } = require(`${__dirname}/../controllers/authentication.controller.js`);
-const {
-    forgotPasswordAdmin,
-    resetPasswordAdmin,
-} = require(`${__dirname}/../controllers/password.controller.js`);
+// const {
+//     forgotPasswordAdmin,
+//     resetPasswordAdmin,
+// } = require(`${__dirname}/../controllers/password.controller.js`);
 
 router.post('/auth/signup', signUpAdmin);
 router.post('/auth/login', loginAdmin);
-router.post('/forgotpassword', forgotPasswordAdmin);
-router.patch('/resetpassword/:id', resetPasswordAdmin);
+// router.post('/forgotpassword', forgotPasswordAdmin);
+// router.patch('/resetpassword/:id', resetPasswordAdmin);
 
 router.use(protect);
 // router.get('/auth/me', getMe, getAdmin);
