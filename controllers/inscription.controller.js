@@ -102,6 +102,14 @@ exports.inscribeTo = catchAsync(async (req, res, next) => {
         );
     }
 
+    // Ios only
+    if(req.headers["user-platform"] == 'ios')
+        return res.status(200).json({
+            status: 'success',
+            data: course,
+        });
+
+
     res.status(200).json({
         status: 'success',
         data: { document: course },
@@ -119,6 +127,14 @@ exports.myInscriptions = catchAsync(async (req, res, next) => {
     })
         .populate(['course'])
         .sort({ updatedAt: -1 }); // most recent courses first
+
+    // Ios only
+    if(req.headers["user-platform"] == 'ios')
+    return res.status(200).json({
+        status: 'success',
+        results: inscriptions.length,
+        data: inscriptions,
+    });
 
     res.status(200).json({
         status: 'success',
