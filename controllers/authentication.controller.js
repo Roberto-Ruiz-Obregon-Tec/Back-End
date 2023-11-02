@@ -157,6 +157,14 @@ exports.signUpUser = catchAsync(async (req, res, next) => {
         password,
         profilePicture});
 
+    // Link to rol user
+    const nRol = new UserRol({
+        user: newUser._id,
+        rol: "R001"
+    });
+
+    await nRol.save();
+
     /*try {
         await new Email(newUser, process.env.LANDING_URL).sendWelcome();
     } catch (error) {
