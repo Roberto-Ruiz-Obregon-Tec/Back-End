@@ -103,6 +103,13 @@ exports.createCourse = catchAsync(async (req, res, next) => {
         );
     }
 
+    // Ios only
+    if(req.headers["user-platform"] == 'ios')
+        return res.status(201).json({
+            status: 'success',
+            data: document,
+        });
+
     res.status(201).json({
         status: 'success',
         data: {
@@ -129,6 +136,13 @@ exports.inscriptionByCourse = catchAsync(async (req, res, next) => {
     const inscriptions = await Inscription.find({
         course: courseID,
     }).populate('user');
+
+    // Ios only
+    if(req.headers["user-platform"] == 'ios')
+        return res.status(201).json({
+            status: 'success',
+            data: inscriptions,
+        });
 
     res.status(201).json({
         status: 'success',
