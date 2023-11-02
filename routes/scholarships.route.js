@@ -12,6 +12,7 @@ const {
 } = require(`${__dirname}/../controllers/authentication.controller.js`);
 
 //router.use(protect);
+router.use(protect, restrictTo('Consultar becas'));
 router.route('/').get(getAllScholarships);
 
 module.exports = router;
