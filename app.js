@@ -24,7 +24,6 @@ const topicsRouter = require('./routes/topics.route');
 const programRouter = require('./routes/program.route');
 const adminRouter = require('./routes/admin.route');
 const eventsRouter = require('./routes/events.route');
-const scholarshipRouter = require('./routes/scholarship.route');
 const viewRouter = require('./routes/views.route');
 const emailRouter = require('./routes/emails.route');
 const aggregationsRouter = require('./routes/aggregations.route');
@@ -110,8 +109,7 @@ app.use('/v1/inscription', inscriptionRouter);
 app.use('/v1/payment', paymentRouter);
 app.use('/v1/course', courseRouter);
 app.use('/v1/topics', topicsRouter);
-app.use('/v1/event', eventsRouter);
-app.use('/v1/scholarship', scholarshipRouter);
+app.use('/v1/event', eventsRouter)
 app.use('/v1/program', programRouter);
 app.use('/v1/admin', adminRouter);
 app.use('/v1/emails', emailRouter);

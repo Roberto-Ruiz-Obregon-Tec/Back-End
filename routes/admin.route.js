@@ -1,5 +1,7 @@
 const express = require('express');
+
 const router = express.Router();
+
 
 // const {
 //     createAdmin,
@@ -8,7 +10,6 @@ const router = express.Router();
 //     updateAdmin,
 //     deleteAdmin,
 // } = require(`${__dirname}/../controllers/admin.controller.js`);
-  
 const {
     loginAdmin,
     signUpAdmin,
