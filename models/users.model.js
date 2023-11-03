@@ -9,7 +9,7 @@ const { bool } = require('sharp');
 /* Creating a schema for the user model. */
 const userSchema = new mongoose.Schema(
     {
-        name: {
+        firstName: {
             type: String,
             required: [true, 'Ingresa tu nombre'],
         },
