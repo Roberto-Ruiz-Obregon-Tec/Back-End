@@ -42,7 +42,7 @@ const userSchema = new mongoose.Schema(
 
         occupation: {
             type: String,
-            required: [true, 'Ingresa tu ocupación'],
+            required: [false, 'Ingresa tu ocupación'],
         },
 
         company: {
@@ -126,8 +126,8 @@ userSchema.methods.correctPassword = async function (
     userPassword
 ) {
     // This refers to the document. Since select is false we dont have access to password.
-   // return await bcrypt.compare(candidatePassword, userPassword);
-   return await candidatePassword === userPassword;
+   return await bcrypt.compare(candidatePassword, userPassword);
+   // return await candidatePassword === userPassword;
 };
 
 /* Creating a password reset token and saving it in the database. */
@@ -165,6 +165,7 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
  * When a user is deleted, their payments as well as course inscriptions are also deleted,
  * updating the capacity of the course.
  */
+
 userSchema.pre('remove', async function (next) {
     const Course = require('./courses.model');
     const Payment = require('./payments.model');
