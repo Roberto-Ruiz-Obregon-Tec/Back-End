@@ -9,7 +9,7 @@ const { bool } = require('sharp');
 /* Creating a schema for the user model. */
 const userSchema = new mongoose.Schema(
     {
-        firstName: {
+        name: {
             type: String,
             required: [true, 'Ingresa tu nombre'],
         },
@@ -33,14 +33,14 @@ const userSchema = new mongoose.Schema(
             min: 0,
             required: [true, 'Ingresa tu edad'],
         },
-        
+
         gender: {
             type: String,
             enum: ['Hombre', 'Mujer', 'Otro'],
             required: [true, 'Ingresa tu sexo']
         },
-        
-        
+
+
         occupation: {
             type: String,
             required: [false, 'Ingresa tu ocupación'],
@@ -53,9 +53,10 @@ const userSchema = new mongoose.Schema(
 
         interests: {
             type: String,
+            required: false
         },
-        
-        
+
+
         company: {
             type: String,
             required: false
@@ -78,8 +79,8 @@ const userSchema = new mongoose.Schema(
             minlength: [8, 'Tu contraseña debe contar con al menos 8 caracteres'],
         },
         // The profile picture will be stored in firebase and accesed with an URL
-        
-    }, {timestamps: true}
+
+    }, { timestamps: true }
 );
 
 
@@ -134,8 +135,8 @@ userSchema.methods.correctPassword = async function (
     userPassword
 ) {
     // This refers to the document. Since select is false we dont have access to password.
-   return await bcrypt.compare(candidatePassword, userPassword);
-   // return await candidatePassword === userPassword;
+    return await bcrypt.compare(candidatePassword, userPassword);
+    // return await candidatePassword === userPassword;
 };
 
 /* Creating a password reset token and saving it in the database. */

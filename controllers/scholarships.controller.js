@@ -1,5 +1,5 @@
 const scholarships = require('../models/scholarships.model');
 const factory = require('./handlerFactory.controller');
 
-// read certifications
+// read scholarships
 exports.getAllScholarships = factory.getAll(scholarships);
