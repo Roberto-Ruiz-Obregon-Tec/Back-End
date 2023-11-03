@@ -1,4 +1,3 @@
-
 const mongoose = require('mongoose');
 const validator = require('validator');
 const AppError = require('../utils/appError');
@@ -41,10 +40,9 @@ const scholarshipSchema = new mongoose.Schema(
             required: [true, 'Ingresa la portada para la beca'],
         },
 
-        // Population sector that the scholarship covers
         sector: {
             type: String,
-            default: ''
+            default: 'Ingresa el sector que cubre la beca'
         },
 
         startDate: {
@@ -60,14 +58,14 @@ const scholarshipSchema = new mongoose.Schema(
 );
 
 // date validation
-// scholarshipSchema.pre('validate', function () {
-//     if (this.endDate < this.startDate) {
-//         throw new AppError(
-//             'La fecha final debe ser menor a la fecha inicial',
-//             400
-//         );
-//     }
-// });
+scholarshipSchema.pre('validate', function () {
+    if (this.endDate < this.startDate) {
+        throw new AppError(
+            'La fecha final debe ser menor a la fecha inicial',
+            400
+        );
+    }
+});
 
 // Override the function 'toJSON' to present the data to the client
 // Removes unnecessary properties '__v' and the creation timestamps
