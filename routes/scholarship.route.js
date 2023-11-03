@@ -13,11 +13,23 @@ const {
 } = scholarshipController;
 
 router.route('/')
-    .get(getAllScholarship)
-    .post(createScholarship);
+    .get(
+        protect, 
+        restrictTo('Consultar becas'),
+        getAllScholarship
+    )
+    .post(
+        protect,
+        restrictTo('Admin'), 
+        createScholarship
+    );
 
     router.route('/:id')
-    .get(getScholarship)
+    .get(
+        protect,
+        restrictTo('Consultar becas'),
+        getScholarship
+    )
     .patch(
         protect,
         restrictTo('Admin'), 
@@ -30,6 +42,10 @@ router.route('/')
     );
 
 router.route('/:id/contact')
-    .get(getContactInfo);
+    .get(
+        protect,
+        restrictTo('Consultar becas'),
+        getContactInfo
+    );
 
 module.exports = router;
