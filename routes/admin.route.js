@@ -16,14 +16,16 @@ const {
     logout,
     editMe,
     protect,
+    restrictTo
 } = require(`${__dirname}/../controllers/authentication.controller.js`);
 // const {
 //     forgotPasswordAdmin,
 //     resetPasswordAdmin,
 // } = require(`${__dirname}/../controllers/password.controller.js`);
-
-router.post('/auth/signup', signUpAdmin);
 router.post('/auth/login', loginAdmin);
+
+router.use(protect, restrictTo("Crear administrador"))
+router.post('/auth/signup', signUpAdmin);
 // router.post('/forgotpassword', forgotPasswordAdmin);
 // router.patch('/resetpassword/:id', resetPasswordAdmin);
 

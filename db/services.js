@@ -167,5 +167,10 @@ const services = [
     {
         "_id": "S042",
         "name": "Consultar usuarios"
-    }
+    },
+
+    {
+        "_id": "S043",
+        "name": "Crear administrador"
+    },
 ]
