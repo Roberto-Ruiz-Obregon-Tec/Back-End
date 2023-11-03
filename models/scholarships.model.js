@@ -60,14 +60,14 @@ const scholarshipSchema = new mongoose.Schema(
 );
 
 // date validation
-courseSchema.pre('validate', function () {
-    if (this.endDate < this.startDate) {
-        throw new AppError(
-            'La fecha final debe ser menor a la fecha inicial',
-            400
-        );
-    }
-});
+// scholarshipSchema.pre('validate', function () {
+//     if (this.endDate < this.startDate) {
+//         throw new AppError(
+//             'La fecha final debe ser menor a la fecha inicial',
+//             400
+//         );
+//     }
+// });
 
 // Override the function 'toJSON' to present the data to the client
 // Removes unnecessary properties '__v' and the creation timestamps

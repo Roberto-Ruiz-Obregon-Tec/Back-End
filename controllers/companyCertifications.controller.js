@@ -23,7 +23,7 @@ exports.getAllCompanies = catchAsync(async (req, res, next) => {
             companies[i] = {...companies[i]._doc, "certifications": "Sin certificaciones"};
         }
 
-        companies[i] = {...companies[i], "certifications": companyCertifications};
+        companies[i] = {...companies[i]._doc, "certifications": companyCertifications};
     }
 
     res.status(200).json({

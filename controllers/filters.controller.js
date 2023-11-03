@@ -129,6 +129,14 @@ exports.filterTopics = catchAsync(async (req, res) => {
         },
     ]);
 
+    // Ios only
+    if(req.headers["user-platform"] == 'ios')
+        return res.status(200).json({
+            status: 'success',
+            data: result,
+        });
+
+
     res.status(200).json({
         status: 'success',
         data: {
@@ -170,6 +178,13 @@ exports.filterInscriptions = catchAsync(async (req, res) => {
             },
         },
     ]);
+
+    // Ios only
+    if(req.headers["user-platform"] == 'ios')
+        return res.status(200).json({
+            status: 'success',
+            data: result,
+        });
 
     res.status(200).json({
         status: 'success',
