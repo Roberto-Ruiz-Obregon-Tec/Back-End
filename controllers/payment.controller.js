@@ -95,6 +95,13 @@ exports.startPayment = catchAsync(async (req, res, next) => {
         );
     }
 
+    // Ios only
+    if(req.headers["user-platform"] == 'ios')
+        return res.status(200).json({
+            status: 'success',
+            data: payment,
+        });
+
     res.status(200).json({
         status: 'success',
         data: { document: payment },
@@ -158,6 +165,13 @@ exports.acceptPayment = catchAsync(async (req, res, next) => {
         );
     }
 
+    // Ios only
+    if(req.headers["user-platform"] == 'ios')
+        return res.status(200).json({
+            status: 'success',
+            data: payment,
+        });
+
     res.status(200).json({
         status: 'success',
         data: { document: payment },
@@ -212,6 +226,13 @@ exports.declinePayment = catchAsync(async (req, res, next) => {
         );
     }
     // Send payment rejected confirmation email
+
+    // Ios only
+    if(req.headers["user-platform"] == 'ios')
+        return res.status(200).json({
+            status: 'success',
+            data: payment,
+        });
 
     res.status(200).json({
         status: 'success',

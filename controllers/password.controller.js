@@ -1,5 +1,5 @@
 const User = require('./../models/users.model');
-const Admin = require('./../models/admins.model');
+// const Admin = require('./../models/admins.model');
 const crypto = require('crypto');
 
 const catchAsync = require('./../utils/catchAsync');
@@ -71,34 +71,34 @@ const resetPassword = async (token, Model, password, passwordConfirm) => {
 };
 
 /* The above code is sending an email to the user with a link to reset their password. */
-exports.forgotPasswordAdmin = catchAsync(async (req, res, next) => {
-    await forgotPassword(Admin, req.body.email, req, 'admin');
+// exports.forgotPasswordAdmin = catchAsync(async (req, res, next) => {
+//     await forgotPassword(Admin, req.body.email, req, 'admin');
 
-    res.status(200).json({
-        status: 'success',
-        message: 'Correo para recuperar tu contraseña enviado.',
-    });
-});
+//     res.status(200).json({
+//         status: 'success',
+//         message: 'Correo para recuperar tu contraseña enviado.',
+//     });
+// });
 
 /*
  * This is the code that is executed when the user clicks on the link in the email. It is a GET request
  * to the server. The server then checks if the token is valid and if it is, it allows the user to
  * change their password. 
 */
-exports.resetPasswordAdmin = catchAsync(async (req, res, next) => {
-    await resetPassword(
-        req.params.id,
-        Admin,
-        req.body.password,
-        req.body.passwordConfirm
-    );
+// exports.resetPasswordAdmin = catchAsync(async (req, res, next) => {
+//     await resetPassword(
+//         req.params.id,
+//         Admin,
+//         req.body.password,
+//         req.body.passwordConfirm
+//     );
 
-    res.status(200).json({
-        status: 'success',
-        message:
-            'Contraseña cambiada con éxito. Quizá debas iniciar sesión de nuevo',
-    });
-});
+//     res.status(200).json({
+//         status: 'success',
+//         message:
+//             'Contraseña cambiada con éxito. Quizá debas iniciar sesión de nuevo',
+//     });
+// });
 
 /* The above code is sending an email to the user with a link to reset their password. */
 exports.forgotPasswordUser = catchAsync(async (req, res, next) => {

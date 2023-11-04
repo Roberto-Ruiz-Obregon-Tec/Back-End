@@ -1,12 +1,15 @@
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
-const User = require('./../models/users.model');
-const Admin = require('./../models/admins.model');
 const Inscription = require('./../models/inscriptions.model');
 
 const catchAsync = require('./../utils/catchAsync');
 const Email = require('./../utils/email');
 const AppError = require('./../utils/appError');
+
+const User = require('./../models/users.model');
+const UserRol = require('../models/userRol.model')
+const RolService = require('../models/rolService.model');
+const Service = require('../models/services.models');
 
 /**
  * This function takes an id as an argument and returns a signed JWT token with the id as the payload
@@ -44,6 +47,14 @@ const createSendToken = (user, statusCode, req, res) => {
     // Remove password from output
     user.password = undefined;
 
+    // Ios only
+    if(req.headers["user-platform"] == 'ios')
+    return res.status(statusCode).json({
+        status: 'success',
+        token,
+        data: user,
+    });
+
     res.status(statusCode).json({
         status: 'success',
         token,
@@ -73,7 +84,8 @@ exports.protect = catchAsync(async (req, res, next) => {
     } else if (req.cookies.jwt) {
         token = req.cookies.jwt;
     }
-    console.log(token);
+    //console.log(token);
+    
     if (!token) {
         return next(
             new AppError(
@@ -87,13 +99,14 @@ exports.protect = catchAsync(async (req, res, next) => {
     // decoded will be the payload of the JWT
 
     // 3) Check if user still exists
-    const user = await User.findById(decoded.id);
-    if (!user) {
+    const client = await User.findById(decoded.id);
+    
+    if (!client) {
         return next(new AppError('El usuario ya no existe.', 401));
     }
 
     // 4) Check if user changed passwords after the token was issued
-    if (user.changedPasswordAfter(decoded.iat)) {
+    if (client.changedPasswordAfter(decoded.iat)) {
         // iat - issued at
         return next(
             new AppError(
@@ -102,26 +115,41 @@ exports.protect = catchAsync(async (req, res, next) => {
             )
         );
     }
-    // 5) Next is called and the req accesses the protected route
-    req.user = user;
+    
+    // 5) Storing client info and calling Next to access the protected route
+    req.client = client;
+    
+    const rol = await UserRol.findOne({user: client._id}, {rol: 1}).populate('rol');
+    req.rolId = rol.rol._id
+    req.rol = rol.rol.name
+
     next();
 });
 
 /* Creating a new user. */
 exports.signUpUser = catchAsync(async (req, res, next) => {
-    const newUser = await User.create({
-        name: req.body.name,
-        age: req.body.age,
-        gender: req.body.gender,
-        job: req.body.job,
-        educationLevel: req.body.educationLevel,
-        postalCode: req.body.postalCode,
-        email: req.body.email,
-        password: req.body.password,
-        passwordConfirm: req.body.passwordConfirm,
+    const parsedJSON = {};
+
+    for (let i = 0; i < Object.keys(req.body).length; i++){ 
+        const key = Object.keys(req.body)[i];
+        const value = req.body[key];
+
+        if (value === undefined || value === null) continue;
+
+        parsedJSON[key] = value;
+    }
+
+    const newUser = await User.create(parsedJSON);
+
+    // Link to rol user
+    const nRol = new UserRol({
+        user: newUser._id,
+        rol: "R001"
     });
 
-    try {
+    await nRol.save();
+
+    /*try {
         await new Email(newUser, process.env.LANDING_URL).sendWelcome();
     } catch (error) {
         return next(
@@ -130,36 +158,50 @@ exports.signUpUser = catchAsync(async (req, res, next) => {
                 500
             )
         );
-    }
+    } */
 
     return createSendToken(newUser, 201, req, res);
 });
 
 /* Creating a new admin. */
 exports.signUpAdmin = catchAsync(async (req, res, next) => {
-    const newUser = await Admin.create({
-        name: req.body.name,
-        email: req.body.email,
-        password: req.body.password,
-        passwordConfirm: req.body.passwordConfirm,
+    const parsedJSON = {};
+
+    for (let i = 0; i < Object.keys(req.body).length; i++){ 
+        const key = Object.keys(req.body)[i];
+        const value = req.body[key];
+
+        if (value === undefined || value === null) continue;
+
+        parsedJSON[key] = value;
+    }
+
+    const newUser = await User.create(parsedJSON);
+
+    // Link to rol admin
+    const nRol = new UserRol({
+        user: newUser._id,
+        rol: "R002"
     });
 
-    try {
-        await new Email(newUser, process.env.LANDING_URL).sendWelcome();
-    } catch (error) {
-        return next(
-            new AppError(
-                'Hemos tenido problemas enviando un correo de bienvenida.',
-                500
-            )
-        );
-    }
+    await nRol.save();
+
+    // try {
+    //     await new Email(newUser, process.env.LANDING_URL).sendWelcome();
+    // } catch (error) {
+    //     return next(
+    //         new AppError(
+    //             'Hemos tenido problemas enviando un correo de bienvenida.',
+    //             500
+    //         )
+    //     );
+    // }
 
     // After signup a verified admin must approve the new admin
     res.status(200).json({
         status: 'success',
         message:
-            'Te has registrado con éxito, espera a que un administrador verifique tu perfil.',
+            '¡Has registrado una cuenta de administrador con éxito!',
     });
 });
 
@@ -169,9 +211,10 @@ exports.signUpAdmin = catchAsync(async (req, res, next) => {
  * protected route.
  */
 exports.loginUser = catchAsync(async (req, res, next) => {
-    const { email, password } = req.body;
+    const req_email = req.body.email;
+    const req_password = req.body.password;
 
-    if (!email || !password) {
+    if (!req_email || !req_password) {
         // After calling next we want the function to end and send an error.
         return next(
             new AppError(
@@ -182,9 +225,9 @@ exports.loginUser = catchAsync(async (req, res, next) => {
     }
 
     // 2 Check is user exists.
-    const user = await User.findOne({ email }).select('+password'); // adding a + to the field set as selected false means we will retrieve it
+    const user = await User.findOne({email: {$eq: req_email}})
 
-    if (!user || !(await user.correctPassword(password, user.password))) {
+    if (!user || !(await user.correctPassword(req_password, user.password))) {
         return next(new AppError('Email o contraseña incorrectos.', 401));
     }
 
@@ -211,18 +254,18 @@ exports.loginAdmin = catchAsync(async (req, res, next) => {
     }
 
     // 2 Check is user exists and has been verified.
-    const user = await Admin.findOne({ email }).select(
-        '+password +hasVerification'
-    ); // adding a + to the field set as selected false means we will retrieve it
+    const user = await User.findOne({email: {$eq: email}})
 
     if (!user || !(await user.correctPassword(password, user.password))) {
         return next(new AppError('Email o contraseña incorrectos.', 401));
     }
 
-    if (!user.hasVerification) {
+    const rol = await UserRol.findOne({user: user._id});
+    
+    if (!rol || rol.rol !== "R002") {
         return next(
             new AppError(
-                'No haz sido verificado, espera a que un administrador verifique tu perfil.',
+                'No tienes permiso para iniciar sesión en esta plataforma.',
                 401
             )
         );
@@ -239,79 +282,10 @@ exports.logout = (req, res, next) => {
     res.status(200).json({ status: 'success' });
 };
 
-/**
- * The above code is checking if the user is logged in. If the user is logged in, the user is allowed
- * to access the protected route. If the user is not logged in, the user is not allowed to access the
- * protected route.
- */
-exports.protect = catchAsync(async (req, res, next) => {
-    // 1) Getting the token and check if its there
-    let token;
-    if (
-        // es un estandard que el token vaya con este header y con el Bearer antes
-        req.headers.authorization &&
-        req.headers.authorization.startsWith('Bearer')
-    ) {
-        token = req.headers.authorization.split(' ')[1];
-    } else if (req.cookies.jwt) {
-        token = req.cookies.jwt;
-    }
-    // console.log('Token used: ', token);
-
-    if (!token) {
-        return next(
-            new AppError(
-                'No has iniciado sesión, por favor inicia sesión para obtener acceso.',
-                401
-            )
-        );
-    }
-    // 2) Verification: Validate the token to view if the signature is valid
-    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-    // decoded will be the JWT payload
-
-    // 3) Check if user or admin exists
-    const user = await User.findById(decoded.id);
-    const admin = await Admin.findById(decoded.id);
-    if (!user && !admin) {
-        return next(
-            new AppError(
-                'El usuario con el que intentas ingresar ya no existe.',
-                401
-            )
-        );
-    }
-
-    // 4) Check if user changed passwords after the token was issued
-    // PARA ESTE CREAREMOS UN nuevo metodo de INSTANCIA
-    if (
-        (user && user.changedPasswordAfter(decoded.iat)) ||
-        (admin && admin.changedPasswordAfter(decoded.iat))
-    ) {
-        // iat - issued at
-        return next(
-            new AppError(
-                'Has cambiado recientemente tu contraseña. Inicia sesión de nuevo.',
-                401
-            )
-        );
-    }
-
-    // 5) Next is called and the req accesses the protected route
-    if (user) {
-        req.userType = 'User';
-        req.user = user;
-    } else if (admin) {
-        req.userType = 'Admin';
-        req.admin = admin;
-    }
-    next();
-});
-
 /* Setting the user id to the params id. */
 exports.getMe = catchAsync(async (req, res, next) => {
     // Using this route before getOne lets us leverage the already created endpoint.
-    let userActive = req.userType == 'User' ? req.user : req.admin;
+    let userActive = req.rol == 'Administrador' ? req.admin : req.user;
     req.params.id = userActive._id;
     next();
 });
@@ -341,6 +315,14 @@ exports.getMyCourses = catchAsync(async (req, res, next) => {
 
     const courses = results.map((ins) => ins.course);
 
+    // Ios only
+    if(req.headers["user-platform"] == 'ios')
+    return res.status(200).json({
+        status: 'success',
+        results: courses.length,
+        data: courses,
+    });
+
     // 3 respond with update
     res.status(200).json({
         status: 'success',
@@ -363,14 +345,21 @@ exports.editMe = catchAsync(async (req, res, next) => {
         );
     }
 
-    let userActive = req.userType == 'User' ? req.user : req.admin;
-    let Model = req.userType == 'User' ? User : Admin;
+    let userActive = req.rol == 'Administrador' ? req.admin : req.user;
     // 2 Update document
-    const user = await Model.findByIdAndUpdate(userActive._id, req.body, {
+    const user = await User.findByIdAndUpdate(userActive._id, req.body, {
         // queremos que regrese el viejo
         new: true,
         runValidators: true,
     });
+
+    // Ios only
+    if(req.headers["user-platform"] == 'ios')
+        return res.status(200).json({
+            status: 'success',
+            data: user,
+        });
+
 
     // 3 respond with update
     res.status(200).json({
@@ -383,17 +372,24 @@ exports.editMe = catchAsync(async (req, res, next) => {
 
 /* Deletes the user by its id*/
 exports.deleteMe = catchAsync(async (req, res, next) => {
-    let userActive = req.userType == 'User' ? req.user : req.admin;
-    let Model = req.userType == 'User' ? User : Admin;
+    let userActive = req.rol == 'Administrador' ? req.admin : req.user;
 
-    if (req.userType != 'User') {
+    if (req.rol == 'Administrador') {
         return next(
             new AppError('Esta función es sólo para borrar usuarios.', 400)
         );
     }
 
     // 2 Update document
-    const user = await Model.findByIdAndDelete(userActive._id);
+    const user = await User.findByIdAndDelete(userActive._id);
+
+    // Ios only
+    if(req.headers["user-platform"] == 'ios')
+        return res.status(200).json({
+            status: 'success',
+            data: user,
+        });
+
 
     // 3 respond with update
     res.status(200).json({
@@ -405,9 +401,12 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
 });
 
 /* Restricting the user to a certain role. */
-exports.restrictTo = (...roles) => {
-    return (req, res, next) => {
-        if (!roles.includes(req.userType)) {
+exports.restrictTo = (service) => {
+    return catchAsync(async(req, res, next) => {
+        const idService = await Service.findOne({name: service}, {_id : 1}); // id asociado al servicio
+        const roles = await RolService.findOne({service: idService._id}); // roles asociados al servicio
+
+        if (!roles.rol.includes(req.rolId)) { // Verificamos que el usuario tenga acceso al servicio
             next(
                 new AppError(
                     'No cuentas con los permisos para realizar esta acción.',
@@ -415,6 +414,7 @@ exports.restrictTo = (...roles) => {
                 )
             );
         }
+        
         next();
-    };
+    });
 };

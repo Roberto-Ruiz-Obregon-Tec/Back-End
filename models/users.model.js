@@ -1,85 +1,88 @@
+
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const { bool } = require('sharp');
+
 
 /* Creating a schema for the user model. */
-const userSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: [true, 'Por favor dinos tu nombre!'],
-    },
-    age: {
-        type: Number,
-        min: 0,
-        required: [true, 'Por favor, escribe tu edad'],
-    },
-    emailAgreement: {
-        type: Boolean,
-        default: true,
-    },
-    gender: {
-        type: String,
-        required: [true, 'Por favor, selecciona tu sexo'],
-        enum: ['Hombre', 'Mujer', 'Prefiero no decir'],
-    },
-    email: {
-        type: String,
-        required: [true, 'Por favor dinos tu correo!'],
-        lowercase: true,
-        unique: [true, 'Este correo ya esta en uso. Elige otro.'],
-        trim: true,
-        validate: [validator.isEmail, 'Necesitas un correo válido.'],
-    },
-    topics: [
-        {
-            type: mongoose.Schema.ObjectId,
-            ref: 'Topics',
+const userSchema = new mongoose.Schema(
+    {
+        firstName: {
+            type: String,
+            required: [true, 'Ingresa tu nombre'],
         },
-    ],
-    job: {
-        type: String,
-    },
-    educationLevel: {
-        type: String,
-        enum: {
-            values: [
-                'Ninguno',
-                'Primaria',
-                'Secundaria',
-                'Preparatoria',
-                'Universidad',
-                'Maestria',
-                'Doctorado',
-            ],
+
+        lastName: {
+            type: String,
+            required: [true, 'Ingresa tu apellido'],
         },
-    },
-    postalCode: {
-        type: Number,
-        required: [true, 'Por favor ingresa un código postal.'],
-    },
-    password: {
-        type: String,
-        required: [true, 'Por favor provee una contraseña.'],
-        // Using select prevents the field from being retrieved
-        minlength: [8, 'Tu contraseña debe contar con al menos 8 caracteres.'],
-        select: false,
-    },
-    passwordConfirm: {
-        type: String,
-        required: [true, 'Por favor confirma tu contraseña.'],
-        validate: {
-            // queremos contraseñas iguales
-            validator: function (value) {
-                return value === this.password;
-            },
-            message: 'Por favor ingresa la misma contraseña.',
+
+        email: {
+            type: String,
+            required: [true, 'Ingresa tu correo'],
+            lowercase: true,
+            unique: [true, 'El correo ingresado ya pertenece a otra cuenta'],
+            trim: true,
+            validate: [validator.isEmail, 'Introduce un correo válido'],
         },
-    },
-    passwordChangedAt: Date,
-    passwordResetToken: String,
-    passwordResetExpires: Date,
-});
+
+        age: {
+            type: Number,
+            min: 0,
+            required: [true, 'Ingresa tu edad'],
+        },
+
+        gender: {
+            type: String,
+            enum: ['Hombre', 'Mujer', 'Otro'],
+            required: [true, 'Ingresa tu sexo']
+        },
+
+
+        occupation: {
+            type: String,
+            required: [false, 'Ingresa tu ocupación'],
+        },
+
+        postalCode: {
+            type: Number,
+            required: [true, 'Ingresa tu código postal'],
+        },
+
+        interests: {
+            type: String,
+            required: false
+        },
+
+
+        company: {
+            type: String,
+            required: false
+        },
+
+        sociallyResponsibleCompany: {
+            type: Boolean,
+            required: false
+        },
+
+        profilePicture: {
+            type: String,
+            required: false,
+        },
+
+        password: {
+            type: String,
+            required: [true, 'Ingresa una contraseña'],
+            // Using select prevents the field from being retrieved
+            minlength: [8, 'Tu contraseña debe contar con al menos 8 caracteres'],
+        },
+        // The profile picture will be stored in firebase and accesed with an URL
+
+    }, { timestamps: true }
+);
+
 
 // Indexing program properties for optimized search
 userSchema.index({ email: 1 });
@@ -89,6 +92,19 @@ userSchema.index({ email: 1 });
  * This is a middleware that runs before the save() or create() method. It hashes the password and sets
  * the passwordConfirm to undefined.
  */
+
+userSchema.set('toJSON', {
+    virtuals: true,
+    transform: (doc, ret, options) => {
+        delete ret.__v;
+        ret.id = ret._id.toString();
+        delete ret._id;
+        delete ret.updatedAt;
+        delete ret.createdAt;
+    },
+});
+
+
 userSchema.pre('save', async function (next) {
     if (this.isModified('password')) {
         this.password = await bcrypt.hash(this.password, 12);
@@ -120,6 +136,7 @@ userSchema.methods.correctPassword = async function (
 ) {
     // This refers to the document. Since select is false we dont have access to password.
     return await bcrypt.compare(candidatePassword, userPassword);
+    // return await candidatePassword === userPassword;
 };
 
 /* Creating a password reset token and saving it in the database. */
@@ -157,6 +174,7 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
  * When a user is deleted, their payments as well as course inscriptions are also deleted,
  * updating the capacity of the course.
  */
+
 userSchema.pre('remove', async function (next) {
     const Course = require('./courses.model');
     const Payment = require('./payments.model');
@@ -193,6 +211,4 @@ userSchema.pre('remove', async function (next) {
     return next();
 });
 
-const User = mongoose.model('User', userSchema);
-
-module.exports = User;
+module.exports = mongoose.model('User', userSchema)

@@ -44,6 +44,13 @@ exports.updateOne = (Model) =>
             return next(error);
         }
 
+        // Ios only
+        if(req.headers["user-platform"] == 'ios')
+            return res.status(200).json({
+                status: 'success',
+                data: document,
+            });
+
         res.status(200).json({
             status: 'success',
             data: { document },
@@ -54,6 +61,14 @@ exports.updateOne = (Model) =>
 exports.createOne = (Model) =>
     catchAsync(async (req, res, next) => {
         const document = await Model.create(req.body);
+
+        // Ios only
+        if(req.headers["user-platform"] == 'ios')
+            return res.status(201).json({
+                status: 'success',
+                data: document,
+            });
+
 
         res.status(201).json({
             status: 'success',
@@ -80,6 +95,13 @@ exports.getOne = (Model, popOptions = []) =>
             return next(error);
         }
 
+        // Ios only
+        if(req.headers["user-platform"] == 'ios')
+            return res.status(200).json({
+                status: 'success',
+                data: document,
+            });
+
         res.status(200).json({
             status: 'success',
             data: {
@@ -96,15 +118,26 @@ exports.getAll = (Model, popOptions) =>
     catchAsync(async (req, res) => {
         let filter = {};
         let query = Model.find(filter);
+        
         if (popOptions) {
             query.populate(popOptions);
         }
+        
         const features = new APIFeatures(query, req.query)
             .filter()
             .sort()
             .limitFields()
             .paginate();
+        
         const documents = await features.query;
+
+        // Ios only
+        if(req.headers["user-platform"] == 'ios')
+            return res.status(200).json({
+                status: 'success',
+                results: documents.length,
+                data: documents,
+            });
 
         res.status(200).json({
             status: 'success',

@@ -18,7 +18,7 @@ class APIFeatures {
      */
     filter() {
         const queryObj = { ...this.queryString };
-        const excludeFields = ['page', 'sort', 'limit', 'fields'];
+        const excludeFields = ['page', 'sort', 'limit', 'fields', 'offset'];
 
         excludeFields.forEach((el) => delete queryObj[el]);
 
@@ -26,7 +26,7 @@ class APIFeatures {
         let queryString = JSON.stringify(queryObj);
         queryString = queryString.replace(
             // To allow more mongoose commands add the name of the command to the regular expression
-            /\b(gte|gt|lte|lt|regex|in)\b/g,
+            /\b(gte|gt|lte|lt|regex|in|eq)\b/g,
             (match) => `$${match}`
         );
 
