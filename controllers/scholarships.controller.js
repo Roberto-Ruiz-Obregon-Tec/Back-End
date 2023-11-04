@@ -6,7 +6,8 @@ const APIFeatures = require(`../utils/apiFeatures`);
 
 const scholarships = require('../models/scholarships.model');
 
-// read certifications
+
+// read scholarships
 exports.getScholarships = catchAsync(async (req, res, next) => {
     let filter = {};
     let query = scholarships.find(filter).select('name sector description organization');

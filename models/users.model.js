@@ -18,19 +18,7 @@ const userSchema = new mongoose.Schema(
             type: String,
             required: [true, 'Ingresa tu apellido'],
         },
-        
-        age: {
-            type: Number,
-            min: 0,
-            required: [true, 'Ingresa tu edad'],
-        },
-        
-        gender: {
-            type: String,
-            enum: ['Hombre', 'Mujer', 'Otro'],
-            required: [true, 'Ingresa tu sexo']
-        },
-        
+
         email: {
             type: String,
             required: [true, 'Ingresa tu correo'],
@@ -40,10 +28,34 @@ const userSchema = new mongoose.Schema(
             validate: [validator.isEmail, 'Introduce un correo válido'],
         },
 
+        age: {
+            type: Number,
+            min: 0,
+            required: [true, 'Ingresa tu edad'],
+        },
+
+        gender: {
+            type: String,
+            enum: ['Hombre', 'Mujer', 'Otro'],
+            required: [true, 'Ingresa tu sexo']
+        },
+
+
         occupation: {
             type: String,
             required: [false, 'Ingresa tu ocupación'],
         },
+
+        postalCode: {
+            type: Number,
+            required: [true, 'Ingresa tu código postal'],
+        },
+
+        interests: {
+            type: String,
+            required: false
+        },
+
 
         company: {
             type: String,
@@ -55,11 +67,11 @@ const userSchema = new mongoose.Schema(
             required: false
         },
 
-        postalCode: {
-            type: Number,
-            required: [true, 'Ingresa tu código postal'],
+        profilePicture: {
+            type: String,
+            required: false,
         },
-        
+
         password: {
             type: String,
             required: [true, 'Ingresa una contraseña'],
@@ -67,11 +79,8 @@ const userSchema = new mongoose.Schema(
             minlength: [8, 'Tu contraseña debe contar con al menos 8 caracteres'],
         },
         // The profile picture will be stored in firebase and accesed with an URL
-        profilePicture: {
-            type: String,
-            required: false,
-        },
-    }, {timestamps: true}
+
+    }, { timestamps: true }
 );
 
 
@@ -126,8 +135,8 @@ userSchema.methods.correctPassword = async function (
     userPassword
 ) {
     // This refers to the document. Since select is false we dont have access to password.
-   return await bcrypt.compare(candidatePassword, userPassword);
-   // return await candidatePassword === userPassword;
+    return await bcrypt.compare(candidatePassword, userPassword);
+    // return await candidatePassword === userPassword;
 };
 
 /* Creating a password reset token and saving it in the database. */
