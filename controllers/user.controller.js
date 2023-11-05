@@ -31,7 +31,6 @@ exports.getAllUsers = catchAsync(async (req, res, next) => {
     const userRols = await UserRol.find().populate('rol'); // Obtener las tablas de usuarios asociados a roles
     const userFocus = await UserFocus.find().populate('focus'); // Obtener la lista de intereses (focus) asociados al programa
 
-console.time("a")
     for(let i = users.length - 1; i >= 0; i--){
       const focusList = []
       let focusFilter = (req_focus.length == 0)?true:false;
@@ -58,7 +57,6 @@ console.time("a")
         users.splice(i, 1); // Eliminamos el registro
       }
     }
-console.timeEnd("a")
 
     res.status(200).json({
       status: 'success',
