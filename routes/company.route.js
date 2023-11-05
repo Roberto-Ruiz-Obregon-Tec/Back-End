@@ -4,14 +4,18 @@ const router = express.Router();
 
 const {
     getAllCompanies
-} = require(`${__dirname}/../controllers/companyCertifications.controller.js`);
+} = require(`${__dirname}/../controllers/company.controller.js`);
 
 const {
     protect,
     restrictTo,
 } = require(`${__dirname}/../controllers/authentication.controller.js`);
 
-// router.use(protect);
-router.route('/').get(getAllCompanies);
+
+router.route('/').get(
+    protect, // Validar inicio de sesión
+    restrictTo('Consultar empresas'), // Validar servicio asociado al rol
+    getAllCompanies 
+);
 
 module.exports = router;

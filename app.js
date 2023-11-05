@@ -29,7 +29,7 @@ const emailRouter = require('./routes/emails.route');
 const aggregationsRouter = require('./routes/aggregations.route');
 const certificationsRouter = require('./routes/certifications.route');
 const foundationInformationRouter = require('./routes/foundationInformation.route');
-const companyCertificationsRouter = require('./routes/companyCertifications.route');
+const companyCertificationsRouter = require('./routes/company.route');
 const scholarshipsRouter = require('./routes/scholarships.route');
 
 const app = express();
