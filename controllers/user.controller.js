@@ -24,7 +24,7 @@ exports.getAllUsers = catchAsync(async (req, res, next) => {
       .paginate();
     const users = await userFeatures.query;
 
-    // Manejo de filtros por interes (focus) y rol
+    // Manejo de filtros por rol
     const req_rol = req.body.rol || "";
     const userRols= await UserRol.find().populate('rol'); // Obtener las tablas de usuarios asociados a roles
 

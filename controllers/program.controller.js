@@ -19,29 +19,29 @@ exports.getAllPrograms = catchAsync(async (req, res, next) => {
 
     // Manejo de filtros por interes (focus)
     const req_focus = req.body.focus || [];
+    const programFocus = await ProgramFocus.find().populate('focus'); // Obtener la lista de intereses (focus) asociados al programa
 
     for (let i = programs.length - 1; i >= 0; i--) {
-        const programFocus = []
-
-        const focus = await ProgramFocus.find({ program: programs[i]._id }, { focus: 1, _id: 0 }).populate('focus'); // Obtener la lista de intereses (focus) asociados al programa
-
-        const mapFocus = focus.map((f) => { programFocus.push(f.focus.name) }) // Almacenando los nombres de los intereses en la lista programaFocus
-
-        programs[i] = { ...programs[i]._doc, "focus": programFocus}; // Agregamos la lista de intereses
-
-        if (req_focus.length === 0) continue; // Si no hay filtro por intereses no hacemos nada
+        const focusList = []
 
         let focusFilter = false;
 
-        req_focus.filter((f) => { // Buscamos si los intereses del filtro coinciden con los del programa
-            focusFilter = (programFocus.includes(f)) ? true : focusFilter;
-        })
+        const mapFocus = programFocus.map((f) => {
+            if (f.program.toString() === programs[i]._id.toString()) { // Buscamos si los intereses del filtro coinciden con los del programa
+                focusList.push(f.focus.name)
+                focusFilter = req_focus.includes(f.focus.name.toString()) ? true : focusFilter;
+            } 
+        
+        }) // Almacenando los nombres de los intereses en la lista programaFocus
 
-        if (!focusFilter || programFocus.length === 0) { // Si no coinicden los filtro de interes con los del programa
+        programs[i] = { ...programs[i]._doc, "focus": focusList}; // Agregamos la lista de intereses
+
+        if (req_focus.length === 0) continue; // Si no hay filtro por intereses no hacemos nada       
+
+        if (!focusFilter) { // Si no coinicden los filtro de interes con los del programa
             programs.splice(i, 1);  // Eliminamos el registro
         }
     }
-    
     // Ios only
     if(req.headers["user-platform"] == 'ios')
     return res.status(200).json({
