@@ -12,18 +12,20 @@ exports.getAllCompanies = catchAsync(async (req, res, next) => {
     const companiesFeatures = new APIFeatures(company.find({}), req.query);
     const companies = await companiesFeatures.query;
 
+    const certifications = await companyCertification.find().populate('certification'); // Obtenemos las certificaciones registradas
+    
     for(let i = companies.length - 1; i >= 0; i--){
         const companyCertifications = [];
 
-        const certifications = await companyCertification.find({company: companies[i]._id}, {certification: 1, _id: 0}).populate('certification');
-        
-        const mapCertifications = certifications.map((c) => {companyCertifications.push(c.certification.name)})
+        const mapCertifications = certifications.map((c) => { // Agregamos al documento de empresa las certificaciones que tiene
+            if(c.company.toString() == companies[i]._id.toString()) companyCertifications.push(c.certification.name)
+        })
 
-        if (certifications === null) {
+        if (certifications === null) { // Si la empresa no cuenta con certificaciones
             companies[i] = {...companies[i]._doc, "certifications": "Sin certificaciones"};
+        } else { // Sino, agregamos las certificaciones correspondientes
+            companies[i] = {...companies[i]._doc, "certifications": companyCertifications};
         }
-
-        companies[i] = {...companies[i]._doc, "certifications": companyCertifications};
     }
 
     res.status(200).json({
