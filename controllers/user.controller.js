@@ -44,14 +44,6 @@ exports.getAllUsers = catchAsync(async (req, res, next) => {
       }
     }
 
-    // Ios only
-    if(req.headers["user-platform"] == 'ios')
-      return res.status(200).json({
-        status: 'success',
-        results: users.length,
-        data: users,
-      });
-
     res.status(200).json({
       status: 'success',
       results: users.length,
