@@ -24,7 +24,7 @@ exports.getAllPrograms = catchAsync(async (req, res, next) => {
     for (let i = programs.length - 1; i >= 0; i--) {
         const focusList = []
 
-        let focusFilter = false;
+        let focusFilter = (req_focus.length == 0)?true:false;
 
         const mapFocus = programFocus.map((f) => {
             if (f.program.toString() === programs[i]._id.toString()) { // Buscamos si los intereses del filtro coinciden con los del programa
@@ -34,9 +34,7 @@ exports.getAllPrograms = catchAsync(async (req, res, next) => {
         
         }) // Almacenando los nombres de los intereses en la lista programaFocus
 
-        programs[i] = { ...programs[i]._doc, "focus": focusList}; // Agregamos la lista de intereses
-
-        if (req_focus.length === 0) continue; // Si no hay filtro por intereses no hacemos nada       
+        programs[i] = { ...programs[i]._doc, "focus": focusList}; // Agregamos la lista de intereses 
 
         if (!focusFilter) { // Si no coinicden los filtro de interes con los del programa
             programs.splice(i, 1);  // Eliminamos el registro
