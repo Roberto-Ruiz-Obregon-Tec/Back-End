@@ -27,10 +27,12 @@ exports.getAllCourses = catchAsync(async (req, res, next) => {
 
     const documents = await features.query; // Cursos que cumplen con los filtros de los params del URL
 
+    const courseFocus = await CourseFocus.find().populate("focus"); // Registros de los focus asociados a los cursos
+
     for(let i = 0; i < documents.length; i++) { // Iteramos sobre cada curso
         let filter = (reqFocus.length == 0)?true:false // Para verificar si cumple con los filtros de focus
-        const cFocus = await CourseFocus.find({course: documents[i]._id}, {focus:1}).populate("focus"); // Obtenemos los focus asociados
-
+        const cFocus = courseFocus.filter(focusInfo => focusInfo.course.toString() == documents[i]._id.toString()); // Obtenemos los focus asociados
+        
         let focus = []
         if(cFocus.length > 0) { // Si existen focus asociados entonces...
             cFocus.forEach( f => { 
