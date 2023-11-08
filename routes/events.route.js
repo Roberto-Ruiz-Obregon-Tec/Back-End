@@ -18,7 +18,11 @@ const fileParser = require('../utils/multipartParser');
 
 router
     .route('/')
-    .get(getAllEvents)
+    .get(
+        protect,
+        restrictTo('Consultar eventos'),
+        getAllEvents
+        )
     .post(
         protect,
         restrictTo('Admin'),
