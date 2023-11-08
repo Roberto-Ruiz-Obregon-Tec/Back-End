@@ -30,9 +30,12 @@ router
         filesController.formatEventImage,
         createEvent
     );
-router
+router 
     .route('/:id')
-    .get(getEvent)
+    .get(protect,
+        restrictTo('Consultar eventos'), // Validar servicio asociado al rol
+        getEvent
+        )
     .patch(
         protect,
         restrictTo('Admin'),
