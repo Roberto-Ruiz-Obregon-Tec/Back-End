@@ -52,6 +52,10 @@ router
         filesController.formatCourseImage,
         updateCourse
     )
-    .delete(protect, restrictTo('Admin'), deleteCourse);
+    .delete(
+        protect, // Validar inicio de sesión
+        restrictTo('Eliminar cursos'), // Validar servicio asociado al rol
+        deleteCourse
+    );
 
 module.exports = router;

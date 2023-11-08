@@ -5,15 +5,18 @@ const factory = require('./handlerFactory.controller');
 const Course = require('../models/courses.model');
 const Focus = require('../models/focus.model'); // Schema to perform .populate("focus")
 const CourseFocus = require('../models/courseFocus.model');
+const UserCourse = require('../models/userCourse.model');
+const CommentCourse = require('../models/commentCourse.model');
+const Comment = require('../models/comments.model');
 const User = require('../models/users.model');
 const Inscription = require('../models/inscriptions.model');
 const Email = require('../utils/email');
+const mongoose = require('mongoose');
 const { request } = require('express');
 const { populate } = require('../models/inscriptions.model');
 const { user } = require('firebase-functions/v1/auth');
 
 exports.updateCourse = factory.updateOne(Course);
-exports.deleteCourse = factory.deleteOne(Course);
 
 exports.getAllCourses = catchAsync(async (req, res, next) => {
     const data = [] // Documentos a retornar
@@ -151,5 +154,41 @@ exports.inscriptionByCourse = catchAsync(async (req, res, next) => {
         data: {
             documents: inscriptions,
         },
+    });
+});
+
+exports.deleteCourse = catchAsync(async (req, res, next) => {
+    const error = new AppError('No existe un curso con ese ID', 404);
+    const filter = {course: req.params.id}
+
+    if(!mongoose.isValidObjectId(req.params.id)) return next(error);
+
+    // Borrar inscripciones relacionadas
+    await Inscription.deleteMany(filter);
+
+    // Borrar relaciones en userCourse
+    await UserCourse.deleteMany(filter);
+
+    // Buscar comentarios asociados al curso
+    const comments = await CommentCourse.find(filter, {_id: 0, comment: 1});
+
+    // Borrar relaciones en commentCourse
+    await CommentCourse.deleteMany(filter);
+
+    // Borrar comentarios anteriormente asociados al curso
+    for(const comment of comments) {
+        await Comment.findByIdAndDelete(comment.comment);
+    }
+
+    // Borrar relaciones en courseFocus
+    await CourseFocus.deleteMany(filter);
+
+    // Borrar curso
+    const doc = await Course.findByIdAndDelete(req.params.id);
+
+    if (!doc) return next(error);
+
+    res.status(200).json({
+        status: 'success'
     });
 });
