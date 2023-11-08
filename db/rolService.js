@@ -214,4 +214,9 @@ const rolService = [
         "rol": ["R002"]
     },
 
+    {
+        "service" : "S044",
+        "rol": ["R002"]
+    },
+
 ]
