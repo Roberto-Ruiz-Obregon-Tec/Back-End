@@ -49,7 +49,7 @@ programSchema.pre('validate', function () {
 });
 
 // Validación de fechas
-courseSchema.pre('validate', function () {
+programSchema.pre('validate', function () {
     if (this.endDate < this.startDate) {
         throw new AppError(
             'La fecha final debe ser menor a la fecha inicial',
