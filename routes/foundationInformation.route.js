@@ -1,18 +1,19 @@
 const express = require('express');
-const foundationInformationController = require('../controllers/foundationInformation.controller.js');
-const { protect, restrictTo } = require('../controllers/authentication.controller.js');
 
 const router = express.Router();
 
-router
-    .route('/')
-    .get(foundationInformationController.getAllfoundationInformation)
-    .post(protect, restrictTo('Admin'), foundationInformationController.createfoundationInformation);
+const {
+    getAllfoundationInformation,
+} = require(`${__dirname}/../controllers/foundationInformation.controller.js`);
 
-router
-    .route('/:id')
-    .get(foundationInformationController.getfoundationInformation)
-    .patch(protect, restrictTo('Admin'), foundationInformationController.updatefoundationInformation)
-    .delete(protect, restrictTo('Admin'), foundationInformationController.deletefoundationInformation);
+const {
+    protect,
+} = require(`${__dirname}/../controllers/authentication.controller.js`);
+
+router.use(protect);
+router.route('/').get(getAllfoundationInformation);
+
+
+
 
 module.exports = router;
