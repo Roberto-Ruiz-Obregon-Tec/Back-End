@@ -20,7 +20,7 @@ router
     .route('/')
     .get(
         protect,
-        restrictTo('Consultar eventos'),
+        restrictTo('Consultar eventos'), // Validar servicio asociado al rol
         getAllEvents
         )
     .post(
