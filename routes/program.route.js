@@ -14,27 +14,15 @@ const {
     protect,
     restrictTo,
 } = require(`${__dirname}/../controllers/authentication.controller.js`);
-const fileParser = require('../utils/multipartParser');
+
 
 router.use(protect, restrictTo('Consultar proyectos'));
-router.route('/')
-    .get(getAllPrograms)
-    .post(
-        protect,
-        fileParser,
-        filesController.formatProgramImage,
-        createProgram
-    );
-router
-    .route('/:id')
-    .get(getProgram)
-    .patch(
-        protect,
-        restrictTo('Consultar proyectos'),
-        fileParser,
-        filesController.formatProgramImage,
-        updateProgram
-    )
-    .delete(protect, restrictTo('Consultar proyectos'), deleteProgram);
+router.route('/').get(getAllPrograms)
+router.route('/:id').get(getProgram)
+
+router.use(protect, restrictTo('Crear proyectos'));
+router.route('/crear').post(createProgram);
+
+
 
 module.exports = router;
