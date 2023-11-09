@@ -3,7 +3,8 @@ const router = express.Router();
 
 const { 
     getAllBankAccounts,
-    createBankAccount
+    createBankAccount,
+    updateBankAccount
 } = require(`${__dirname}/../controllers/bankAccounts.controller.js`);
 
 const { 
@@ -19,7 +20,12 @@ router.route('/').get(getAllBankAccounts); //Ruta para consultar las cuentas
 
 
 router.use(protect, restrictTo("Crear Cuenta de Banco"))
-router.route('/create').post(createBankAccount); //Ruta para crear cuentas (restringida)
+router.route('/createBankAccount').post(createBankAccount); //Ruta para crear cuentas (restringida)
+
+
+router.use(protect, restrictTo("Crear Cuenta de Banco"))
+router.route('/updateBankAccount').put(updateBankAccount); //Ruta para editar cuentas (restringida)
+
 
 module.exports = router;
 
