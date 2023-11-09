@@ -2,7 +2,28 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const APIFeatures = require(`../utils/apiFeatures`);
 
-const BankAccount = require('../models/bankAccounts.model'); 
+const bankAccount = require('../models/bankAccounts.model'); 
+
+
+exports.getAllBankAccounts = catchAsync(async (req, res, next) => {
+    accounts = await bankAccount.find()
+
+    // Ios only
+    if(req.headers["user-platform"] == 'ios')
+    return res.status(200).json({
+        status: 'success',
+        results: accounts.length,
+        data: accounts,
+    });
+
+    res.status(200).json({
+        status: 'success',
+        results: accounts.length,
+        data: { accounts },
+    });
+
+
+});
 
 exports.createBankAccount = catchAsync(async (req, res, next) => {
     const { bank, accountNumber, propietary } = req.body;
@@ -13,7 +34,7 @@ exports.createBankAccount = catchAsync(async (req, res, next) => {
     }
 
     // Crear la cuenta bancaria en la base de datos
-    const newBankAccount = await BankAccount.create({
+    const newBankAccount = await bankAccount.create({
         bank,
         accountNumber,
         propietary,
@@ -26,3 +47,4 @@ exports.createBankAccount = catchAsync(async (req, res, next) => {
         },
     });
 });
+

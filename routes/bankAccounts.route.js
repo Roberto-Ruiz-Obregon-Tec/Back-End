@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 
 const { 
-    createBankAccount 
+    getAllBankAccounts,
+    createBankAccount
 } = require(`${__dirname}/../controllers/bankAccounts.controller.js`);
 
 const { 
@@ -12,8 +13,7 @@ const {
 
 
 router.use(protect);
-
-//router.route('/').get(getAllfoundationInformation);
+router.route('/').get(getAllBankAccounts);
 router.use(protect, restrictTo("Crear Cuenta de Banco"))
 router.route('/create').post(createBankAccount);
 

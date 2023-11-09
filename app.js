@@ -120,7 +120,7 @@ app.use('/v1/certifications', certificationsRouter);
 app.use('/v1/informacion-fundacion', foundationInformationRouter);
 app.use('/v1/company-certifications', companyCertificationsRouter);
 app.use('/v1/scholarships', scholarshipsRouter);
-app.use('/v1/bankAccount', bankAccountRouter);
+app.use('/v1/bankAccounts', bankAccountRouter);
 
 // ERROR HANDLER FOR UNHANDLED ROUTES
 app.all('*', (req, res, next) => {
