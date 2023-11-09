@@ -5,11 +5,11 @@ const Focus = require('../models/focus.model');
 const catchAsync = require('../utils/catchAsync');
 const APIFeatures = require('../utils/apiFeatures');
 const AppError = require('../utils/appError');
+const mongoose = require('mongoose')
 
 exports.getAllPrograms = factory.getAll(Program);
 exports.getProgram = factory.getOne(Program);
 exports.updateProgram = factory.updateOne(Program);
-exports.deleteProgram = factory.deleteOne(Program);
 
 exports.getAllPrograms = catchAsync(async (req, res, next) => {
     const programFeatures = new APIFeatures(Program.find(), req.query)
@@ -92,4 +92,25 @@ exports.createProgram = catchAsync(async (req, res, next) => {
         status: 'success',
     });
 
+})
+
+
+exports.deleteProgram = catchAsync (async (req, res, next) => {
+    const missingError = new AppError('No se recibio nignuna id', 404); // Defino un error en caso de que no se mande el id del programa a eliminar
+    const validationError = new AppError('id no valida', 404); // Defino un error en caso de que no se mande el id del programa a eliminar
+
+
+    if (req.body._id === undefined || req.body._id === null) return next(missingError);
+
+    const id = req.body._id
+
+    if (!(mongoose.isValidObjectId(id))) return next(validationError);
+
+    await ProgramFocus.deleteMany({program: id});
+    await Program.deleteOne({_id : id});
+
+
+    res.status(200).json({
+        status: 'success'
+    });
 })

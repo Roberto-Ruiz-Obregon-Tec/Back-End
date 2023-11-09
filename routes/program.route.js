@@ -23,6 +23,8 @@ router.route('/:id').get(getProgram)
 router.use(protect, restrictTo('Crear proyectos'));
 router.route('/crear').post(createProgram);
 
+router.use(protect, restrictTo('Eliminar proyectos'));
+router.route('/borrar').delete(deleteProgram);
 
 
 module.exports = router;
