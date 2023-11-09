@@ -15,7 +15,7 @@ const {
 router.use(protect);
 router.route('/').get(getAllfoundationInformation);
 router.use(protect, restrictTo("Editar InfoRRO"))
-router.route('/update').get(updatefoundationInformation);
+router.route('/update').put(updatefoundationInformation);
 
 
 
