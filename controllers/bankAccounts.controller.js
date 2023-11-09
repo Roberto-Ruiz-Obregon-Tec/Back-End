@@ -4,7 +4,7 @@ const APIFeatures = require(`../utils/apiFeatures`);
 
 const bankAccount = require('../models/bankAccounts.model'); 
 
-
+/* A function that returns all the bank accounts  */
 exports.getAllBankAccounts = catchAsync(async (req, res, next) => {
     accounts = await bankAccount.find()
 
@@ -25,15 +25,17 @@ exports.getAllBankAccounts = catchAsync(async (req, res, next) => {
 
 });
 
+
+/* A function that allows admins to create new Bank Accounts */
 exports.createBankAccount = catchAsync(async (req, res, next) => {
     const { bank, accountNumber, propietary } = req.body;
 
-    // Validar los datos de entrada
+    // Validate data entry
     if (!bank || !accountNumber || !propietary) {
         return next(new AppError('Todos los campos son obligatorios.', 400));
     }
 
-    // Crear la cuenta bancaria en la base de datos
+    // Create the account
     const newBankAccount = await bankAccount.create({
         bank,
         accountNumber,
