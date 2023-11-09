@@ -20,7 +20,7 @@ router
     .route('/')
     .get(getAllEvents)
 
-//router.use(protect, restrictTo('Crear eventos'));
+router.use(protect, restrictTo('Crear eventos'));
 router.route('/crear')
     .post(
         fileParser,
