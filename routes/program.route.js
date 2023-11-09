@@ -21,8 +21,10 @@ router.route('/').get(getAllPrograms)
 router.route('/:id').get(getProgram)
 
 router.use(protect, restrictTo('Crear proyectos'));
-router.route('/crear').post(createProgram);
+router.route('/create').post(createProgram);
 
+router.use(protect, restrictTo('Eliminar proyectos'));
+router.route('/delete/:id').delete(deleteProgram);
 
 
 module.exports = router;
