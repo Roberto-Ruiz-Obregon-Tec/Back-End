@@ -47,7 +47,7 @@ router
     );
 
 // Delete event
-router.use(protect, restrictTo('Eliminar eventos'), )
+router.use(protect, restrictTo('Eliminar eventos'))
 router.route('/delete/:id').delete(deleteEvent);
 
 module.exports = router;
