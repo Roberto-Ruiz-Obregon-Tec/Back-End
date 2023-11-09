@@ -19,8 +19,8 @@ const fileParser = require('../utils/multipartParser');
 router
     .route('/')
     .get(
-        // protect,
-        // restrictTo('Consultar eventos'), // Validar servicio asociado al rol
+        protect,
+        restrictTo('Consultar eventos'), // Validar servicio asociado al rol
         getAllEvents
     );
 
