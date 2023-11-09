@@ -7,7 +7,7 @@ const mongoose = require('mongoose')
 const foundationInformation = require('../models/foundationInformation.model');
 
 
-//read information
+//Get the data froma the db
 exports.getAllfoundationInformation = catchAsync(async(req, res, next) => {
     info = await foundationInformation.find()
 
@@ -27,7 +27,7 @@ exports.getAllfoundationInformation = catchAsync(async(req, res, next) => {
 });
 
 
-//Update
+//Update information from the db
 exports.updatefoundationInformation = catchAsync(async(req, res, next) => {
     const {_id, ...restBody }= req.body
     const preFoundationInfo = await foundationInformation.findOne({_id : _id})
