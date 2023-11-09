@@ -19,13 +19,14 @@ const fileParser = require('../utils/multipartParser');
 router
     .route('/')
     .get(getAllEvents)
-    .post(
-        protect,
-        restrictTo('Admin'),
-        fileParser,
-        filesController.formatEventImage,
-        createEvent
-    );
+    // .post(
+    //     protect,
+    //     restrictTo('Admin'),
+    //     fileParser,
+    //     filesController.formatEventImage,
+    //     createEvent
+    // );
+
 router
     .route('/:id')
     .get(getEvent)
@@ -35,7 +36,10 @@ router
         fileParser,
         filesController.formatEventImage,
         updateEvent
-    )
-    .delete(protect, restrictTo('Admin'), deleteEvent);
+    );
+
+// Delete event
+router.use(protect, restrictTo('Eliminar eventos'), )
+router.route('/delete/:id').delete(deleteEvent);
 
 module.exports = router;
