@@ -73,7 +73,7 @@ exports.createProgram = catchAsync(async (req, res, next) => {
 
     if (focus !== undefined){ // Si hay focus en el request
         const id = newProgram._id 
-        const allFocus = await Focus.find() // Obtengo to
+        const allFocus = await Focus.find() // Obtengo todos los enfoques de la tabla
 
         focus.forEach(async (f) => {
             let currentFocus = allFocus.find(jsonFocus => jsonFocus.name == f); // Busco si algun focus ya esta en al base de datos
