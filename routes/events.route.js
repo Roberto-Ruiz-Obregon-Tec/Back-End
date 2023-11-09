@@ -18,7 +18,11 @@ const fileParser = require('../utils/multipartParser');
 
 router
     .route('/')
-    .get(getAllEvents)
+    .get(
+        // protect,
+        // restrictTo('Consultar eventos'), // Validar servicio asociado al rol
+        getAllEvents
+    );
 
 router.use(protect, restrictTo('Crear eventos'));
 router.route('/create')
@@ -28,9 +32,12 @@ router.route('/create')
         createEvent
     );
 
-router
+router 
     .route('/:id')
-    .get(getEvent)
+    .get(protect,
+        restrictTo('Consultar eventos'), // Validar servicio asociado al rol
+        getEvent
+        )
     .patch(
         protect,
         restrictTo('Admin'),
