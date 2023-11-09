@@ -29,7 +29,10 @@ router
         protect, // Validar inicio de sesión
         restrictTo('Consultar cursos'), // Validar servicio asociado al rol
         getAllCourses
-    )
+    );
+
+router
+    .route('/create')
     .post(
         protect, // Validar inicio de sesión
         restrictTo('Crear cursos'), // Validar servicio asociado al rol
@@ -42,14 +45,20 @@ router
         protect, // Validar inicio de sesión
         restrictTo('Consultar cursos'), // Validar servicio asociado al rol
         getCourse
-    )
+    );
+
+router
+    .route('/update/:id')
     .patch(
         protect,
         restrictTo('Admin'),
         fileParser,
         filesController.formatCourseImage,
         updateCourse
-    )
+    );
+
+router
+    .route('/delete/:id')
     .delete(
         protect, // Validar inicio de sesión
         restrictTo('Eliminar cursos'), // Validar servicio asociado al rol
