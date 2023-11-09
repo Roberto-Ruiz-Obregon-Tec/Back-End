@@ -83,6 +83,15 @@ const courseSchema =  new mongoose.Schema(
             type: Number,
             default: 0,
             validate: {
+                validator: (value) => value >= 0 && value <= 5,
+            },
+            set: (value) => parseFloat(value.toFixed(2))
+        },
+
+        ratingCount: {
+            type: Number,
+            default: 10,
+            validate: {
                 validator: (value) => value >= 0,
             },
         },
