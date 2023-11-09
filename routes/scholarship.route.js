@@ -9,7 +9,6 @@ const {
     createScholarship,
     updateScholarship,
     deleteScholarship,
-    getContactInfo,
 } = scholarshipController;
 
 router.route('/')
@@ -41,11 +40,5 @@ router.route('/')
         deleteScholarship
     );
 
-router.route('/:id/contact')
-    .get(
-        protect,
-        restrictTo('Consultar becas'),
-        getContactInfo
-    );
 
 module.exports = router;
