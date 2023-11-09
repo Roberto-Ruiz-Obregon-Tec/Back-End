@@ -173,4 +173,20 @@ const services = [
         "_id": "S043",
         "name": "Crear administrador"
     },
+    {
+        "_id": "S045",
+        "name": "Conusltar Cuentas de Banco"
+    },
+    {
+        "_id": "S046",
+        "name": "Crear Cuenta de Banco"
+    },
+    {
+        "_id": "S047",
+        "name": "Editar Cuenta de Banco"
+    },
+    {
+        "_id": "S048",
+        "name": "Eliminar Cuenta de Banco"
+    },
 ]
