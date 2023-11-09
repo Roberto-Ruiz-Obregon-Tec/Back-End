@@ -21,7 +21,7 @@ router
     .get(getAllEvents)
 
 router.use(protect, restrictTo('Crear eventos'));
-router.route('/crear')
+router.route('/create')
     .post(
         fileParser,
         filesController.formatEventImage,
