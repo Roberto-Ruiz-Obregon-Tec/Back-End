@@ -107,7 +107,7 @@ const courseSchema =  new mongoose.Schema(
 
 // Validación de fechas
 courseSchema.pre('validate', function () {
-    if (this.fecha_fin < this.fecha_inicio) {
+    if (this.endDate < this.startDate) {
         throw new AppError(
             'La fecha final debe ser menor a la fecha inicial',
             400
