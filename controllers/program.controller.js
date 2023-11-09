@@ -100,9 +100,9 @@ exports.deleteProgram = catchAsync (async (req, res, next) => {
     const validationError = new AppError('id no valida', 404); // Defino un error en caso de que no se mande el id del programa a eliminar
 
 
-    if (req.body._id === undefined || req.body._id === null) return next(missingError); // Si no existe id en el body mandamos error
+    if (req.params.id === undefined || req.params.id === null) return next(missingError); // Si no existe id en el body mandamos error
 
-    const id = req.body._id
+    const id = req.params.id
 
     if (!(mongoose.isValidObjectId(id))) return next(validationError); // Si el id no es valido, mandamos error
 
