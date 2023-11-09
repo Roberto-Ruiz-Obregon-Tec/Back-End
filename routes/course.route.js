@@ -31,10 +31,8 @@ router
         getAllCourses
     )
     .post(
-        protect,
-        restrictTo('Admin'),
-        fileParser,
-        filesController.formatCourseImage,
+        protect, // Validar inicio de sesión
+        restrictTo('Crear cursos'), // Validar servicio asociado al rol
         createCourse
     );
     

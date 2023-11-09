@@ -78,48 +78,39 @@ exports.getCourse = catchAsync(async (req, res, next) => {
     });
 }); 
 
-/** 
- * A function that creates a course and sends an email to all the users that are interested in the
- * course.
-*/
 exports.createCourse = catchAsync(async (req, res, next) => {
-    const document = await Course.create(req.body);
+    const error = new AppError('No hay datos para crear el curso', 404);
+    const {focus, ...courseInfo} = req.body;
 
-    const usersToAlert = await User.find({
-        $or: [
-            // Query and send mail to users in the area
-            {
-                postalCode: document.postalCode,
-            },
-            // Query and send email to users interested in topics
-            { topics: { $in: document.topics } },
-        ],
-        emailAgreement: true,
-    });
+    if(courseInfo === undefined) return next(error); // En caso de no recibir datos para crear un curso, manda un error
 
-    try {
-        await Email.sendMultipleNewCourseAlert(usersToAlert, document);
-    } catch (error) {
-        return next(
-            new AppError(
-                'Hemos tenido problemas enviando los correos de notificación.',
-                500
-            )
-        );
+    const newCourse = await Course.create(courseInfo);
+    
+    if(focus) {
+        const focusRecords = await Focus.find(); // Obtenemos los focus ya registrados
+        const match = focusRecords.filter(record => focus.includes(record.name)) // Filtramos para buscar si hay coincidentes
+        
+        for(const coincidence of match) { // Para cada focus ya registrado
+            await CourseFocus.create({ // Creamos la relación
+                "course": newCourse._id,
+                "focus": coincidence._id
+            });
+            focus.splice(focus.indexOf(coincidence.name), 1); // Eliminamos de los focus por registrar
+        }
+        
+        for(const focusName of focus) { // Para cada focus no registrado
+            const newFocus = await Focus.create({ // Se crea el focus
+                "name": focusName
+            });
+            await CourseFocus.create({ // Se crea la relación
+                "course": newCourse._id,
+                "focus": newFocus._id
+            });
+        }
     }
 
-    // Ios only
-    if(req.headers["user-platform"] == 'ios')
-        return res.status(201).json({
-            status: 'success',
-            data: document,
-        });
-
-    res.status(201).json({
-        status: 'success',
-        data: {
-            document,
-        },
+    res.status(200).json({
+        status: 'success'
     });
 });
 
