@@ -10,6 +10,7 @@ const {
     updateCourse,
     deleteCourse,
     inscriptionByCourse,
+    updateRating
 } = require(`${__dirname}/../controllers/course.controller.js`);
 
 const {
@@ -20,6 +21,15 @@ const {
 } = require(`${__dirname}/../controllers/authentication.controller.js`);
 
 const fileParser = require('../utils/multipartParser');
+
+//Ruta para updatear Rating
+router
+    .route('/updateRating')
+    .put(
+        protect,
+        restrictTo('Consultar cursos'),
+        updateRating
+    )
 
 router.route('/getInscriptions/:id').get(inscriptionByCourse);
 

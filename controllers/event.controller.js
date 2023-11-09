@@ -25,6 +25,35 @@ exports.deleteEvent = catchAsync (async (req, res, next) => {
     await Event.deleteOne({_id : id}); // Eliminamos el evento
 
     res.status(200).json({
-        status: 'success'
+        status: 'success',
+    });
+});
+
+exports.createEvent = catchAsync(async (req, res, next) => {
+    const error = new AppError('No existe informacion del evento', 404); // Defino un error en caso de que no se mande la informacion
+    const {focus, ...eventInfo} = req.body 
+
+    if (eventInfo === undefined) return next(error);
+
+    const newEvent = await Event.create(eventInfo); // Creo el evento
+
+    if (focus !== undefined){ // Si hay focus en el request
+        const id = newEvent._id 
+        const allFocus = await Focus.find() // Obtengo todos los enfoques de la tabla
+
+        focus.forEach(async (f) => {
+            let currentFocus = allFocus.find(jsonFocus => jsonFocus.name == f); // Busco si algun focus ya esta en al base de datos
+
+            if (currentFocus === undefined || currentFocus === null){ // Si no esta
+                currentFocus = await Focus.create({name: f}); // Creamos el focus
+            }
+
+            const eventFocus = await EventFocus.create({focus: currentFocus._id, event: newEvent._id, }) // Relacionamos el evento con el focus
+
+        });
+    }
+
+    res.status(200).json({
+        status: 'success',
     });
 });
