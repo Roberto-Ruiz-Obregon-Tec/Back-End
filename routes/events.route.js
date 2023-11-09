@@ -21,7 +21,7 @@ router
     .get(getAllEvents)
     .post(
         protect,
-        restrictTo('Admin'),
+        restrictTo('Crear eventos'),
         fileParser,
         filesController.formatEventImage,
         createEvent
