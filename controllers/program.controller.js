@@ -1,11 +1,13 @@
 const factory = require('./handlerFactory.controller');
 const Program = require('../models/programs.model');
 const ProgramFocus = require('../models/programFocus.model');
+const Focus = require('../models/focus.model');
 const catchAsync = require('../utils/catchAsync');
 const APIFeatures = require('../utils/apiFeatures');
+const AppError = require('../utils/appError');
+
 exports.getAllPrograms = factory.getAll(Program);
 exports.getProgram = factory.getOne(Program);
-exports.createProgram = factory.createOne(Program);
 exports.updateProgram = factory.updateOne(Program);
 exports.deleteProgram = factory.deleteOne(Program);
 
@@ -19,27 +21,29 @@ exports.getAllPrograms = catchAsync(async (req, res, next) => {
 
     // Manejo de filtros por interes (focus)
     const req_focus = req.body.focus || [];
-    const programFocus = await ProgramFocus.find().populate('focus'); // Obtener la lista de intereses (focus) asociados al programa
 
     for (let i = programs.length - 1; i >= 0; i--) {
-        const focusList = []
+        const programFocus = []
 
-        let focusFilter = (req_focus.length == 0)?true:false;
+        const focus = await ProgramFocus.find({ program: programs[i]._id }, { focus: 1, _id: 0 }).populate('focus'); // Obtener la lista de intereses (focus) asociados al programa
 
-        const mapFocus = programFocus.map((f) => {
-            if (f.program.toString() === programs[i]._id.toString()) { // Buscamos si los intereses del filtro coinciden con los del programa
-                focusList.push(f.focus.name)
-                focusFilter = req_focus.includes(f.focus.name.toString()) ? true : focusFilter;
-            } 
-        
-        }) // Almacenando los nombres de los intereses en la lista programaFocus
+        const mapFocus = focus.map((f) => { programFocus.push(f.focus.name) }) // Almacenando los nombres de los intereses en la lista programaFocus
 
-        programs[i] = { ...programs[i]._doc, "focus": focusList}; // Agregamos la lista de intereses 
+        programs[i] = { ...programs[i]._doc, "focus": programFocus}; // Agregamos la lista de intereses
 
-        if (!focusFilter) { // Si no coinicden los filtro de interes con los del programa
+        if (req_focus.length === 0) continue; // Si no hay filtro por intereses no hacemos nada
+
+        let focusFilter = false;
+
+        req_focus.filter((f) => { // Buscamos si los intereses del filtro coinciden con los del programa
+            focusFilter = (programFocus.includes(f)) ? true : focusFilter;
+        })
+
+        if (!focusFilter || programFocus.length === 0) { // Si no coinicden los filtro de interes con los del programa
             programs.splice(i, 1);  // Eliminamos el registro
         }
     }
+    
     // Ios only
     if(req.headers["user-platform"] == 'ios')
     return res.status(200).json({
@@ -56,3 +60,36 @@ exports.getAllPrograms = catchAsync(async (req, res, next) => {
         },
     });
 });
+
+
+exports.createProgram = catchAsync(async (req, res, next) => {
+    const error = new AppError('No existe informacion del programa', 404); // Defino un error en caso de que no se mande la informacion
+    const {focus, ...programInfo} = req.body 
+
+
+    if (programInfo === undefined) return next(error); // Si no hay informacion de programa, mandamos error
+
+    const newProgram = await Program.create(programInfo); // Creo el nuevo programa
+
+    if (focus !== undefined){ // Si hay focus en el request
+        const id = newProgram._id 
+        const allFocus = await Focus.find() // Obtengo todos los enfoques de la tabla
+
+        focus.forEach(async (f) => {
+            let currentFocus = allFocus.find(jsonFocus => jsonFocus.name == f); // Busco si algun focus ya esta en al base de datos
+
+            if (currentFocus === undefined || currentFocus === null){ // Si no esta
+                currentFocus = await Focus.create({name: f}); // Creamos el focus
+            }
+
+            const programFocus = await ProgramFocus.create({focus: currentFocus._id, program: newProgram._id, }) // Relacionamos el enfoque con el programa
+
+        });
+    }
+    
+
+    res.status(200).json({
+        status: 'success',
+    });
+
+})
