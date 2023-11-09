@@ -9,7 +9,6 @@ const mongoose = require('mongoose')
 
 exports.getAllPrograms = factory.getAll(Program);
 exports.getProgram = factory.getOne(Program);
-exports.updateProgram = factory.updateOne(Program);
 
 exports.getAllPrograms = catchAsync(async (req, res, next) => {
     const programFeatures = new APIFeatures(Program.find(), req.query)
@@ -114,4 +113,27 @@ exports.deleteProgram = catchAsync (async (req, res, next) => {
     res.status(200).json({
         status: 'success'
     });
+})
+
+exports.updateProgram - catchAsync (async (req, res, next) => {
+    const missingError = new AppError('No se recibio nignuna id', 404); // Defino un error en caso de que no se mande el id del programa a eliminar
+    const validationError = new AppError('id no valida', 404); // Defino un error en caso de que no se mande el id del programa a eliminar
+
+    if (req.body._id === undefined || req.body._id === null) return next(missingError); // Si no existe id en el body mandamos error
+
+    const {_id, ...restBody} = req.body 
+
+    if (!(mongoose.isValidObjectId(_id))) return next(validationError); // Si el id no es valido, mandamos error
+
+
+    const preProgram = Program.findOne({_id : _id})
+
+    const keys = Object.keys(preProgram._doc)
+
+    for (let i = 0; i < keys.length; i++){
+        preProgram[keys[i]] = restBody[keys[i]]  || preProgram[keys[i]];
+    }
+
+    await preProgram.save({validateBeforeSave : false})
+
 })
