@@ -20,11 +20,11 @@ router.route('/').get(getAllBankAccounts); //Ruta para consultar las cuentas
 
 
 router.use(protect, restrictTo("Crear Cuenta de Banco"))
-router.route('/createBankAccount').post(createBankAccount); //Ruta para crear cuentas (restringida)
+router.route('/create').post(createBankAccount); //Ruta para crear cuentas (restringida)
 
 
 router.use(protect, restrictTo("Editar Cuenta de Banco"))
-router.route('/updateBankAccount').put(updateBankAccount); //Ruta para editar cuentas (restringida)
+router.route('/update').put(updateBankAccount); //Ruta para editar cuentas (restringida)
 
 
 module.exports = router;
