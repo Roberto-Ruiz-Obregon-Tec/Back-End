@@ -45,7 +45,8 @@ const foundationInformationSchema = new mongoose.Schema({
 
 );
 
-foundationInformationSchema.set('toJSON', {
+//Return id (not _id)
+programSchema.set('toJSON', {
     virtuals: true,
     transform: (doc, ret, options) => {
         delete ret.__v;
@@ -55,5 +56,6 @@ foundationInformationSchema.set('toJSON', {
         delete ret.createdAt;
     },
 });
+
 
 module.exports = mongoose.model('FoundationInformation', foundationInformationSchema);
