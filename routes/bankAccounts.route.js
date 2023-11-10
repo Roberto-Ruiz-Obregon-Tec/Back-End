@@ -23,7 +23,7 @@ router.use(protect, restrictTo("Crear Cuenta de Banco"))
 router.route('/createBankAccount').post(createBankAccount); //Ruta para crear cuentas (restringida)
 
 
-router.use(protect, restrictTo("Crear Cuenta de Banco"))
+router.use(protect, restrictTo("Editar Cuenta de Banco"))
 router.route('/updateBankAccount').put(updateBankAccount); //Ruta para editar cuentas (restringida)
 
 
