@@ -62,7 +62,7 @@ exports.updateBankAccount = catchAsync(async(req, res, next) => {
         preBankAccounts[keys[i]] = restBody[keys[i]] || preBankAccounts[keys[i]];
     }
 
-    await preBankAccounts.save({validateBeforeSave: false})
+    await preBankAccounts.save()
 
 
     res.status(200).json({
