@@ -44,7 +44,10 @@ router
         fileParser,
         filesController.formatEventImage,
         updateEvent
-    )
-    //.delete(protect, restrictTo('Admin'), deleteEvent);
+    );
+
+// Delete event
+router.use(protect, restrictTo('Eliminar eventos'))
+router.route('/delete/:id').delete(deleteEvent);
 
 module.exports = router;
