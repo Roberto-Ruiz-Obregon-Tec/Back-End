@@ -183,3 +183,59 @@ exports.deleteCourse = catchAsync(async (req, res, next) => {
         status: 'success'
     });
 });
+
+// A function that modifies the rating of the course with a parameter id and returns the new rating
+exports.updateRating = catchAsync(async (req, res, next) => {
+    const courseID = req.body.id;
+
+    // await because is a petition to the database
+    const course = await Course.findById(courseID);
+
+    // there's no course with that id
+    // 500 is a server problem, 400 user error
+    if (!course) {
+        return next(new AppError('No se encontró un curso con ese ID.', 404));
+    }
+
+    // get the rating of the course
+    const rating = course.rating;
+    
+    const ratingCount = course.ratingCount;
+
+    // get the new rating
+    const newRating = req.body.rating;
+
+    // the new rating is not a number between 0 and 5
+    if (newRating < 0 || newRating > 5) {
+        return next(new AppError('No es un numero valido', 404));
+    }
+
+    // calculate the new rating
+    const updatedRating = (rating * ratingCount + newRating) / (ratingCount + 1);
+
+    // update the rating of the course
+    const updatedCourse = await Course.findByIdAndUpdate(
+        courseID,
+        { rating: updatedRating,
+          ratingCount: ratingCount + 1
+        },
+        {
+            new: true,
+            runValidators: true,
+        }
+    );
+
+    // Ios only
+    if(req.headers["user-platform"] == 'ios')
+        return res.status(201).json({
+            status: 'success',
+            data: updatedCourse,
+        });
+
+    res.status(201).json({
+        status: 'success',
+        data: {
+            updatedCourse,
+        },
+    });
+});
