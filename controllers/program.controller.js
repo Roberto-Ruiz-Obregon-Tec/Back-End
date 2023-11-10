@@ -128,7 +128,7 @@ exports.updateProgram = catchAsync (async (req, res, next) => {
 
     const keys = Object.keys(preProgram._doc)
 
-    for (let i = 0; i < keys.length; i++){
+    for (let i = 0; i < keys.length; i++){ // Actualiza los parametros del programa
         preProgram[keys[i]] = restBody[keys[i]]  || preProgram[keys[i]];
     }
 
