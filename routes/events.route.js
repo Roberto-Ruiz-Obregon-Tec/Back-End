@@ -22,14 +22,16 @@ router
         protect,
         restrictTo('Consultar eventos'), // Validar servicio asociado al rol
         getAllEvents
-        )
+    );
+
+router.use(protect, restrictTo('Crear eventos'));
+router.route('/create')
     .post(
-        protect,
-        restrictTo('Admin'),
         fileParser,
         filesController.formatEventImage,
         createEvent
     );
+
 router 
     .route('/:id')
     .get(protect,
@@ -42,7 +44,10 @@ router
         fileParser,
         filesController.formatEventImage,
         updateEvent
-    )
-    .delete(protect, restrictTo('Admin'), deleteEvent);
+    );
+
+// Delete event
+router.use(protect, restrictTo('Eliminar eventos'))
+router.route('/delete/:id').delete(deleteEvent);
 
 module.exports = router;
