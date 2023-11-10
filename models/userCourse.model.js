@@ -1,7 +1,7 @@
 
-const mongoose = require('moongose');
+const mongoose = require('mongoose');
 
-const userCourseSchema = new mongoose.Schemma(
+const userCourseSchema = new mongoose.Schema(
     {
         course:{
             type: mongoose.SchemaTypes.ObjectId,

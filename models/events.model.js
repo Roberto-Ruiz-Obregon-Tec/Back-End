@@ -31,7 +31,7 @@ const eventSchema = new mongoose.Schema(
                     /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(value),
             },
         },
-	}
+	}, { timestamps: true }
 );
 
 // date validation

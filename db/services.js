@@ -174,6 +174,10 @@ const services = [
         "name": "Crear administrador"
     },
     {
+        "_id": "S044",
+        "name": "Editar InfoRRO"
+    },
+      {
         "_id": "S045",
         "name": "Conusltar Cuentas de Banco"
     },
@@ -189,4 +193,5 @@ const services = [
         "_id": "S048",
         "name": "Eliminar Cuenta de Banco"
     },
+
 ]

@@ -83,6 +83,15 @@ const courseSchema =  new mongoose.Schema(
             type: Number,
             default: 0,
             validate: {
+                validator: (value) => value >= 0 && value <= 5,
+            },
+            set: (value) => parseFloat(value.toFixed(2))
+        },
+
+        ratingCount: {
+            type: Number,
+            default: 10,
+            validate: {
                 validator: (value) => value >= 0,
             },
         },
@@ -107,7 +116,7 @@ const courseSchema =  new mongoose.Schema(
 
 // Validación de fechas
 courseSchema.pre('validate', function () {
-    if (this.fecha_fin < this.fecha_inicio) {
+    if (this.endDate < this.startDate) {
         throw new AppError(
             'La fecha final debe ser menor a la fecha inicial',
             400
