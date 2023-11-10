@@ -46,7 +46,7 @@ const foundationInformationSchema = new mongoose.Schema({
 );
 
 //Return id (not _id)
-programSchema.set('toJSON', {
+foundationInformationSchema.set('toJSON', {
     virtuals: true,
     transform: (doc, ret, options) => {
         delete ret.__v;
