@@ -79,7 +79,7 @@ exports.createProgram = catchAsync(async (req, res, next) => {
                 currentFocus = await Focus.create({name: f}); // Creamos el focus
             }
 
-            const programFocus = await ProgramFocus.create({focus: currentFocus._id, program: newProgram._id, }) // Relacionamos el enfoque con el programa
+            await ProgramFocus.create({focus: currentFocus._id, program: newProgram._id, }) // Relacionamos el enfoque con el programa
 
         });
     }
@@ -113,18 +113,18 @@ exports.deleteProgram = catchAsync (async (req, res, next) => {
     });
 })
 
-exports.updateProgram - catchAsync (async (req, res, next) => {
+exports.updateProgram = catchAsync (async (req, res, next) => {
     const missingError = new AppError('No se recibio nignuna id', 404); // Defino un error en caso de que no se mande el id del programa a eliminar
     const validationError = new AppError('id no valida', 404); // Defino un error en caso de que no se mande el id del programa a eliminar
 
     if (req.body._id === undefined || req.body._id === null) return next(missingError); // Si no existe id en el body mandamos error
 
-    const {_id, ...restBody} = req.body 
+    const {_id, focus, ...restBody} = req.body 
 
     if (!(mongoose.isValidObjectId(_id))) return next(validationError); // Si el id no es valido, mandamos error
 
 
-    const preProgram = Program.findOne({_id : _id})
+    const preProgram = await Program.findOne({_id : _id})
 
     const keys = Object.keys(preProgram._doc)
 
@@ -133,5 +133,24 @@ exports.updateProgram - catchAsync (async (req, res, next) => {
     }
 
     await preProgram.save({validateBeforeSave : false})
+    await ProgramFocus.deleteMany({program: _id});
 
+    if (focus !== undefined || focus === null){
+        const allFocus = await Focus.find() // Obtengo todos los enfoques de la tabla
+
+        focus.forEach(async (f) => {
+            let currentFocus = allFocus.find(jsonFocus => jsonFocus.name == f); // Busco si algun focus ya esta en al base de datos
+
+            if (currentFocus === undefined || currentFocus === null){ // Si no esta
+                currentFocus = await Focus.create({name: f}); // Creamos el focus
+            }
+
+            await ProgramFocus.create({focus: currentFocus._id, program: preProgram._id, }) // Relacionamos el enfoque con el programa
+
+        });
+    }
+
+    res.status(200).json({
+        status: 'success'
+    });
 })
