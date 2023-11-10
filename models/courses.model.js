@@ -41,11 +41,13 @@ const courseSchema =  new mongoose.Schema(
         },
         
         postalCode: {
-            type: Number
+            type: Number,
+            default: 0,
         },
         
         location: {
-            type: String
+            type: String,
+            default: "Sin ubicación definida",
         },
         
         status: {
