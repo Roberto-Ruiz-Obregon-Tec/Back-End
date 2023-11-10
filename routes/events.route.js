@@ -33,14 +33,15 @@ router.route('/create')
     );
 
 router 
-    .route('/:id')
+.route('/:id')
     .get(protect,
         restrictTo('Consultar eventos'), // Validar servicio asociado al rol
         getEvent
-        )
-    .patch(
-        protect,
-        restrictTo('Admin'),
+    );
+
+router.use(protect, restrictTo('Editar eventos'))
+router.route('/update/:id')
+    .put(
         fileParser,
         filesController.formatEventImage,
         updateEvent
