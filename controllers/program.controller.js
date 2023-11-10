@@ -132,7 +132,7 @@ exports.updateProgram = catchAsync (async (req, res, next) => {
         preProgram[keys[i]] = restBody[keys[i]]  || preProgram[keys[i]];
     }
 
-    await preProgram.save({validateBeforeSave : false})
+    await preProgram.save()
     await ProgramFocus.deleteMany({program: _id});
 
     if (focus !== undefined || focus === null){
