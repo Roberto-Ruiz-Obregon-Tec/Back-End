@@ -9,6 +9,7 @@ const {
     getAllUsers,
     updateUser,
     deleteUser,
+    getMyCourses
 } = require(`${__dirname}/../controllers/user.controller.js`);
 
 // Importing controllers for authentication and password management
@@ -20,8 +21,7 @@ const {
     restrictTo,
     getMe,
     editMe,
-    deleteMe,
-    getMyCourses,
+    deleteMe
 } = require(`${__dirname}/../controllers/authentication.controller.js`);
 const {
     forgotPasswordUser,
@@ -37,10 +37,10 @@ router.patch('/resetpassword/:id', resetPasswordUser); // Resetting the user's p
 // Middleware to protect routes (requires authentication)
 router.use('/auth', protect);
 router.get('/auth/me', getMe, getUser); // Get user's own profile
-router.get('/auth/mycourses', getMyCourses); // Get user's courses
 router.patch('/auth/updateme', editMe); // Update user's own information
 router.get('/auth/deleteme', deleteMe); // Delete user's own account
 router.get('/auth/logout', logout); // User logout
+router.route('/mycourses').get(getMyCourses); // Get user's courses
 
 // Middleware to restrict access to certain routes (requires specific permissions)
 router.use(protect, restrictTo('Consultar usuarios'));
@@ -54,5 +54,7 @@ router.route('/:id').get(getUser).patch(updateUser).delete(deleteUser); // Get, 
 // - GET: Retrieve a specific user by ID
 // - PATCH: Update a specific user by ID
 // - DELETE: Delete a specific user by ID
+
+
 
 module.exports = router; // Export the router with defined routes

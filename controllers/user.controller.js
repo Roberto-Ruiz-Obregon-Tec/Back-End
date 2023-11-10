@@ -7,6 +7,11 @@ const UserRol = require('../models/userRol.model');
 const UserFocus = require('../models/userFocus.model');
 const Focus = require('../models/focus.model'); // Reference to the Focus model
 const Rol = require('../models/rols.model'); // Reference to the Rol model
+const UserCourse = require('../models/userCourse.model');
+const { ObjectId } = require('mongodb');
+const jwt = require('jsonwebtoken');
+const Course = require('../models/courses.model');
+const CourseFocus = require('../models/courseFocus.model');
 
 // Export controller functions for handling User data
 exports.getAllUsers = factory.getAll(User);
@@ -71,5 +76,59 @@ exports.getAllUsers = catchAsync(async (req, res, next) => {
         data: {
             users,
         },
+    });
+});
+
+exports.getMyCourses = catchAsync(async (req, res, next) => {
+    // Create an instance of APIFeatures for filtering, sorting, limiting, and pagination
+    const token = req.cookies.jwt;
+
+    jwt.verify(token, process.env.JWT_SECRET, async (err, user) => {
+        
+        if (err) {
+            res.status(500).json({
+                status: 'error: An error occured decoding user (JWT):'
+            });
+        }
+        
+        else {
+            const userCoursesFeatures = new APIFeatures(UserCourse.find({},{},{User: user.id}), req.query)
+            .filter()
+            .sort()
+            .limitFields()
+            .paginate();
+
+            const userCourses = await userCoursesFeatures.query;
+
+            courses = []
+
+            for(let i = 0; i < userCourses.length; i++) {
+                courseID = userCourses[i].toObject().Course
+                
+                const features = new APIFeatures(Course.findOne({ _id: courseID}), req.query)
+                    .filter()
+                    .sort()
+                    .limitFields()
+                    .paginate();
+
+                const document = await features.query; // Información del curso especificado en los params del URL
+
+                if(document.length > 0) { // Si hay un documento...
+                    const cFocus = await CourseFocus.find({course: document[0]._id}, {focus:1}).populate("focus"); // Obtenemos los focus asociados
+
+                    let focus = []
+                    if(cFocus.length > 0) cFocus.forEach( f => { focus.push(f.focus.name) }) // Si existen focus asociados, almacenamos su nombre
+
+                    document[0] = {...document[0]._doc, "focus": focus}
+                }
+                
+                courses.push(document[0])
+            }
+
+            res.status(200).json({
+                status: 'success',
+                data: courses,
+            });
+        };
     });
 });
