@@ -5,15 +5,18 @@ const factory = require('./handlerFactory.controller');
 const Course = require('../models/courses.model');
 const Focus = require('../models/focus.model'); // Schema to perform .populate("focus")
 const CourseFocus = require('../models/courseFocus.model');
+const UserCourse = require('../models/userCourse.model');
+const CommentCourse = require('../models/commentCourse.model');
+const Comment = require('../models/comments.model');
 const User = require('../models/users.model');
 const Inscription = require('../models/inscriptions.model');
 const Email = require('../utils/email');
+const mongoose = require('mongoose');
 const { request } = require('express');
 const { populate } = require('../models/inscriptions.model');
 const { user } = require('firebase-functions/v1/auth');
 
 exports.updateCourse = factory.updateOne(Course);
-exports.deleteCourse = factory.deleteOne(Course);
 
 exports.getAllCourses = catchAsync(async (req, res, next) => {
     const data = [] // Documentos a retornar
@@ -75,48 +78,39 @@ exports.getCourse = catchAsync(async (req, res, next) => {
     });
 }); 
 
-/** 
- * A function that creates a course and sends an email to all the users that are interested in the
- * course.
-*/
 exports.createCourse = catchAsync(async (req, res, next) => {
-    const document = await Course.create(req.body);
+    const error = new AppError('No hay datos para crear el curso', 404);
+    const {focus, ...courseInfo} = req.body;
 
-    const usersToAlert = await User.find({
-        $or: [
-            // Query and send mail to users in the area
-            {
-                postalCode: document.postalCode,
-            },
-            // Query and send email to users interested in topics
-            { topics: { $in: document.topics } },
-        ],
-        emailAgreement: true,
-    });
+    if(courseInfo === undefined) return next(error); // En caso de no recibir datos para crear un curso, manda un error
 
-    try {
-        await Email.sendMultipleNewCourseAlert(usersToAlert, document);
-    } catch (error) {
-        return next(
-            new AppError(
-                'Hemos tenido problemas enviando los correos de notificación.',
-                500
-            )
-        );
+    const newCourse = await Course.create(courseInfo);
+    
+    if(focus) {
+        const focusRecords = await Focus.find(); // Obtenemos los focus ya registrados
+        const match = focusRecords.filter(record => focus.includes(record.name)) // Filtramos para buscar si hay coincidentes
+        
+        for(const coincidence of match) { // Para cada focus ya registrado
+            await CourseFocus.create({ // Creamos la relación
+                "course": newCourse._id,
+                "focus": coincidence._id
+            });
+            focus.splice(focus.indexOf(coincidence.name), 1); // Eliminamos de los focus por registrar
+        }
+        
+        for(const focusName of focus) { // Para cada focus no registrado
+            const newFocus = await Focus.create({ // Se crea el focus
+                "name": focusName
+            });
+            await CourseFocus.create({ // Se crea la relación
+                "course": newCourse._id,
+                "focus": newFocus._id
+            });
+        }
     }
 
-    // Ios only
-    if(req.headers["user-platform"] == 'ios')
-        return res.status(201).json({
-            status: 'success',
-            data: document,
-        });
-
-    res.status(201).json({
-        status: 'success',
-        data: {
-            document,
-        },
+    res.status(200).json({
+        status: 'success'
     });
 });
 
@@ -150,6 +144,98 @@ exports.inscriptionByCourse = catchAsync(async (req, res, next) => {
         status: 'success',
         data: {
             documents: inscriptions,
+        },
+    });
+});
+
+exports.deleteCourse = catchAsync(async (req, res, next) => {
+    const error = new AppError('No existe un curso con ese ID', 404);
+    const filter = {course: req.params.id}
+
+    if(!mongoose.isValidObjectId(req.params.id)) return next(error);
+
+    // Borrar inscripciones relacionadas
+    await Inscription.deleteMany(filter);
+
+    // Borrar relaciones en userCourse
+    await UserCourse.deleteMany(filter);
+
+    // Buscar comentarios asociados al curso
+    const comments = await CommentCourse.find(filter, {_id: 0, comment: 1});
+
+    // Borrar relaciones en commentCourse
+    await CommentCourse.deleteMany(filter);
+
+    // Borrar comentarios anteriormente asociados al curso
+    for(const comment of comments) {
+        await Comment.findByIdAndDelete(comment.comment);
+    }
+
+    // Borrar relaciones en courseFocus
+    await CourseFocus.deleteMany(filter);
+
+    // Borrar curso
+    const doc = await Course.findByIdAndDelete(req.params.id);
+
+    if (!doc) return next(error);
+
+    res.status(200).json({
+        status: 'success'
+    });
+});
+
+// A function that modifies the rating of the course with a parameter id and returns the new rating
+exports.updateRating = catchAsync(async (req, res, next) => {
+    const courseID = req.body.id;
+
+    // await because is a petition to the database
+    const course = await Course.findById(courseID);
+
+    // there's no course with that id
+    // 500 is a server problem, 400 user error
+    if (!course) {
+        return next(new AppError('No se encontró un curso con ese ID.', 404));
+    }
+
+    // get the rating of the course
+    const rating = course.rating;
+    
+    const ratingCount = course.ratingCount;
+
+    // get the new rating
+    const newRating = req.body.rating;
+
+    // the new rating is not a number between 0 and 5
+    if (newRating < 0 || newRating > 5) {
+        return next(new AppError('No es un numero valido', 404));
+    }
+
+    // calculate the new rating
+    const updatedRating = (rating * ratingCount + newRating) / (ratingCount + 1);
+
+    // update the rating of the course
+    const updatedCourse = await Course.findByIdAndUpdate(
+        courseID,
+        { rating: updatedRating,
+          ratingCount: ratingCount + 1
+        },
+        {
+            new: true,
+            runValidators: true,
+        }
+    );
+
+    // Ios only
+    if(req.headers["user-platform"] == 'ios')
+        return res.status(201).json({
+            status: 'success',
+            data: updatedCourse,
+        });
+
+    res.status(201).json({
+        status: 'success',
+        data: {
+            updatedCourse,
         },
     });
 });

@@ -1,13 +1,15 @@
 const factory = require('./handlerFactory.controller');
 const Program = require('../models/programs.model');
 const ProgramFocus = require('../models/programFocus.model');
+const Focus = require('../models/focus.model');
 const catchAsync = require('../utils/catchAsync');
 const APIFeatures = require('../utils/apiFeatures');
+const AppError = require('../utils/appError');
+const mongoose = require('mongoose')
+
 exports.getAllPrograms = factory.getAll(Program);
 exports.getProgram = factory.getOne(Program);
-exports.createProgram = factory.createOne(Program);
 exports.updateProgram = factory.updateOne(Program);
-exports.deleteProgram = factory.deleteOne(Program);
 
 exports.getAllPrograms = catchAsync(async (req, res, next) => {
     const programFeatures = new APIFeatures(Program.find(), req.query)
@@ -56,3 +58,58 @@ exports.getAllPrograms = catchAsync(async (req, res, next) => {
         },
     });
 });
+
+
+exports.createProgram = catchAsync(async (req, res, next) => {
+    const error = new AppError('No existe informacion del programa', 404); // Defino un error en caso de que no se mande la informacion
+    const {focus, ...programInfo} = req.body 
+
+
+    if (programInfo === undefined) return next(error); // Si no hay informacion de programa, mandamos error
+
+    const newProgram = await Program.create(programInfo); // Creo el nuevo programa
+
+    if (focus !== undefined){ // Si hay focus en el request
+        const id = newProgram._id 
+        const allFocus = await Focus.find() // Obtengo todos los enfoques de la tabla
+
+        focus.forEach(async (f) => {
+            let currentFocus = allFocus.find(jsonFocus => jsonFocus.name == f); // Busco si algun focus ya esta en al base de datos
+
+            if (currentFocus === undefined || currentFocus === null){ // Si no esta
+                currentFocus = await Focus.create({name: f}); // Creamos el focus
+            }
+
+            const programFocus = await ProgramFocus.create({focus: currentFocus._id, program: newProgram._id, }) // Relacionamos el enfoque con el programa
+
+        });
+    }
+    
+
+    res.status(200).json({
+        status: 'success',
+    });
+
+})
+
+
+exports.deleteProgram = catchAsync (async (req, res, next) => {
+    const missingError = new AppError('No se recibio nignuna id', 404); // Defino un error en caso de que no se mande el id del programa a eliminar
+    const validationError = new AppError('id no valida', 404); // Defino un error en caso de que no se mande el id del programa a eliminar
+
+
+    if (req.params.id === undefined || req.params.id === null) return next(missingError); // Si no existe id en el body mandamos error
+
+    const id = req.params.id
+
+    if (!(mongoose.isValidObjectId(id))) return next(validationError); // Si el id no es valido, mandamos error
+
+    // Borramos los enfoques asociados al programa y el programa
+    await ProgramFocus.deleteMany({program: id});
+    await Program.deleteOne({_id : id});
+
+
+    res.status(200).json({
+        status: 'success'
+    });
+})
