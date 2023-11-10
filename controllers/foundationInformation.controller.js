@@ -39,7 +39,7 @@ exports.updatefoundationInformation = catchAsync(async(req, res, next) => {
         preFoundationInfo[keys[i]] = restBody[keys[i]] || preFoundationInfo[keys[i]];
     }
 
-    await preFoundationInfo.save({validateBeforeSave: false})
+    await preFoundationInfo.save()
 
 
     res.status(200).json({
