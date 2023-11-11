@@ -1,13 +1,32 @@
 name: Deploy staging env
 on:
   push:
-    branches: [ staging ]
+    branches: [ dev ]
 env:
   DEPLOY_ENV: test
   DNAME: test
   CI: ${{ secrets.CI }}
+  API_KEY: ${{ secrets.API_KEY }}
+  APP_ID: ${{ secrets.APP_ID }}
+  AUTH_DOMAIN: ${{ secrets.AUTH_DOMAIN }}
   IS_DEPLOY: ${{ secrets.IS_DEPLOY }}
-  FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+  MESSAGING_SENDER_ID: ${{ secrets.MESSAGING_SENDER_ID }}
+  PROJECT_ID: ${{ secrets.PROJECT_ID }}
+  STORAGE_BUCKET: ${{ secrets.STORAGE_BUCKET }}
+  DATABASE: ${{ secrets.DATABASE }}
+  DATABASE_USER: ${{ secrets.DATABASE_USER }}
+  DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+  JWT_SECRET: ${{ secrets.JWT_SECRET }}
+  JWT_EXPIRES_IN: ${{ secrets.JWT_EXPIRES_IN }}
+  JWT_COOKIE_EXPIRES_IN: ${{ secrets.JWT_COOKIE_EXPIRES_IN }}
+  MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+  MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+  OAUTH_CLIENTID: ${{ secrets.OAUTH_CLIENTID }}
+  OAUTH_CLIENT_SECRET: ${{ secrets.OAUTH_CLIENT_SECRET }}
+  OAUTH_ACCESS_TOKEN: ${{ secrets.OAUTH_ACCESS_TOKEN }}
+  OAUTH_REFRESH_TOKEN: ${{ secrets.OAUTH_REFRESH_TOKEN }}
+  EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+  LANDING_URL: ${{ secrets.LANDING_URL }}
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
@@ -16,27 +35,8 @@ jobs:
       - name: Disable update
         run: npm config set update-notifier false
       - name: Download deps
-        run: npm install
-      - name: Create env json
-        uses: jsdaniell/create-json@1.1.2
-        id: create-env-json
-        with:
-          name: "env.json"
-          json: '{"DEPLOY_ENV" : "test","DNAME" : "test","CI" : "${{ secrets.CI }}","API_KEY" : "${{ secrets.API_KEY }}","APP_ID" : "${{ secrets.APP_ID }}","AUTH_DOMAIN" : "${{ secrets.AUTH_DOMAIN }}","IS_DEPLOY" : "${{ secrets.IS_DEPLOY }}","MESSAGING_SENDER_ID" : "${{ secrets.MESSAGING_SENDER_ID }}","PROJECT_ID" : "${{ secrets.PROJECT_ID }}","STORAGE_BUCKET" : "${{ secrets.STORAGE_BUCKET }}","DATABASE" : "${{ secrets.DATABASE }}","DATABASE_USER" : "${{ secrets.DATABASE_USER }}","DATABASE_PASSWORD" : "${{ secrets.DATABASE_PASSWORD }}","JWT_SECRET" : "${{ secrets.JWT_SECRET }}","JWT_EXPIRES_IN" : "${{ secrets.JWT_EXPIRES_IN }}","JWT_COOKIE_EXPIRES_IN" : "${{ secrets.JWT_COOKIE_EXPIRES_IN }}","MAIL_USERNAME" : "${{ secrets.MAIL_USERNAME }}","MAIL_PASSWORD" : "${{ secrets.MAIL_PASSWORD }}","OAUTH_CLIENTID" : "${{ secrets.OAUTH_CLIENTID }}","OAUTH_CLIENT_SECRET" : "${{ secrets.OAUTH_CLIENT_SECRET }}","OAUTH_ACCESS_TOKEN" : "${{ secrets.OAUTH_ACCESS_TOKEN }}","OAUTH_REFRESH_TOKEN" : "${{ secrets.OAUTH_REFRESH_TOKEN }}","EMAIL_FROM" : "${{ secrets.EMAIL_FROM }}","LANDING_URL" : "${{ secrets.LANDING_URL }}","FIREBASE_TOKEN" : "${{ secrets.FIREBASE_TOKEN }}"}'
-          dir: "./"
-        # the below task clears the previous env data
-      - name: Clear env configs
-        uses: w9jds/firebase-action@master
-        with:
-          args: functions:config:unset env
-        # store the env data
-      - name: Set env configs
-        uses: w9jds/firebase-action@master
-        with:
-          args: functions:config:set env=\"$(cat env.json)\"
-        # The below task uses the w9jds/firebase-action@master action with the appropriate argument 
-        # to deploy your firebase cloud functions.
-      - name: Deploy
-        uses: w9jds/firebase-action@master
-        with:
-          args: deploy --only functions
+        run: npm ci && npm install -g firebase-tools
+      - name: Deploy to Firebase
+        run: firebase deploy --only functions
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
