@@ -35,7 +35,7 @@ jobs:
       - name: Disable update
         run: npm config set update-notifier false
       - name: Download deps
-        run: npm ci
+        run: npm ci && npm install firebase-tools
       - name: Deploy to Firebase
         run: firebase deploy --only functions
         env:
