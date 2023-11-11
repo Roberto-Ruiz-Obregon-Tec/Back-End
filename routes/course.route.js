@@ -10,6 +10,7 @@ const {
     updateCourse,
     deleteCourse,
     inscriptionByCourse,
+    updateRating
 } = require(`${__dirname}/../controllers/course.controller.js`);
 
 const {
@@ -21,6 +22,15 @@ const {
 
 const fileParser = require('../utils/multipartParser');
 
+//Ruta para updatear Rating
+router
+    .route('/updateRating')
+    .put(
+        protect,
+        restrictTo('Consultar cursos'),
+        updateRating
+    )
+
 router.route('/getInscriptions/:id').get(inscriptionByCourse);
 
 router
@@ -29,12 +39,13 @@ router
         protect, // Validar inicio de sesión
         restrictTo('Consultar cursos'), // Validar servicio asociado al rol
         getAllCourses
-    )
+    );
+
+router
+    .route('/create')
     .post(
-        protect,
-        restrictTo('Admin'),
-        fileParser,
-        filesController.formatCourseImage,
+        protect, // Validar inicio de sesión
+        restrictTo('Crear cursos'), // Validar servicio asociado al rol
         createCourse
     );
     
@@ -44,14 +55,24 @@ router
         protect, // Validar inicio de sesión
         restrictTo('Consultar cursos'), // Validar servicio asociado al rol
         getCourse
-    )
+    );
+
+router
+    .route('/update/:id')
     .patch(
         protect,
         restrictTo('Admin'),
         fileParser,
         filesController.formatCourseImage,
         updateCourse
-    )
-    .delete(protect, restrictTo('Admin'), deleteCourse);
+    );
+
+router
+    .route('/delete/:id')
+    .delete(
+        protect, // Validar inicio de sesión
+        restrictTo('Eliminar cursos'), // Validar servicio asociado al rol
+        deleteCourse
+    );
 
 module.exports = router;

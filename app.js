@@ -29,13 +29,14 @@ const emailRouter = require('./routes/emails.route');
 const aggregationsRouter = require('./routes/aggregations.route');
 const certificationsRouter = require('./routes/certifications.route');
 const foundationInformationRouter = require('./routes/foundationInformation.route');
-const companyCertificationsRouter = require('./routes/companyCertifications.route');
+const companyCertificationsRouter = require('./routes/company.route');
 const scholarshipsRouter = require('./routes/scholarships.route');
+const bankAccountRouter = require('./routes/bankAccounts.route');
 
 const app = express();
 
 // Read env variables and save them
-dotenv.config({ path: './config.env' });
+dotenv.config();
 
 app.enable('trust proxy');
 app.use(cors());
@@ -119,6 +120,7 @@ app.use('/v1/certifications', certificationsRouter);
 app.use('/v1/informacion-fundacion', foundationInformationRouter);
 app.use('/v1/company-certifications', companyCertificationsRouter);
 app.use('/v1/scholarships', scholarshipsRouter);
+app.use('/v1/bankAccounts', bankAccountRouter);
 
 // ERROR HANDLER FOR UNHANDLED ROUTES
 app.all('*', (req, res, next) => {
