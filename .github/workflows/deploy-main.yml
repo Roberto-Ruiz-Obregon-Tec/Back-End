@@ -35,7 +35,7 @@ jobs:
       - name: Disable update
         run: npm config set update-notifier false
       - name: Download deps
-        run: npm install
+        run: npm ci
       - name: Deploy to Firebase
         uses: w9jds/firebase-action@master
         with:
