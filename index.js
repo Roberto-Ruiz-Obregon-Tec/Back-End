@@ -68,8 +68,9 @@ process.on('SIGTERM', () => {
     }
 });
 
-if (process.env.DEPLOY_ENV === "production") {
-    exports.api = functions.https.onRequest(app);
-} else if (process.env.DEPLOY_ENV === "test") {
-    exports.test = functions.https.onRequest(app);
-};
+// if (process.env.DEPLOY_ENV === "production") {
+//     exports.api = functions.https.onRequest(app);
+// } else if (process.env.DEPLOY_ENV === "test") {
+//     exports.test = functions.https.onRequest(app);
+// };
+exports.test = functions.https.onRequest(app);
