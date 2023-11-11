@@ -34,54 +34,32 @@ jobs:
       - uses: actions/checkout@v3
       - name: Disable update
         run: npm config set update-notifier false
-      - name: Print env DEPLOY_ENV
-        run: echo "DEPLOY_ENV: $DEPLOY_ENV"
-      - name: Print env DNAME
-        run: echo "DNAME: $DNAME"
-      - name: Print env CI
-        run: echo "CI: $CI"
-      - name: Print env API_KEY
-        run: echo "API_KEY: $API_KEY"
-      - name: Print env APP_ID
-        run: echo "APP_ID: $APP_ID"
-      - name: Print env AUTH_DOMAIN
-        run: echo "AUTH_DOMAIN: $AUTH_DOMAIN"
-      - name: Print env IS_DEPLOY
-        run: echo "IS_DEPLOY: $IS_DEPLOY"
-      - name: Print env MESSAGING_SENDER_I
-        run: echo "MESSAGING_SEND: $MESSAGING_SEND"ER_ID
-      - name: Print env PROJECT_ID
-        run: echo "PROJECT_ID: $PROJECT_ID"
-      - name: Print env STORAGE_BUCKET
-        run: echo "STORAGE_BUCKET: $STORAGE_BUCKET"
-      - name: Print env DATABASE
-        run: echo "DATABASE: $DATABASE"
-      - name: Print env DATABASE_USER
-        run: echo "DATABASE_USER: $DATABASE_USER"
-      - name: Print env DATABASE_PASSWORD
-        run: echo "DATABASE_PASSW: $DATABASE_PASSW"ORD
-      - name: Print env JWT_SECRET
-        run: echo "JWT_SECRET: $JWT_SECRET"
-      - name: Print env JWT_EXPIRES_IN
-        run: echo "JWT_EXPIRES_IN: $JWT_EXPIRES_IN"
-      - name: Print env JWT_COOKIE_EXPIRES
-        run: echo "JWT_COOKIE_EXP: $JWT_COOKIE_EXP"IRES_IN
-      - name: Print env MAIL_USERNAME
-        run: echo "MAIL_USERNAME: $MAIL_USERNAME"
-      - name: Print env MAIL_PASSWORD
-        run: echo "MAIL_PASSWORD: $MAIL_PASSWORD"
-      - name: Print env OAUTH_CLIENTID
-        run: echo "OAUTH_CLIENTID: $OAUTH_CLIENTID"
-      - name: Print env OAUTH_CLIENT_SECRE
-        run: echo "OAUTH_CLIENT_S: $OAUTH_CLIENT_S"ECRET
-      - name: Print env OAUTH_ACCESS_TOKEN
-        run: echo "OAUTH_ACCESS_T: $OAUTH_ACCESS_T"OKEN
-      - name: Print env OAUTH_REFRESH_TOKE
-        run: echo "OAUTH_REFRESH_: $OAUTH_REFRESH_"TOKEN
-      - name: Print env EMAIL_FROM
-        run: echo "EMAIL_FROM: $EMAIL_FROM"
-      - name: Print env LANDING_URL
-        run: echo "LANDING_URL: $LANDING_URL"
+      - name: Print envs
+        run: |
+          echo "DEPLOY_ENV: $DEPLOY_ENV"
+          echo "DNAME: $DNAME"
+          echo "CI: $CI"
+          echo "API_KEY: $API_KEY"
+          echo "APP_ID: $APP_ID"
+          echo "AUTH_DOMAIN: $AUTH_DOMAIN"
+          echo "IS_DEPLOY: $IS_DEPLOY"
+          echo "MESSAGING_SENDER_ID: $MESSAGING_SENDER_ID"
+          echo "PROJECT_ID: $PROJECT_ID"
+          echo "STORAGE_BUCKET: $STORAGE_BUCKET"
+          echo "DATABASE: $DATABASE"
+          echo "DATABASE_USER: $DATABASE_USER"
+          echo "DATABASE_PASSWORD: $DATABASE_PASSWORD"
+          echo "JWT_SECRET: $JWT_SECRET"
+          echo "JWT_EXPIRES_IN: $JWT_EXPIRES_IN"
+          echo "JWT_COOKIE_EXPIRES_IN: $JWT_COOKIE_EXPIRES_IN"
+          echo "MAIL_USERNAME: $MAIL_USERNAME"
+          echo "MAIL_PASSWORD: $MAIL_PASSWORD"
+          echo "OAUTH_CLIENTID: $OAUTH_CLIENTID"
+          echo "OAUTH_CLIENT_SECRET: $OAUTH_CLIENT_SECRET"
+          echo "OAUTH_ACCESS_TOKEN: $OAUTH_ACCESS_TOKEN"
+          echo "OAUTH_REFRESH_TOKEN: $OAUTH_REFRESH_TOKEN"
+          echo "EMAIL_FROM: $EMAIL_FROM"
+          echo "LANDING_URL: $LANDING_URL"
       - name: Download deps
         run: npm install
       - name: Deploy to Firebase
