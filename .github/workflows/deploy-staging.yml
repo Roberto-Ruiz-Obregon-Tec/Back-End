@@ -28,10 +28,14 @@ env:
   EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
   LANDING_URL: ${{ secrets.LANDING_URL }}
 jobs:
-  deploy:
-    name: Deploy
+  build_and_deploy:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+      - name: Disable update
+        run: npm config set update-notifier false
+      - name: Download deps
+        run: npm install
       - name: Deploy to Firebase
         uses: w9jds/firebase-action@master
         with:
