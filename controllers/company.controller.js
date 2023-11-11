@@ -1,12 +1,12 @@
 const companyCertification = require('../models/companyCertifications.model');
 const company = require('../models/companies.model');
 const certification = require('../models/certifications.model');
+const CompanyFocus = require('../models/companyFocus.model');
+const Focus = require('../models/focus.model');
 const catchAsync = require('../utils/catchAsync');
-const APIFeatures = require(`../utils/apiFeatures`);
-const factory = require('./handlerFactory.controller');
-
-// read company
-exports.getAllCompanies = factory.getAll(company);
+const APIFeatures = require('../utils/apiFeatures');
+const AppError = require('../utils/appError');
+const mongoose = require('mongoose')
 
 exports.getAllCompanies = catchAsync(async (req, res, next) => {
     const req_certifications = req.body.certifications || []; // Filtros por certificación
@@ -43,5 +43,25 @@ exports.getAllCompanies = catchAsync(async (req, res, next) => {
         data: {
           companies,
         },
+    });
+});
+
+
+exports.deleteCompany = catchAsync (async (req, res, next) => {
+    const missingError = new AppError('No se recibio nignuna id', 404); // Defino un error en caso de que no se mande el id del evento a eliminar
+    const validationError = new AppError('id no valida', 404); // Defino un error en caso de que no se mande el id del evento a eliminar
+
+    if (req.params.id === undefined || req.params.id === null) return next(missingError); // Si no existe id en los params mandamos error
+
+    const id = req.params.id
+
+    if (!(mongoose.isValidObjectId(id))) return next(validationError);
+
+    await CompanyFocus.deleteMany({company: id}); // Eliminamos los registros de los enfoques asociados al evento
+    await companyCertification.deleteMany({company: id}); // Eliminamos los registros de las certificaciones asociadas al evento
+    await company.deleteOne({_id : id}); // Eliminamos el evento
+
+    res.status(200).json({
+        status: 'success',
     });
 });
