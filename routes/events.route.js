@@ -40,7 +40,7 @@ router
     );
 
 router.use(protect, restrictTo('Editar eventos'))
-router.route('/update/:id')
+router.route('/update')
     .put(
         fileParser,
         filesController.formatEventImage,
