@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 
 // Read env variables and save them
-dotenv.config({ path: './config.env' });
+dotenv.config();
 
 let mongo = null;
 

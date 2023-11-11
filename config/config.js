@@ -1,7 +1,7 @@
 const dotenv = require('dotenv');
 
 // Read env variables and save them
-dotenv.config({ path: './config.env' });
+dotenv.config();
 
 const {
     API_KEY,
