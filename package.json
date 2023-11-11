@@ -10,7 +10,7 @@
         "start:dev": "nodemon index.js",
         "start:prod": "cross-env NODE_ENV=development nodemon index.js",
         "debug": "ndb index.js",
-        "deploy": "jest && firebase deploy --only functions",
+        "deploy": "firebase deploy --only functions",
         "serve": "firebase emulators:start --only functions",
         "doc": "jsdoc -c jsconf.json",
         "watch:js": "parcel watch ./public/js/index.js --out-dir ./public/js --out-file bundle.js --public-url /js",

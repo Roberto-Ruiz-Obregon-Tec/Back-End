@@ -37,6 +37,6 @@ jobs:
       - name: Download deps
         run: npm ci && npm install firebase-tools
       - name: Deploy to Firebase
-        run: firebase deploy --only functions
+        run: npm run deploy
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
