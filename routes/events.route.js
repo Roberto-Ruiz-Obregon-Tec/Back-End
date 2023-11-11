@@ -15,6 +15,7 @@ const {
     restrictTo,
 } = require(`${__dirname}/../controllers/authentication.controller.js`);
 const fileParser = require('../utils/multipartParser');
+const { getFilteredEvents } = require('../controllers/event.controller');
 
 router
     .route('/')
@@ -44,6 +45,15 @@ router
         fileParser,
         filesController.formatEventImage,
         updateEvent
+    );
+
+//Ruta para los eventos por filtro (nombre)
+router
+    .route('/')
+    .get(
+        protect,
+        restrictTo('Consultar eventos'), // Validar servicio asociado al rol
+        getFilteredEvents
     );
 
 // Delete event

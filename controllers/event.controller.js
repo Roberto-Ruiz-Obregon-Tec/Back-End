@@ -57,3 +57,25 @@ exports.createEvent = catchAsync(async (req, res, next) => {
         status: 'success',
     });
 });
+
+// Filter events by name
+exports.getFilteredEvents = async (req, res, next) => {
+    try {
+        let query = Event.find();
+        const features = new APIFeatures(query, req.query)
+            .filter()
+            .sort()
+            .limitFields()
+            .paginate();
+
+        const events = await features.query;
+
+        res.status(200).json({
+            status: 'success',
+            results: events.length,
+            data: { events },
+        });
+    } catch (err) {
+        next(err);
+    }
+};
