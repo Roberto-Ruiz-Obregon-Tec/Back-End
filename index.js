@@ -3,7 +3,7 @@ const functions = require('firebase-functions');
 const mongoose = require('mongoose');
 
 // Read env variables and save them
-dotenv.config({ path: './config.env' });
+dotenv.config();
 
 // Error catching
 process.on('unhandledException', (err) => {

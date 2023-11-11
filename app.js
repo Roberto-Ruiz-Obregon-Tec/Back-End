@@ -36,7 +36,7 @@ const bankAccountRouter = require('./routes/bankAccounts.route');
 const app = express();
 
 // Read env variables and save them
-dotenv.config({ path: './config.env' });
+dotenv.config();
 
 app.enable('trust proxy');
 app.use(cors());
