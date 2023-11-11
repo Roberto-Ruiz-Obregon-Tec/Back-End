@@ -9,8 +9,7 @@ const {
     PROJECT_ID,
     STORAGE_BUCKET,
     MESSAGING_SENDER_ID,
-    APP_ID,
-    MEASSUREMENT_ID,
+    APP_ID
 } = process.env;
 
 // Your web app's Firebase configuration
@@ -22,7 +21,6 @@ module.exports = {
         projectId: PROJECT_ID,
         storageBucket: STORAGE_BUCKET,
         messagingSenderId: MESSAGING_SENDER_ID,
-        appId: APP_ID,
-        measurementId: MEASSUREMENT_ID,
+        appId: APP_ID
     },
 };
