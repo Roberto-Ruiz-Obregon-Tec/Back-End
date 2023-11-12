@@ -26,6 +26,7 @@ const adminRouter = require('./routes/admin.route');
 const eventsRouter = require('./routes/events.route');
 const viewRouter = require('./routes/views.route');
 const emailRouter = require('./routes/emails.route');
+const publicationRouter = require('./routes/publication.route');
 const aggregationsRouter = require('./routes/aggregations.route');
 const certificationsRouter = require('./routes/certifications.route');
 const foundationInformationRouter = require('./routes/foundationInformation.route');
@@ -114,6 +115,7 @@ app.use('/v1/event', eventsRouter)
 app.use('/v1/program', programRouter);
 app.use('/v1/admin', adminRouter);
 app.use('/v1/emails', emailRouter);
+app.use('/v1/publication', publicationRouter);
 app.use('/v1/aggregations', aggregationsRouter);
 app.use('/', viewRouter);
 app.use('/v1/certifications', certificationsRouter);
