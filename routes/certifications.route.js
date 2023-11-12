@@ -1,15 +1,12 @@
 const express = require('express');
-
 const router = express.Router();
+const certificationController = require('../controllers/certifications.controller');
+const { protect, restrictTo,} = require(`${__dirname}/../controllers/authentication.controller.js`);
 
 const {
     getAllCertifications,
-} = require(`${__dirname}/../controllers/certifications.controller.js`);
+} = certificationController;
 
-const {
-    protect,
-    restrictTo,
-} = require(`${__dirname}/../controllers/authentication.controller.js`);
 
 router.route('/').get(
     protect, // Validar inicio de sesión
