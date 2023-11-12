@@ -5,6 +5,7 @@ const { protect, restrictTo,} = require(`${__dirname}/../controllers/authenticat
 
 const {
     getAllCertifications,
+    createCertification,
 } = certificationController;
 
 
@@ -13,5 +14,11 @@ router.route('/').get(
     restrictTo('Consultar certificaciones'), // Validar servicio asociado al rol
     getAllCertifications
     );
+
+router.route('/').post(
+    protect, // Validar inicio de sesión
+    restrictTo('Crear certificaciones'), // Validar servicio asociado al rol
+    createCertification
+);
 
 module.exports = router;
