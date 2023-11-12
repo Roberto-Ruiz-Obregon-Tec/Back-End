@@ -1,18 +1,45 @@
 const express = require('express');
-
 const router = express.Router();
+const scholarshipController = require('../controllers/scholarship.controller');
+const { protect, restrictTo } = require('../controllers/authentication.controller');
+
 
 const {
-    getScholarships,
-} = require(`${__dirname}/../controllers/scholarships.controller.js`);
+    getAllScholarship,
+    getScholarship,
+    createScholarship,
+    updateScholarship,
+    deleteScholarship,
+} = scholarshipController;
 
-const {
-    protect,
-    restrictTo,
-} = require(`${__dirname}/../controllers/authentication.controller.js`);
+router.route('/')
+    .get(
+        protect, 
+        restrictTo('Consultar becas'),
+        getAllScholarship
+    )
+    .post(
+        protect,
+        restrictTo('Admin'), 
+        createScholarship
+    );
 
-//router.use(protect);
-router.use(protect, restrictTo('Consultar becas'));
-router.route('/').get(getScholarships);
+    router.route('/:id')
+    .get(
+        protect,
+        restrictTo('Consultar becas'),
+        getScholarship
+    )
+    .patch(
+        protect,
+        restrictTo('Admin'), 
+        updateScholarship
+    )
+    .delete(
+        protect, 
+        restrictTo('Admin'), 
+        deleteScholarship
+    );
+
 
 module.exports = router;
