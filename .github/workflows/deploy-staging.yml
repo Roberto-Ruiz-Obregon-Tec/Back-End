@@ -1,0 +1,23 @@
+name: Deploy staging env
+on:
+  push:
+    branches: [ staging ]
+env:
+  CI: ${{ secrets.CI }}
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Disable update
+        run: npm config set update-notifier false
+      - name: Create env file
+        run: |
+          touch .env
+          echo "${{ secrets.STAGING_ENV_VARS }}" >> .env
+      - name: Download deps
+        run: npm ci && npm install -g firebase-tools
+      - name: Deploy to Firebase
+        run: firebase deploy --only functions:test
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}

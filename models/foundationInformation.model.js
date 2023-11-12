@@ -27,23 +27,23 @@ const foundationInformationSchema = new mongoose.Schema({
     },
     facebook: {
         type: String,
-        default: "https://www.facebook.com/?locale=es_LA",
-        match: [/^(https?:\/\/)?(www\.)?facebook.com\/[a-zA-Z0-9(\.\?)?]/, 'URL de Facebook no válida']
+        default: "https://www.facebook.com/?locale=es_ES/",
+        match: [/^(https?:\/\/)?(www\.)?facebook\.com.*/, 'URL de Facebook no válida']
     },
     twitter: {
         type: String,
         default: "https://twitter.com/?lang=es",
-        match: [/^(https?:\/\/)?(www\.)?twitter.com\/[a-zA-Z0-9(\.\?)?]/, 'URL de Twitter no válida']
+        match: [/^(https?:\/\/)?(www\.)?twitter.com.*/, 'URL de Twitter no válida']
     },
     instagram: {
         type: String,
         default: "https://www.instagram.com/",
-        match: [/^(https?:\/\/)?(www\.)?instagram.com\/[a-zA-Z0-9(\.\?)?]/, 'URL de Instagram no válida']
+        match: [/^(https?:\/\/)?(www\.)?instagram.com.*/, 'URL de Instagram no válida']
     },
     tiktok: {
         type: String,
         default: "https://www.tiktok.com/es/",
-        match: [/^(https?:\/\/)?(www\.)?tiktok.com\/[a-zA-Z0-9(\.\?)?]/, 'URL de TikTok no válida']
+        match: [/^(https?:\/\/)?(www\.)?tiktok.com.*/, 'URL de TikTok no válida']
     }
 }, { timestamps: true }
 
