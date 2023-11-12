@@ -14,6 +14,6 @@ const {
 
 // Editar publicaciones
 router.use(protect, restrictTo('Editar una publicación'));
-router.route('/create').post(updatePublication);
+router.route('/update').put(updatePublication);
 
 module.exports = router; // Se exporta el router con las rutas definidas

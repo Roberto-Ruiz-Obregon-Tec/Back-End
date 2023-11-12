@@ -1,6 +1,7 @@
 
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
+const mongoose = require('mongoose');
 const Publication = require('../models/publications.model');
 
 exports.updatePublication = catchAsync(async (req, res, next) => {
