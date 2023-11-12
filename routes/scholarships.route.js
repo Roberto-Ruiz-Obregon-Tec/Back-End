@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const scholarshipController = require('../controllers/scholarship.controller');
+const scholarshipController = require('../controllers/scholarships.controller');
 const { protect, restrictTo } = require('../controllers/authentication.controller');
 
 
