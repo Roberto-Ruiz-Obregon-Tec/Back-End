@@ -1,5 +1,4 @@
 const express = require('express');
-const filesController = require('../controllers/files.controller');
 
 const router = express.Router();
 
@@ -20,8 +19,6 @@ const {
     restrictTo,
 } = require(`${__dirname}/../controllers/authentication.controller.js`);
 
-const fileParser = require('../utils/multipartParser');
-
 //Ruta para updatear Rating
 router
     .route('/updateRating')
@@ -29,12 +26,12 @@ router
         protect,
         restrictTo('Consultar cursos'),
         updateRating
-    )
+    );
 
 router.route('/getInscriptions/:id').get(inscriptionByCourse);
 
 router
-    .route('/')
+    .route('/') // Ruta raíz
     .get(
         protect, // Validar inicio de sesión
         restrictTo('Consultar cursos'), // Validar servicio asociado al rol
@@ -42,36 +39,34 @@ router
     );
 
 router
-    .route('/create')
+    .route('/create') // Crear curso
     .post(
-        protect, // Validar inicio de sesión
-        restrictTo('Crear cursos'), // Validar servicio asociado al rol
+        protect, 
+        restrictTo('Crear cursos'), 
         createCourse
     );
     
 router
-    .route('/:id')
+    .route('/:id') // Vista detallada de un curso
     .get(
-        protect, // Validar inicio de sesión
-        restrictTo('Consultar cursos'), // Validar servicio asociado al rol
+        protect, 
+        restrictTo('Consultar cursos'), 
         getCourse
     );
 
 router
-    .route('/update/:id')
-    .patch(
+    .route('/update') // Editar curso
+    .put(
         protect,
-        restrictTo('Admin'),
-        fileParser,
-        filesController.formatCourseImage,
+        restrictTo('Editar cursos'),
         updateCourse
     );
 
 router
-    .route('/delete/:id')
+    .route('/delete/:id') // Borrar curso
     .delete(
-        protect, // Validar inicio de sesión
-        restrictTo('Eliminar cursos'), // Validar servicio asociado al rol
+        protect, 
+        restrictTo('Eliminar cursos'), 
         deleteCourse
     );
 

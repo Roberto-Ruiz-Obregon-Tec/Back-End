@@ -26,5 +26,8 @@ router.route('/create').post(createProgram);
 router.use(protect, restrictTo('Eliminar proyectos'));
 router.route('/delete/:id').delete(deleteProgram);
 
+router.use(protect, restrictTo('Editar proyectos'));
+router.route('/update').put(updateProgram);
+
 
 module.exports = router;
