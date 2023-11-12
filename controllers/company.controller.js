@@ -109,18 +109,20 @@ exports.updateCompany = catchAsync(async (req, res, next) => {
     if (certifications !== undefined || certifications === null){ 
         const allCertifications = await Certification.find()
 
-        certifications.forEach(async (c) => {
-            let currentCertifications = allCertifications.find(jsonCertifications => jsonCertifications.name == c); // Busco si algun certification ya esta en al base de datos
-
-            if (currentCertifications === undefined || currentCertifications === null){ // Si no esta
+        certifications.forEach(async (certificationData) => {
+            const { name, description, adquisitionDate } = certificationData;
+    
+            let currentCertifications = allCertifications.find(jsonCertifications => jsonCertifications.name == name);
+    
+            if (currentCertifications === undefined || currentCertifications === null) {
                 currentCertifications = await Certification.create({
-                    name: c,
-                    description: req.body.certificationDescription, // Obtener description del cuerpo del request
-                    adquisitionDate: req.body.certificationAdquisitionDate, // Obtener adquisitionDate del cuerpo del request
+                    name,
+                    description,
+                    adquisitionDate: new Date(adquisitionDate), // Convertir la fecha a objeto Date
                 });
             }
-
-            await companyCertification.create({company: preCompany._id, certification: currentCertifications._id, }) // Relacionamos la empresa con el certification
+    
+            await companyCertification.create({company: preCompany._id, certification: currentCertifications._id });
         });
     }
 
