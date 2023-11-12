@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 
 const {
-    getAllScholarships,
+    getScholarships,
 } = require(`${__dirname}/../controllers/scholarships.controller.js`);
 
 const {
@@ -13,6 +13,6 @@ const {
 
 //router.use(protect);
 router.use(protect, restrictTo('Consultar becas'));
-router.route('/').get(getAllScholarships);
+router.route('/').get(getScholarships);
 
 module.exports = router;

@@ -2,30 +2,32 @@ const express = require('express');
 
 const router = express.Router();
 
-const {
-    createAdmin,
-    getAdmin,
-    getAllAdmins,
-    updateAdmin,
-    deleteAdmin,
-} = require(`${__dirname}/../controllers/admin.controller.js`);
+
+// const {
+//     createAdmin,
+//     getAdmin,
+//     getAllAdmins,
+//     updateAdmin,
+//     deleteAdmin,
+// } = require(`${__dirname}/../controllers/admin.controller.js`);
+  
 const {
     loginAdmin,
     signUpAdmin,
     logout,
     editMe,
     protect,
-    restrictTo,
 } = require(`${__dirname}/../controllers/authentication.controller.js`);
-const {
-    forgotPasswordAdmin,
-    resetPasswordAdmin,
-} = require(`${__dirname}/../controllers/password.controller.js`);
+// const {
+//     forgotPasswordAdmin,
+//     resetPasswordAdmin,
+// } = require(`${__dirname}/../controllers/password.controller.js`);
 
+router.use(protect, restrictTo("Crear administrador"))
 router.post('/auth/signup', signUpAdmin);
 router.post('/auth/login', loginAdmin);
-router.post('/forgotpassword', forgotPasswordAdmin);
-router.patch('/resetpassword/:id', resetPasswordAdmin);
+// router.post('/forgotpassword', forgotPasswordAdmin);
+// router.patch('/resetpassword/:id', resetPasswordAdmin);
 
 router.use(protect);
 // router.get('/auth/me', getMe, getAdmin);

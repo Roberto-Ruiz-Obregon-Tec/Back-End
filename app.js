@@ -24,14 +24,14 @@ const topicsRouter = require('./routes/topics.route');
 const programRouter = require('./routes/program.route');
 const adminRouter = require('./routes/admin.route');
 const eventsRouter = require('./routes/events.route');
-const scholarshipRouter = require('./routes/scholarship.route');
 const viewRouter = require('./routes/views.route');
 const emailRouter = require('./routes/emails.route');
 const aggregationsRouter = require('./routes/aggregations.route');
 const certificationsRouter = require('./routes/certifications.route');
 const foundationInformationRouter = require('./routes/foundationInformation.route');
-const companyCertificationsRouter = require('./routes/companyCertifications.route');
+const companyCertificationsRouter = require('./routes/company.route');
 const scholarshipsRouter = require('./routes/scholarships.route');
+const bankAccountRouter = require('./routes/bankAccounts.route');
 
 const app = express();
 
@@ -110,8 +110,7 @@ app.use('/v1/inscription', inscriptionRouter);
 app.use('/v1/payment', paymentRouter);
 app.use('/v1/course', courseRouter);
 app.use('/v1/topics', topicsRouter);
-app.use('/v1/event', eventsRouter);
-app.use('/v1/scholarship', scholarshipRouter);
+app.use('/v1/event', eventsRouter)
 app.use('/v1/program', programRouter);
 app.use('/v1/admin', adminRouter);
 app.use('/v1/emails', emailRouter);
@@ -121,6 +120,7 @@ app.use('/v1/certifications', certificationsRouter);
 app.use('/v1/informacion-fundacion', foundationInformationRouter);
 app.use('/v1/company-certifications', companyCertificationsRouter);
 app.use('/v1/scholarships', scholarshipsRouter);
+app.use('/v1/bankAccounts', bankAccountRouter);
 
 // ERROR HANDLER FOR UNHANDLED ROUTES
 app.all('*', (req, res, next) => {

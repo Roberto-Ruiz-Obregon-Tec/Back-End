@@ -5,80 +5,71 @@ const factory = require('./handlerFactory.controller');
 const User = require('../models/users.model');
 const UserRol = require('../models/userRol.model');
 const UserFocus = require('../models/userFocus.model');
-const Focus = require('../models/focus.model'); // Para referencia al modelo focus
-const Rol = require('../models/rols.model'); // Para referencia la modelo rol
+const Focus = require('../models/focus.model'); // Reference to the Focus model
+const Rol = require('../models/rols.model'); // Reference to the Rol model
 
-
+// Export controller functions for handling User data
 exports.getAllUsers = factory.getAll(User);
 exports.getUser = factory.getOne(User, ['topics']);
 exports.createUser = factory.createOne(User);
 exports.updateUser = factory.updateOne(User);
 exports.deleteUser = factory.deleteOne(User);
 
+// Controller function to get all users with additional filtering and population
 exports.getAllUsers = catchAsync(async (req, res, next) => {
-    const userFeatures = new APIFeatures(User.find({}, {password: 0}), req.query)
-      .filter()
-      .sort()
-      .limitFields()
-      .paginate();
+    // Create an instance of APIFeatures for filtering, sorting, limiting, and pagination
+    const userFeatures = new APIFeatures(User.find({}, { password: 0 }), req.query)
+        .filter()
+        .sort()
+        .limitFields()
+        .paginate();
+    
+    // Execute the query to fetch users
     const users = await userFeatures.query;
 
-    // Manejo de filtros por interes (focus) y rol
-    const req_focus = req.body.focus || [];
-    const req_rol = req.body.rol || "";
+    // Filter users based on role and focus criteria
+    const req_rol = req.body.rol || ""; // Filter by role
+    const req_focus = req.body.focus || []; // Filter by focus
 
-    for(let i = users.length - 1; i >= 0; i--){
-      const userFocus = []
-    
+    // Fetch UserRol and UserFocus data for reference
+    const userRols = await UserRol.find().populate('rol'); // Get the tables of users associated with roles
+    const userFocus = await UserFocus.find().populate('focus'); // Get the list of interests (focus) associated with the program
 
-      const rol = await UserRol.findOne({user: users[i]._id}, {rol: 1, _id: 0}).populate('rol'); // Obtener el nombre del rol asociado al usuario
-      const focus = await UserFocus.find({user: users[i]._id}, {focus: 1, _id: 0}).populate('focus'); // Obtener la lista de intereses (focus) asociados al usuario
+    // Iterate through the users to apply role and focus filtering
+    for (let i = users.length - 1; i >= 0; i--) {
+        const focusList = [];
+        let focusFilter = (req_focus.length == 0) ? true : false;
 
-      const mapFocus = focus.map((f) => {userFocus.push(f.focus.name)}) // Almacenando los nombres de los intereses en la lista userFocus
+        // Find the role of the user
+        const rol = userRols.find(userInfo => userInfo.user.toString() == users[i]._id.toString());
 
-      if (rol === null) { // Si el usuario no tiene rol
-        users[i] = {...users[i]._doc, "rol": "Sin rol asignado"};
-      } else { // Agregando el campo de rol
-        users[i] = {...users[i]._doc, "rol": rol.rol.name};
-      }
+        if (rol === undefined || rol === null) { // If the user has no role
+            users[i] = { ...users[i]._doc, "rol": "No assigned role" };
+        } else { // Add the role field
+            users[i] = { ...users[i]._doc, "rol": rol.rol.name };
+        }
 
-      users[i] = {...users[i], "focus": userFocus}; // Agregamos la lista de intereses
-      
-      if (req_rol !== "" && users[i].rol != req_rol) {  // Si no coinicde el filtro de rol con el del usuario
-        users.splice(i, 1); // Eliminamos el registro
-        continue;
-      }
+        // Check and filter based on user's focus
+        const mapFocus = userFocus.map(f => {
+            if (f.user.toString() === users[i]._id.toString()) {
+                focusList.push(f.focus.name);
+                focusFilter = req_focus.includes(f.focus.name) ? true : focusFilter;
+            }
+        });
 
-      if (req_focus.length === 0) continue; // Si no hay filtro por intereses no hacemos nada
-      
-      let focusFilter = false; 
+        users[i] = { ...users[i], "focus": focusList }; // Add the list of interests
 
-      req_focus.filter( (f) => { // Buscamos si los intereses del filtro coinciden con los del usuario
-        focusFilter = (userFocus.includes(f))? true : focusFilter;
-      })
-
-      if (!focusFilter || userFocus.length === 0) { // Si no coinicden los filtro de interes con los del usuario
-        users.splice(i, 1);  // Eliminamos el registro
-      }
-      
-      
+        if ((req_rol !== "" && users[i].rol != req_rol) || !focusFilter) {
+            users.splice(i, 1); // Remove the record if it doesn't match the role or focus filter
+        }
     }
 
-    // Ios only
-    if(req.headers["user-platform"] == 'ios')
-      return res.status(200).json({
+    // Send the filtered user data as a response
+    res.status(200).json({
         status: 'success',
         results: users.length,
-        data: users,
-      });
-
-    res.status(200).json({
-      status: 'success',
-      results: users.length,
-      data: {
-        users,
-      },
+        data: {
+            users,
+        },
     });
-  });
-  
-
+});

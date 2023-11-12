@@ -1,4 +1,5 @@
 const express = require('express');
+
 const router = express.Router();
 
 const {
@@ -10,7 +11,10 @@ const {
     restrictTo,
 } = require(`${__dirname}/../controllers/authentication.controller.js`);
 
-//router.use(protect);
-router.route('/').get(getAllCertifications);
+router.route('/').get(
+    protect, // Validar inicio de sesión
+    restrictTo('Consultar certificaciones'), // Validar servicio asociado al rol
+    getAllCertifications
+    );
 
 module.exports = router;

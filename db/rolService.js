@@ -207,6 +207,31 @@ const rolService = [
     {
         "service" : "S042",
         "rol": ["R002"]
-    }
+    },
+
+    {
+        "service" : "S043",
+        "rol": ["R002"]
+    },
+    {
+        "service" : "S044",
+        "rol": ["R002"]
+    },
+    {
+        "service" : "S045",
+        "rol": ["R002", "R001"]
+    },
+    {
+        "service" : "S046",
+        "rol": ["R002"]
+    },
+    {
+        "service" : "S047",
+        "rol": ["R002"]
+    },
+    {
+        "service" : "S048",
+        "rol": ["R002"]
+    },
 
 ]
