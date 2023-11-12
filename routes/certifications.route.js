@@ -6,22 +6,29 @@ const { protect, restrictTo,} = require(`${__dirname}/../controllers/authenticat
 const {
     getAllCertifications,
     createCertification,
+    updateCertification,
     deleteCertification,
 } = certificationController;
 
 
-router.route('/').get(
-    protect, // Validar inicio de sesión
-    restrictTo('Consultar certificaciones'), // Validar servicio asociado al rol
-    getAllCertifications
+router.route('/')
+    .get(
+        protect, // Validar inicio de sesión
+        restrictTo('Consultar certificaciones'), // Validar servicio asociado al rol
+        getAllCertifications
+    )
+    .post(
+        protect, // Validar inicio de sesión
+        restrictTo('Crear certificaciones'), // Validar servicio asociado al rol
+        createCertification
     );
 
-router.route('/').post(
-    protect, // Validar inicio de sesión
-    restrictTo('Crear certificaciones'), // Validar servicio asociado al rol
-    createCertification
-);
 router.route('/:id')
+    .patch(
+        protect, // Validar inicio de sesión
+        restrictTo('Editar certificaciones'), // Validar servicio asociado al rol
+        updateCertification
+    )
     .delete(
         protect, // Validar inicio de sesión
         restrictTo('Eliminar certificaciones'), // Validar servicio asociado al rol
