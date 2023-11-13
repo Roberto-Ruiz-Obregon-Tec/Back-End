@@ -317,16 +317,16 @@ exports.updateRating = catchAsync(async (req, res, next) => {
 
 
 exports.createCourseComment = catchAsync(async (req, res, next) => {
-    const missingError = new AppError('Falta el comentario o la id de la publicacion', 404); // Defino un error en caso de que no se mande el id de la publicacion a eliminar
+    const missingError = new AppError('Falta el comentario o la id del curso', 404); // Defino un error en caso de que no se mande el id de la publicacion a eliminar
 
     const user = req.client._id;
     const {comment, course} = req.body
 
     if (comment === undefined || comment === null) return next(missingError)
-    if (publication === undefined || publication === null) return next(missingError)
+    if (course === undefined || courseComments === null) return next(missingError)
 
-    const created_comment = await Comment.create({comment : comment, status : "Pendiente", user: user});
-    const publicationComment = await CommentPublication.create({course: course, comment: created_comment._id})
+    const created_comment = await Comment.create({comment : comment, status : "Pendiente", user: user}); // Creamos el comentario
+    const courseComment = await CommentCourse.create({course: course, comment: created_comment._id}) // Ligamos el comentario al curso
 
 
     res.status(200).json({
