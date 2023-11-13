@@ -4,7 +4,8 @@ const filesController = require('../controllers/files.controller');
 const router = express.Router();
 
 const {
-    getFocus
+    getFocus,
+    updateFocus
 } = require(`${__dirname}/../controllers/focus.controller.js`);
 const {
     protect,
@@ -13,5 +14,6 @@ const {
 
 router.route('/').get(protect, restrictTo('Consultar enfoques'), getFocus);
 
+router.route('/update').put(protect, restrictTo('Editar enfoques'), updateFocus);
 
 module.exports = router
