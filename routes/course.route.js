@@ -9,7 +9,8 @@ const {
     updateCourse,
     deleteCourse,
     inscriptionByCourse,
-    updateRating
+    updateRating,
+    createCourseComment
 } = require(`${__dirname}/../controllers/course.controller.js`);
 
 const {
