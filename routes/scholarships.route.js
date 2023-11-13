@@ -13,14 +13,10 @@ const {
     restrictTo, // RBAC: Verificar que el servicio esté asociado al rol del usuario
 } = require(`${__dirname}/../controllers/authentication.controller.js`);
 
-router.route('/').get(protect, restrictTo('Consultar becas'), getScholarships);
-
 router.route('/create').post(protect, restrictTo('Crear becas'), createScholarship);
 
-router.use(protect, restrictTo('Eliminar becas'));
-router.route('/delete/:id').delete(deleteScolarship);
+router.route('/delete/:id').delete(protect, restrictTo('Eliminar becas'), deleteScolarship);
 
-router.use(protect, restrictTo('Consultar becas'));
-router.route('/').get(getScholarships);
+router.route('/').get(protect, restrictTo('Consultar becas'), getScholarships);
 
 module.exports = router;
