@@ -18,7 +18,7 @@ const scholarshipFocusSchema = new mongoose.Schema(
 );
 
 // Indexing focusScholarship properties for optimized search
-focusScholarshipSchema.index({ scholarship: 1 });
-focusScholarshipSchema.index({ focus: 1 });
+scholarshipFocusSchema.index({ scholarship: 1 });
+scholarshipFocusSchema.index({ focus: 1 });
 
 module.exports = mongoose.model('ScholarshipFocus', scholarshipFocusSchema);
