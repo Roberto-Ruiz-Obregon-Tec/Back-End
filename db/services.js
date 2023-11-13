@@ -198,4 +198,12 @@ const services = [
         "name": "Consultar publicaciones"
     },
 
+
+
+    
+    {
+        "_id" : "S051",
+        "name" : "Consultar usuarios inscritos a un curso"
+    }
+
 ]

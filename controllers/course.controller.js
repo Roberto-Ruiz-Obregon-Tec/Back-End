@@ -313,3 +313,26 @@ exports.updateRating = catchAsync(async (req, res, next) => {
         },
     });
 });
+
+
+exports.getUsers = catchAsync(async (req, res, next) => {
+    const missingError = new AppError('No se recibio nignuna id', 404); // Defino un error en caso de que no se mande el id del programa a eliminar
+    const validationError = new AppError('id no valida', 404); // Defino un error en caso de que no se mande el id del programa a eliminar
+
+
+    if (req.params.id === undefined || req.params.id === null) return next(missingError); // Si no existe id en los params mandamos error
+
+    const id = req.params.id
+
+    if (!(mongoose.isValidObjectId(id))) return next(validationError); // Si el id no es valido, mandamos error
+
+
+    const users = await UserCourse.find({course: id}, {_id: 0, course: 0}).populate('user', '-password')
+
+
+    res.status(200).json({
+        status: 'success',
+        results: users.length,
+        data: users,
+    });
+})
