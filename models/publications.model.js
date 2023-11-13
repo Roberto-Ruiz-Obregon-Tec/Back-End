@@ -1,5 +1,5 @@
 
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
 const publicationSchema = new mongoose.Schema(
     {
@@ -17,7 +17,7 @@ const publicationSchema = new mongoose.Schema(
             type: Number,
             default: 0,
             validate: {
-                validator: (value) => value >= 0,
+                validator: (likes) => likes >= 0,
             }
         },
         
@@ -30,6 +30,6 @@ const publicationSchema = new mongoose.Schema(
             }
         }
     }, { timestamps: true }
-)
+);
 
-module.exports = mongoose.model('Publication', publicationSchema)
+module.exports = mongoose.model('Publication', publicationSchema);

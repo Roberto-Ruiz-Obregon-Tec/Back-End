@@ -1,14 +1,37 @@
 
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 const Publication = require('../models/publications.model');
-const CommentPublication = require('../models/commentPublication.model')
-const Comment = require('../models/comments.model')
+const CommentPublication = require('../models/commentPublication.model');
+const Comment = require('../models/comments.model');
+
+exports.updatePublication = catchAsync(async (req, res, next) => {
+    const error = new AppError('No existe una publicación con ese ID', 404);
+    const {_id, likes, ...publicationInfo} = req.body; // Aislamos los likes para que no puedan editarse
+
+    if(!mongoose.isValidObjectId(_id)) return next(error);
+
+    const prevPublication = await Publication.findOne({"_id": _id}); // Si no se encuentra la publicación
+    if(!prevPublication) return next(error); // Se retorna un mensaje de error
+
+    const keys = Object.keys(prevPublication._doc);
+
+    for(key of keys){ // Iteramos sobre las llaves del objeto
+        prevPublication[key] = publicationInfo[key] || prevPublication[key]; // Se actualizan los atributos recibidos
+    }
+
+    await prevPublication.save(); // Se guardan los cambios
+
+    res.status(200).json({
+        status: 'success'
+    });
+});
+
 
 exports.createPublication = catchAsync(async (req, res, next) => {
     const error = new AppError('No hay datos para crear la publicación', 404);
-    const {...publicationInfo} = req.body;
+    const {likes, ...publicationInfo} = req.body; // Aislamos los likes para que la publicación inicie con 0
 
     if(publicationInfo === undefined) return next(error); // Si no se recibió información, se manda un error
 
