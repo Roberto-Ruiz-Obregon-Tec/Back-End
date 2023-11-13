@@ -2,6 +2,7 @@
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const APIFeatures = require(`../utils/apiFeatures`);
+const mongoose = require('mongoose');
 const Focus = require('../models/focus.model');
 const scholarships = require('../models/scholarships.model');
 const ScholarshipFocus = require('../models/scholarshipFocus.model');
@@ -55,6 +56,49 @@ exports.createScholarship = catchAsync(async (req, res, next) => {
 
             await ScholarshipFocus.create({ // Se crea la relación
                 "scholarship": newScholarship._id,
+                "focus": match._id
+            });
+        }
+    }
+
+    res.status(200).json({
+        status: 'success'
+    });
+});
+
+exports.updateScholarship = catchAsync(async (req, res, next) => {
+    const error = new AppError('No existe una beca con ese ID', 404);
+    const {_id, focus, ...scholarshiṕInfo} = req.body;
+
+    if(!mongoose.isValidObjectId(_id)) return next(error);
+
+    const prevScholarship = await scholarships.findOne({"_id": _id}); // Si no se encuentra la beca
+    if(!prevScholarship) return next(error); // Se retorna un mensaje de error
+
+    const keys = Object.keys(prevScholarship._doc);
+
+    for(key of keys){ // Iteramos sobre las llaves del objeto
+        prevScholarship[key] = scholarshiṕInfo[key] || prevScholarship[key]; // Se actualizan los atributos recibidos
+    }
+
+    await prevScholarship.save(); // Se guardan los cambios
+    
+    if(focus) { // Si hay cambios en los focus
+        await ScholarshipFocus.deleteMany({scholarship: _id}); // Borramos las relaciones existentes
+
+        const focusRecords = await Focus.find(); // Obtenemos los focus ya registrados
+
+        for(const focusName of focus) { // Para cada focus del update
+            let match = focusRecords.find(record => record.name == focusName); // Verificamos si está registrado
+
+            if(!match) { // Si no existe, se crea
+                match = await Focus.create({
+                    "name": focusName
+                });
+            }
+
+            await ScholarshipFocus.create({ // Se crea la relación
+                "scholarship": _id,
                 "focus": match._id
             });
         }

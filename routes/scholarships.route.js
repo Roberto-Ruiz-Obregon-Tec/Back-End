@@ -5,6 +5,7 @@ const router = express.Router();
 const {
     getScholarships,
     createScholarship,
+    updateScholarship,
 } = require(`${__dirname}/../controllers/scholarships.controller.js`);
 
 const {
@@ -17,5 +18,7 @@ router.route('/').get(getScholarships);
 
 router.use(protect, restrictTo('Crear becas'));
 router.route('/create').post(createScholarship);
+
+router.route('/update').put(updateScholarship);
 
 module.exports = router;
