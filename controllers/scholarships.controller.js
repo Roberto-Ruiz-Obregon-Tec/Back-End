@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const Focus = require('../models/focus.model');
 const scholarships = require('../models/scholarships.model');
 const ScholarshipFocus = require('../models/scholarshipFocus.model');
+const mongoose = require('mongoose')
 
 // read scholarships
 exports.getScholarships = catchAsync(async (req, res, next) => {
@@ -103,6 +104,26 @@ exports.updateScholarship = catchAsync(async (req, res, next) => {
             });
         }
     }
+
+    res.status(200).json({
+        status: 'success'
+    });
+});
+
+exports.deleteScolarship = catchAsync (async (req, res, next) => {
+    const missingError = new AppError('No se recibio nignuna id', 404); // Defino un error en caso de que no se mande el id de la beca a eliminar
+    const validationError = new AppError('id no valida', 404); // Defino un error en caso de que no se mande el id de la beca a eliminar
+
+
+    if (req.params.id === undefined || req.params.id === null) return next(missingError); // Si no existe id en los params mandamos error
+
+    const id = req.params.id
+
+    if (!(mongoose.isValidObjectId(id))) return next(validationError); // Si el id no es valido, mandamos error
+
+    // Borramos los enfoques asociados al programa y el programa
+    await ScholarshipFocus.deleteMany({scholarship: id});
+    await scholarships.deleteOne({_id : id});
 
     res.status(200).json({
         status: 'success'
