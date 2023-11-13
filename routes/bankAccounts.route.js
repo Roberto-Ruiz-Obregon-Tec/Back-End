@@ -15,16 +15,12 @@ const {
 } = require(`${__dirname}/../controllers/authentication.controller.js`);
 
 
-router.use(protect);
-router.route('/').get(getAllBankAccounts); //Ruta para consultar las cuentas
 
+router.route('/').get(protect, getAllBankAccounts); //Ruta para consultar las cuentas
 
-router.use(protect, restrictTo("Crear Cuenta de Banco"))
-router.route('/create').post(createBankAccount); //Ruta para crear cuentas (restringida)
+router.route('/create').post(protect, restrictTo("Crear Cuenta de Banco"), createBankAccount); //Ruta para crear cuentas (restringida)
 
-
-router.use(protect, restrictTo("Editar Cuenta de Banco"))
-router.route('/update').put(updateBankAccount); //Ruta para editar cuentas (restringida)
+router.route('/update').put(protect, restrictTo("Editar Cuenta de Banco"), updateBankAccount); //Ruta para editar cuentas (restringida)
 
 
 module.exports = router;

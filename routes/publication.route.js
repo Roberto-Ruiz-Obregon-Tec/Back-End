@@ -15,13 +15,12 @@ const {
 } = require(`${__dirname}/../controllers/authentication.controller.js`)
 
 // Crear publicaciones
-router.use(protect, restrictTo('Crear una publicación'));
-router.route('/create').post(createPublication);
+router.route('/create').post(protect, restrictTo('Crear una publicación'), createPublication);
 
-router.use(protect, restrictTo('Borrar una publicación'));
-router.route('/delete/:id').delete(deletePublication);
+//Borrar publicaciones
+router.route('/delete/:id').delete(protect, restrictTo('Borrar una publicación'), deletePublication);
 
-router.use(protect, restrictTo('Consultar publicaciones'));
-router.route('/').get(getAllPublications);
+
+router.route('/').get(protect, restrictTo('Consultar publicaciones'), getAllPublications);
 
 module.exports = router; // Se exporta el router con las rutas definidas
