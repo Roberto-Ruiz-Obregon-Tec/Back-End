@@ -15,7 +15,6 @@ const {
 //router.use(protect);
 router.route('/').get(protect, restrictTo('Consultar becas'), getScholarships);
 
-router.use(protect, restrictTo('Crear becas'));
-router.route('/create').post(createScholarship);
+router.route('/create').post(protect, restrictTo('Crear becas'), createScholarship);
 
 module.exports = router;

@@ -16,8 +16,7 @@ const {
 } = require(`${__dirname}/../controllers/authentication.controller.js`)
 
 // Editar publicaciones
-router.use(protect, restrictTo('Editar una publicación'));
-router.route('/update').put(updatePublication);
+router.route('/update').put(protect, restrictTo('Editar una publicación'), updatePublication);
 // Crear publicaciones
 router.route('/create').post(protect, restrictTo('Crear una publicación'), createPublication);
 
