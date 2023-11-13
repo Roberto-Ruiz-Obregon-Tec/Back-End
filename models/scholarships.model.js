@@ -38,13 +38,16 @@ const scholarshipSchema = new mongoose.Schema(
 
         image: {
             type: String,
-            required: [true, 'Ingresa la portada para la beca'],
+            required: [true, 'Ingresa una imagen para la beca'],
+            validate: {
+                validator: (value) =>
+                    /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(value),
+            }
         },
 
-        // Population sector that the scholarship covers
-        sector: {
+        sector: { // Population sector that the scholarship covers
             type: String,
-            default: ''
+            default: "Para todo público"
         },
 
         startDate: {
@@ -59,15 +62,15 @@ const scholarshipSchema = new mongoose.Schema(
     }, { timestamps: true }
 );
 
-// date validation
-// scholarshipSchema.pre('validate', function () {
-//     if (this.endDate < this.startDate) {
-//         throw new AppError(
-//             'La fecha final debe ser menor a la fecha inicial',
-//             400
-//         );
-//     }
-// });
+// Validación de fechas
+scholarshipSchema.pre('validate', function () {
+    if (this.endDate < this.startDate) {
+        throw new AppError(
+            'La fecha final debe ser menor a la fecha inicial',
+            400
+        );
+    }
+});
 
 // Override the function 'toJSON' to present the data to the client
 // Removes unnecessary properties '__v' and the creation timestamps
@@ -84,3 +87,4 @@ scholarshipSchema.set('toJSON', {
 });
 
 module.exports = mongoose.model('Scholarship', scholarshipSchema);
+// Population sector that the scholarship covers
