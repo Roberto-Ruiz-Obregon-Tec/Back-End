@@ -29,7 +29,8 @@ const programSchema = new mongoose.Schema(
         },
         
         postalCode: {
-            type: Number
+            type: Number,
+            default: 0
         },
         
         description: {
