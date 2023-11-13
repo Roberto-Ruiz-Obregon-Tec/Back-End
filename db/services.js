@@ -198,4 +198,8 @@ const services = [
         "name": "Consultar publicaciones"
     },
 
+    {
+        "_id": "S050",
+        "name": "Consultar enfoques"
+    },
 ]

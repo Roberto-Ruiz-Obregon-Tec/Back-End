@@ -34,6 +34,7 @@ const companyCertificationsRouter = require('./routes/company.route');
 const scholarshipsRouter = require('./routes/scholarships.route');
 const bankAccountRouter = require('./routes/bankAccounts.route');
 const commentRouter = require('./routes/comments.route');
+const focusRouter = require('./routes/focus.route');
 
 const app = express();
 
@@ -125,6 +126,7 @@ app.use('/v1/company-certifications', companyCertificationsRouter);
 app.use('/v1/scholarships', scholarshipsRouter);
 app.use('/v1/bankAccounts', bankAccountRouter);
 app.use('/v1/comment', commentRouter);
+app.use('/v1/focus', focusRouter);
 
 // ERROR HANDLER FOR UNHANDLED ROUTES
 app.all('*', (req, res, next) => {
