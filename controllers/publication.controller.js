@@ -6,7 +6,7 @@ const Publication = require('../models/publications.model');
 
 exports.updatePublication = catchAsync(async (req, res, next) => {
     const error = new AppError('No existe una publicación con ese ID', 404);
-    const {_id, ...publicationInfo} = req.body;
+    const {_id, likes, ...publicationInfo} = req.body; // Aislamos los likes para que no puedan editarse
 
     if(!mongoose.isValidObjectId(_id)) return next(error);
 
