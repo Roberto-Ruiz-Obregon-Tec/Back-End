@@ -12,8 +12,8 @@ const {
     restrictTo, // RBAC: Verificar que el servicio esté asociado al rol del usuario
 } = require(`${__dirname}/../controllers/authentication.controller.js`);
 
-router.use(protect, restrictTo('Consultar becas'));
-router.route('/').get(getScholarships);
+//router.use(protect);
+router.route('/').get(protect, restrictTo('Consultar becas'), getScholarships);
 
 router.use(protect, restrictTo('Crear becas'));
 router.route('/create').post(createScholarship);

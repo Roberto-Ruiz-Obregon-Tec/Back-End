@@ -16,18 +16,13 @@ const {
 } = require(`${__dirname}/../controllers/authentication.controller.js`);
 
 
-router.use(protect, restrictTo('Consultar proyectos'));
-router.route('/').get(getAllPrograms)
-router.route('/:id').get(getProgram)
+router.route('/create').post(protect, restrictTo('Crear proyectos'), createProgram);
+router.route('/delete/:id').delete(protect, restrictTo('Eliminar proyectos'), deleteProgram);
 
-router.use(protect, restrictTo('Crear proyectos'));
-router.route('/create').post(createProgram);
+router.route('/update').put(protect, restrictTo('Editar proyectos'), updateProgram);
 
-router.use(protect, restrictTo('Eliminar proyectos'));
-router.route('/delete/:id').delete(deleteProgram);
-
-router.use(protect, restrictTo('Editar proyectos'));
-router.route('/update').put(updateProgram);
+router.route('/').get(protect, restrictTo('Consultar proyectos'), getAllPrograms)
+router.route('/:id').get(protect, restrictTo('Consultar proyectos'), getProgram)
 
 
 module.exports = router;
