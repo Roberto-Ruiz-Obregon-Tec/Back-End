@@ -29,8 +29,25 @@ exports.getAllCourses = catchAsync(async (req, res, next) => {
     const documents = await features.query; // Cursos que cumplen con los filtros de los params del URL
 
     const courseFocus = await CourseFocus.find().populate("focus"); // Registros de los focus asociados a los cursos
+    const courseComments = await CommentCourse.find().populate("comment").populate([
+        { 
+          path: 'comment', 
+          populate: [{ path: 'user' }] 
+        }
+      ]); // Registros de los comentarios asociados a los cursos
 
     for(let i = 0; i < documents.length; i++) { // Iteramos sobre cada curso
+        // 1. Comentarios asociados
+        let comments = courseComments.filter(comment => comment.course.toString() == documents[i]._id.toString() && comment.comment.status == 'Aprobado');
+        let approvedComments = [];
+
+        comments.forEach( c => { // Agarramos únicamente los comentarios
+            approvedComments.push({"comment": c.comment.comment, "user": c.comment.user.firstName + " " + c.comment.user.lastName});
+        });
+
+        documents[i]._doc = {...documents[i]._doc, "comments": approvedComments}; // Guardamos los comentarios que han sido aprobados
+
+        // 2. Focus asociados
         let filter = (reqFocus.length == 0)?true:false // Para verificar si cumple con los filtros de focus
         const cFocus = courseFocus.filter(focusInfo => focusInfo.course.toString() == documents[i]._id.toString()); // Obtenemos los focus asociados
         
@@ -60,6 +77,22 @@ exports.getCourse = catchAsync(async (req, res, next) => {
         .paginate();
 
     const document = await features.query; // Información del curso especificado en los params del URL
+
+    const courseComments = await CommentCourse.find({course: document[0]._id}, {comment:1}).populate("comment").populate([
+        { 
+          path: 'comment', 
+          populate: [{ path: 'user' }] 
+        }
+      ]); // Comentarios asociados
+    let approvedComments = [];
+
+    courseComments.forEach( c => { // Agarramos únicamente los comentarios
+        if(c.comment.status == 'Aprobado') {
+            approvedComments.push({"comment": c.comment.comment, "user": c.comment.user.firstName + " " + c.comment.user.lastName});
+        }
+    });
+
+    document[0]._doc = {...document[0]._doc, "comments": approvedComments}; // Guardamos los comentarios que han sido aprobados
 
     if(document.length > 0) { // Si hay un documento...
         const cFocus = await CourseFocus.find({course: document[0]._id}, {focus:1}).populate("focus"); // Obtenemos los focus asociados
