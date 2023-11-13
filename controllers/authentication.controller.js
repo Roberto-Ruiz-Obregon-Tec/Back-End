@@ -405,7 +405,6 @@ exports.restrictTo = (service) => {
     return catchAsync(async(req, res, next) => {
         const idService = await Service.findOne({name: service}, {_id : 1}); // id asociado al servicio
         const roles = await RolService.findOne({service: idService._id}); // roles asociados al servicio
-        console.log(service)
 
         if (!roles.rol.includes(req.rolId)) { // Verificamos que el usuario tenga acceso al servicio
             next(
