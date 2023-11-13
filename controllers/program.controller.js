@@ -97,7 +97,7 @@ exports.deleteProgram = catchAsync (async (req, res, next) => {
     const validationError = new AppError('id no valida', 404); // Defino un error en caso de que no se mande el id del programa a eliminar
 
 
-    if (req.params.id === undefined || req.params.id === null) return next(missingError); // Si no existe id en el body mandamos error
+    if (req.params.id === undefined || req.params.id === null) return next(missingError); // Si no existe id en los params mandamos error
 
     const id = req.params.id
 
