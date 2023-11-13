@@ -117,8 +117,8 @@ exports.createPublicationComment = catchAsync(async (req, res, next) => {
     if (comment === undefined || comment === null) return next(missingError)
     if (publication === undefined || publication === null) return next(missingError)
 
-    const created_comment = await Comment.create({comment : comment, status : "Pendiente", user: user});
-    const publicationComment = await CommentPublication.create({publication: publication, comment: created_comment._id})
+    const created_comment = await Comment.create({comment : comment, status : "Pendiente", user: user}); // Crear el comentario
+    const publicationComment = await CommentPublication.create({publication: publication, comment: created_comment._id}) // Ligar el comentario a la publicacion
 
 
     res.status(200).json({
