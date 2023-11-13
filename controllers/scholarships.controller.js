@@ -6,7 +6,6 @@ const mongoose = require('mongoose');
 const Focus = require('../models/focus.model');
 const scholarships = require('../models/scholarships.model');
 const ScholarshipFocus = require('../models/scholarshipFocus.model');
-const mongoose = require('mongoose')
 
 // read scholarships
 exports.getScholarships = catchAsync(async (req, res, next) => {
