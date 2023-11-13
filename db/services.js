@@ -193,5 +193,9 @@ const services = [
         "_id": "S048",
         "name": "Eliminar Cuenta de Banco"
     },
+    {
+        "_id": "S049",
+        "name": "Consultar publicaciones"
+    },
 
 ]
