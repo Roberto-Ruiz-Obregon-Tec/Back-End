@@ -323,7 +323,7 @@ exports.createCourseComment = catchAsync(async (req, res, next) => {
     const {comment, course} = req.body
 
     if (comment === undefined || comment === null) return next(missingError)
-    if (course === undefined || courseComments === null) return next(missingError)
+    if (course === undefined || course === null) return next(missingError)
 
     const created_comment = await Comment.create({comment : comment, status : "Pendiente", user: user}); // Creamos el comentario
     const courseComment = await CommentCourse.create({course: course, comment: created_comment._id}) // Ligamos el comentario al curso
