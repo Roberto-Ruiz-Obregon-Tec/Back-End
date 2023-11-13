@@ -12,6 +12,12 @@ const commentSchema = new mongoose.Schema(
             type: String,
             enum: ['Aprobado', 'Rechazado', 'Pendiente'],
             required: [true, 'Ingresa el status del comentario (Aprobado, Rechazado, Pendiente)']
+        },
+
+        user: {
+            type: mongoose.SchemaTypes.ObjectId,
+            ref: 'User',
+            required: [true, 'Campo de usuario necesario'],
         }
     }, { timestamps: true }
 )

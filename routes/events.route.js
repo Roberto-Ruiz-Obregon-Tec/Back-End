@@ -24,30 +24,30 @@ router
         getAllEvents
     );
 
-router.use(protect, restrictTo('Crear eventos'));
 router.route('/create')
     .post(
+        protect,
+        restrictTo('Crear eventos'),
         fileParser,
         filesController.formatEventImage,
         createEvent
     );
 
 router 
-    .route('/:id')
+.route('/:id')
     .get(protect,
         restrictTo('Consultar eventos'), // Validar servicio asociado al rol
         getEvent
-        )
-    .patch(
-        protect,
-        restrictTo('Admin'),
+    );
+
+router.route(protect, restrictTo('Editar eventos'), '/update')
+    .put(
         fileParser,
         filesController.formatEventImage,
         updateEvent
     );
 
 // Delete event
-router.use(protect, restrictTo('Eliminar eventos'))
-router.route('/delete/:id').delete(deleteEvent);
+router.route('/delete/:id').delete(protect, restrictTo('Eliminar eventos'), deleteEvent);
 
 module.exports = router;

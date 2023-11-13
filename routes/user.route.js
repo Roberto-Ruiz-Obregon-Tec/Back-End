@@ -42,11 +42,9 @@ router.get('/auth/deleteme', deleteMe); // Delete user's own account
 router.get('/auth/logout', logout); // User logout
 router.route('/mycourses').get(getMyCourses); // Get user's courses
 
-// Middleware to restrict access to certain routes (requires specific permissions)
-router.use(protect, restrictTo('Consultar usuarios'));
 
 // Routes for managing user data
-router.route('/').get(getAllUsers).post(createUser); // Get all users or create a new user
+router.route('/').get(protect, restrictTo('Consultar usuarios'), getAllUsers).post(createUser); // Get all users or create a new user
 // - GET: Retrieve a list of all users
 // - POST: Create a new user
 

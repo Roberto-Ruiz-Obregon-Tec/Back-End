@@ -13,63 +13,58 @@ const jwt = require('jsonwebtoken');
 const Course = require('../models/courses.model');
 const CourseFocus = require('../models/courseFocus.model');
 
-// Export controller functions for handling User data
 exports.getAllUsers = factory.getAll(User);
 exports.getUser = factory.getOne(User, ['topics']);
 exports.createUser = factory.createOne(User);
 exports.updateUser = factory.updateOne(User);
 exports.deleteUser = factory.deleteOne(User);
 
-// Controller function to get all users with additional filtering and population
+
 exports.getAllUsers = catchAsync(async (req, res, next) => {
-    // Create an instance of APIFeatures for filtering, sorting, limiting, and pagination
     const userFeatures = new APIFeatures(User.find({}, { password: 0 }), req.query)
         .filter()
         .sort()
         .limitFields()
         .paginate();
-    
-    // Execute the query to fetch users
     const users = await userFeatures.query;
 
-    // Filter users based on role and focus criteria
-    const req_rol = req.body.rol || ""; // Filter by role
-    const req_focus = req.body.focus || []; // Filter by focus
+    const req_rol = req.body.rol || ""; // Filtro por rol
+    const req_focus = req.body.focus || []; // Filtro por enfoque
 
-    // Fetch UserRol and UserFocus data for reference
-    const userRols = await UserRol.find().populate('rol'); // Get the tables of users associated with roles
-    const userFocus = await UserFocus.find().populate('focus'); // Get the list of interests (focus) associated with the program
 
-    // Iterate through the users to apply role and focus filtering
+    const userRols = await UserRol.find().populate('rol'); // Acceder a las asociaciones de usuario y rol
+    const userFocus = await UserFocus.find().populate('focus'); // Acceder a las asociaciones de usuario y enfoque
+
+
     for (let i = users.length - 1; i >= 0; i--) {
         const focusList = [];
+        
         let focusFilter = (req_focus.length == 0) ? true : false;
 
-        // Find the role of the user
+        // Encontramos el rol del usuario
         const rol = userRols.find(userInfo => userInfo.user.toString() == users[i]._id.toString());
 
-        if (rol === undefined || rol === null) { // If the user has no role
-            users[i] = { ...users[i]._doc, "rol": "No assigned role" };
-        } else { // Add the role field
+        if (rol === undefined || rol === null) { // Si no hay rol
+            users[i] = { ...users[i]._doc, "rol": "Sin rol asignado" };
+        } else { // Agregamos el rol
             users[i] = { ...users[i]._doc, "rol": rol.rol.name };
         }
 
-        // Check and filter based on user's focus
+        
         const mapFocus = userFocus.map(f => {
-            if (f.user.toString() === users[i]._id.toString()) {
+            if (f.user.toString() === users[i]._id.toString()) { // Agregamos el enfoque al usuario
                 focusList.push(f.focus.name);
                 focusFilter = req_focus.includes(f.focus.name) ? true : focusFilter;
             }
         });
 
-        users[i] = { ...users[i], "focus": focusList }; // Add the list of interests
+        users[i] = { ...users[i], "focus": focusList }; // Agregamos la lsita de intereses
 
         if ((req_rol !== "" && users[i].rol != req_rol) || !focusFilter) {
-            users.splice(i, 1); // Remove the record if it doesn't match the role or focus filter
+            users.splice(i, 1); // Removemos al usuario en caso de no cumplir los filtros
         }
     }
 
-    // Send the filtered user data as a response
     res.status(200).json({
         status: 'success',
         results: users.length,
