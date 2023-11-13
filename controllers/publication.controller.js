@@ -41,8 +41,6 @@ exports.getAllPublications = catchAsync(async (req, res, next) => {
         },
     });
 })
-const CommentPublication = require('../models/commentPublication.model');
-const Comment = require('../models/comments.model');
 
 exports.updatePublication = catchAsync(async (req, res, next) => {
     const error = new AppError('No existe una publicación con ese ID', 404);
