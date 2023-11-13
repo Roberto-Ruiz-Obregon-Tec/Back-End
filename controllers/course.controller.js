@@ -36,8 +36,6 @@ exports.getAllCourses = catchAsync(async (req, res, next) => {
         }
       ]); // Registros de los comentarios asociados a los cursos
 
-console.log(courseComments)
-
     for(let i = 0; i < documents.length; i++) { // Iteramos sobre cada curso
         // 1. Comentarios asociados
         let comments = courseComments.filter(comment => comment.course.toString() == documents[i]._id.toString() && comment.comment.status == 'Aprobado');
