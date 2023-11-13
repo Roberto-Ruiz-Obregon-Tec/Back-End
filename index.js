@@ -3,7 +3,7 @@ const functions = require('firebase-functions');
 const mongoose = require('mongoose');
 
 // Read env variables and save them
-dotenv.config({ path: './config.env' });
+dotenv.config();
 
 // Error catching
 process.on('unhandledException', (err) => {
@@ -26,6 +26,7 @@ mongoose
         useCreateIndex: true,
         useFindAndModify: true,
         useUnifiedTopology: true,
+        dbName: process.env.DNAME === undefined ? "test" : process.env.DNAME
     })
     .then((con) => {
         console.log('Connection to DB successful');
@@ -37,27 +38,38 @@ const app = require(`${__dirname}/app.js`);
 const port = process.env.PORT;
 
 // app.listen nos regresa un objeto de
-const server = app.listen(port, () => {
-    console.log(`Server running on ${port}...`);
-});
+let server = null;
+if (process.env.IS_DEPLOY !== "true") {
+    server = app.listen(port, () => {
+        console.log(`Server running on ${port}...`);
+    });
+}
 
 // UNHANDLED REJECTION
 /* Catching unhandled rejections. */
 process.on('unhandledRejection', (err) => {
     console.log(err.name, err.message);
     console.log('UNHANDLED REJECTION!: SHUTTING DOWN');
-    server.close(() => {
-        process.exit(1);
-    });
+    if (process.env.IS_DEPLOY !== "true") {
+        server.close(() => {
+            process.exit(1);
+        });
+    }
 });
 
 // SERVER SHUTDOWN
 /* A signal that is sent to the process to tell it to terminate. */
 process.on('SIGTERM', () => {
     console.log('SIGTERM received. Shutting down.');
-    server.close(() => {
-        console.log('Process terminated.');
-    });
+    if (process.env.IS_DEPLOY !== "true") {
+        server.close(() => {
+            console.log('Process terminated.');
+        });
+    }
 });
 
-exports.api = functions.https.onRequest(app);
+if (process.env.DEPLOY_ENV === "production") {
+    exports.api = functions.https.onRequest(app);
+} else if (process.env.DEPLOY_ENV === "test") {
+    exports.test = functions.https.onRequest(app);
+};

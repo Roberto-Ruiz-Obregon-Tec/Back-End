@@ -29,7 +29,8 @@ const programSchema = new mongoose.Schema(
         },
         
         postalCode: {
-            type: Number
+            type: Number,
+            default: 0
         },
         
         description: {
@@ -42,9 +43,19 @@ const programSchema = new mongoose.Schema(
 
 programSchema.pre('validate', function () {
     if (
-        this.fecha_limite < new Date()
+        this.deadlineDate < new Date()
     ) {
         throw new AppError('La fecha limite debe estar en el futuro', 400);
+    }
+});
+
+// Validación de fechas
+programSchema.pre('validate', function () {
+    if (this.endDate < this.startDate) {
+        throw new AppError(
+            'La fecha final debe ser menor a la fecha inicial',
+            400
+        );
     }
 });
 

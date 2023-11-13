@@ -2,6 +2,7 @@ const express = require('express');
 
 const router = express.Router();
 
+// Importing controllers for user-related actions
 const {
     createUser,
     getUser,
@@ -9,6 +10,8 @@ const {
     updateUser,
     deleteUser,
 } = require(`${__dirname}/../controllers/user.controller.js`);
+
+// Importing controllers for authentication and password management
 const {
     loginUser,
     signUpUser,
@@ -25,22 +28,29 @@ const {
     resetPasswordUser,
 } = require(`${__dirname}/../controllers/password.controller.js`);
 
-router.post('/auth/signup', signUpUser);
-router.post('/auth/login', loginUser);
-router.post('/forgotpassword', forgotPasswordUser);
-router.patch('/resetpassword/:id', resetPasswordUser);
+// Defining routes for various actions
+router.post('/auth/signup', signUpUser); // User registration
+router.post('/auth/login', loginUser); // User login
+router.post('/forgotpassword', forgotPasswordUser); // Request to reset a forgotten password
+router.patch('/resetpassword/:id', resetPasswordUser); // Resetting the user's password
 
+// Middleware to protect routes (requires authentication)
 router.use('/auth', protect);
-router.get('/auth/me', getMe, getUser);
-router.get('/auth/mycourses', getMyCourses);
-router.patch('/auth/updateme', editMe);
-router.get('/auth/deleteme', deleteMe);
-router.get('/auth/logout', logout);
-
-router.use(protect, restrictTo('Consultar usuarios'));
-router.route('/').get(getAllUsers).post(createUser);
+router.get('/auth/me', getMe, getUser); // Get user's own profile
+router.get('/auth/mycourses', getMyCourses); // Get user's courses
+router.patch('/auth/updateme', editMe); // Update user's own information
+router.get('/auth/deleteme', deleteMe); // Delete user's own account
+router.get('/auth/logout', logout); // User logout
 
 
-router.route('/:id').get(getUser).patch(updateUser).delete(deleteUser);
+// Routes for managing user data
+router.route('/').get(protect, restrictTo('Consultar usuarios'), getAllUsers).post(createUser); // Get all users or create a new user
+// - GET: Retrieve a list of all users
+// - POST: Create a new user
 
-module.exports = router;
+router.route('/:id').get(getUser).patch(updateUser).delete(deleteUser); // Get, update, or delete a specific user by ID
+// - GET: Retrieve a specific user by ID
+// - PATCH: Update a specific user by ID
+// - DELETE: Delete a specific user by ID
+
+module.exports = router; // Export the router with defined routes

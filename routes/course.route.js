@@ -1,5 +1,4 @@
 const express = require('express');
-const filesController = require('../controllers/files.controller');
 
 const router = express.Router();
 
@@ -10,6 +9,7 @@ const {
     updateCourse,
     deleteCourse,
     inscriptionByCourse,
+    updateRating
 } = require(`${__dirname}/../controllers/course.controller.js`);
 
 const {
@@ -19,39 +19,55 @@ const {
     restrictTo,
 } = require(`${__dirname}/../controllers/authentication.controller.js`);
 
-const fileParser = require('../utils/multipartParser');
+//Ruta para updatear Rating
+router
+    .route('/updateRating')
+    .put(
+        protect,
+        restrictTo('Consultar cursos'),
+        updateRating
+    );
 
 router.route('/getInscriptions/:id').get(inscriptionByCourse);
 
 router
-    .route('/')
+    .route('/') // Ruta raíz
     .get(
         protect, // Validar inicio de sesión
         restrictTo('Consultar cursos'), // Validar servicio asociado al rol
         getAllCourses
-    )
+    );
+
+router
+    .route('/create') // Crear curso
     .post(
-        protect,
-        restrictTo('Admin'),
-        fileParser,
-        filesController.formatCourseImage,
+        protect, 
+        restrictTo('Crear cursos'), 
         createCourse
     );
     
 router
-    .route('/:id')
+    .route('/:id') // Vista detallada de un curso
     .get(
-        protect, // Validar inicio de sesión
-        restrictTo('Consultar cursos'), // Validar servicio asociado al rol
+        protect, 
+        restrictTo('Consultar cursos'), 
         getCourse
-    )
-    .patch(
+    );
+
+router
+    .route('/update') // Editar curso
+    .put(
         protect,
-        restrictTo('Admin'),
-        fileParser,
-        filesController.formatCourseImage,
+        restrictTo('Editar cursos'),
         updateCourse
-    )
-    .delete(protect, restrictTo('Admin'), deleteCourse);
+    );
+
+router
+    .route('/delete/:id') // Borrar curso
+    .delete(
+        protect, 
+        restrictTo('Eliminar cursos'), 
+        deleteCourse
+    );
 
 module.exports = router;

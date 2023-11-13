@@ -18,24 +18,36 @@ const fileParser = require('../utils/multipartParser');
 
 router
     .route('/')
-    .get(getAllEvents)
+    .get(
+        protect,
+        restrictTo('Consultar eventos'), // Validar servicio asociado al rol
+        getAllEvents
+    );
+
+router.route('/create')
     .post(
         protect,
-        restrictTo('Admin'),
+        restrictTo('Crear eventos'),
         fileParser,
         filesController.formatEventImage,
         createEvent
     );
-router
-    .route('/:id')
-    .get(getEvent)
-    .patch(
-        protect,
-        restrictTo('Admin'),
+
+router 
+.route('/:id')
+    .get(protect,
+        restrictTo('Consultar eventos'), // Validar servicio asociado al rol
+        getEvent
+    );
+
+router.route(protect, restrictTo('Editar eventos'), '/update')
+    .put(
         fileParser,
         filesController.formatEventImage,
         updateEvent
-    )
-    .delete(protect, restrictTo('Admin'), deleteEvent);
+    );
+
+// Delete event
+router.route('/delete/:id').delete(protect, restrictTo('Eliminar eventos'), deleteEvent);
 
 module.exports = router;
