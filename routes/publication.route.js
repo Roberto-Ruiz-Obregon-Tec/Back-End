@@ -4,6 +4,7 @@ const router = express.Router();
 
 // Importar controladores necesarios
 const {
+    getAllPublications,
     updatePublication,
     createPublication,
     deletePublication
@@ -12,16 +13,17 @@ const {
 const {
     protect, // Inicio de sesión correcto: Bearer token
     restrictTo, // RBAC: Verificar que el servicio esté asociado al rol del usuario
-} = require(`${__dirname}/../controllers/authentication.controller.js`);
+} = require(`${__dirname}/../controllers/authentication.controller.js`)
 
 // Editar publicaciones
-router.use(protect, restrictTo('Editar una publicación'));
-router.route('/update').put(updatePublication);
+router.route('/update').put(protect, restrictTo('Editar una publicación'), updatePublication);
 // Crear publicaciones
-router.use(protect, restrictTo('Crear una publicación'));
-router.route('/create').post(createPublication);
+router.route('/create').post(protect, restrictTo('Crear una publicación'), createPublication);
 
-router.use(protect, restrictTo('Borrar una publicación'));
-router.route('/delete/:id').delete(deletePublication);
+//Borrar publicaciones
+router.route('/delete/:id').delete(protect, restrictTo('Borrar una publicación'), deletePublication);
+
+
+router.route('/').get(protect, restrictTo('Consultar publicaciones'), getAllPublications);
 
 module.exports = router; // Se exporta el router con las rutas definidas

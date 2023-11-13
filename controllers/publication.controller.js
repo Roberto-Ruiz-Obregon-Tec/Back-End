@@ -3,8 +3,44 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const mongoose = require('mongoose');
 const Publication = require('../models/publications.model');
-const CommentPublication = require('../models/commentPublication.model');
-const Comment = require('../models/comments.model');
+const CommentPublication = require('../models/commentPublication.model')
+const Comment = require('../models/comments.model')
+const APIFeatures = require(`../utils/apiFeatures`);
+
+exports.getAllPublications = catchAsync(async (req, res, next) => {
+    const publicationFeatures = new APIFeatures(Publication.find(), req.query)
+        .filter()
+        .sort()
+        .limitFields()
+        .paginate();
+    
+    const publications = await publicationFeatures.query;
+    const publicationsComments = await CommentPublication.find().populate('comment');
+
+    // Iterar por las publicaciones para concatenar los comentarios asociados a cada una 
+    for (let i = 0; i < publications.length; i++) {
+        const commentList = [];
+ 
+        // Proceso para asociar los comentarios que estan asociados a la publicacion actual
+
+        const mapComments = publicationsComments.map(pc => {
+            if (publications[i]._id.toString() === pc.publication.toString() && pc.comment.status === 'Aprobado') {
+                commentList.push(pc.comment.comment);
+            }
+        })
+
+       publications[i] = {...publications[i]._doc, "comments" : commentList}
+    }
+
+    // Send the filtered user data as a response
+    res.status(200).json({
+        status: 'success',
+        results: publications.length,
+        data: {
+            publications,
+        },
+    });
+})
 
 exports.updatePublication = catchAsync(async (req, res, next) => {
     const error = new AppError('No existe una publicación con ese ID', 404);

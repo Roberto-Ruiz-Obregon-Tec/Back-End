@@ -20,10 +20,8 @@ router.route('/').get(
     getAllCompanies 
 );
 
-router.use(protect, restrictTo('Dar de baja empresas del catálogo ESR'));
-router.route('/delete/:id').delete(deleteCompany);
+router.route('/delete/:id').delete(protect, restrictTo('Dar de baja empresas del catálogo ESR'), deleteCompany);
 
-router.use(protect, restrictTo('Editar catálogo de empresas ESR'));
-router.route('/update').put(updateCompany);
+router.route('/update').put(protect, restrictTo('Editar catálogo de empresas ESR'), updateCompany);
 
 module.exports = router;
