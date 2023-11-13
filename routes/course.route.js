@@ -70,4 +70,13 @@ router
         deleteCourse
     );
 
+
+router
+    .route('/comment/create')
+    .post(
+        protect,
+        restrictTo('Crear comentarios'),
+        createCourseComment
+    )
+
 module.exports = router;
