@@ -334,5 +334,23 @@ exports.getUsers = catchAsync(async (req, res, next) => {
         status: 'success',
         results: users.length,
         data: users,
+    })
+})
+
+exports.createCourseComment = catchAsync(async (req, res, next) => {
+    const missingError = new AppError('Falta el comentario o la id del curso', 404); // Defino un error en caso de que no se mande el id de la publicacion a eliminar
+
+    const user = req.client._id;
+    const {comment, course} = req.body
+
+    if (comment === undefined || comment === null) return next(missingError)
+    if (course === undefined || course === null) return next(missingError)
+
+    const created_comment = await Comment.create({comment : comment, status : "Pendiente", user: user}); // Creamos el comentario
+    const courseComment = await CommentCourse.create({course: course, comment: created_comment._id}) // Ligamos el comentario al curso
+
+
+    res.status(200).json({
+        status: 'success'
     });
 })

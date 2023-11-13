@@ -10,7 +10,8 @@ const {
     deleteCourse,
     inscriptionByCourse,
     updateRating,
-    getUsers
+    getUsers,
+    createCourseComment
 } = require(`${__dirname}/../controllers/course.controller.js`);
 
 const {
@@ -81,5 +82,14 @@ router
         restrictTo('Eliminar cursos'), 
         deleteCourse
     );
+
+
+router
+    .route('/comment/create')
+    .post(
+        protect,
+        restrictTo('Crear comentarios'),
+        createCourseComment
+    )
 
 module.exports = router;
