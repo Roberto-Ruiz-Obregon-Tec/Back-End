@@ -23,8 +23,7 @@ router.route('/create').post(protect, restrictTo("Crear Cuenta de Banco"), creat
 
 router.route('/update').put(protect, restrictTo("Editar Cuenta de Banco"), updateBankAccount); //Ruta para editar cuentas (restringida)
 
-router.use(protect, restrictTo("Eliminar Cuenta de Banco"))
-router.route('/delete').delete(deleteBankAccount); //Ruta para elimnar cuentas (restringida)
+router.route('/delete').delete(protect, restrictTo("Eliminar Cuenta de Banco"), deleteBankAccount); //Ruta para elimnar cuentas (restringida)
 
 
 
