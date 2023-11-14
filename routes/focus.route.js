@@ -5,7 +5,8 @@ const router = express.Router();
 
 const {
     getFocus,
-    updateFocus
+    updateFocus,
+    deleteFocus
 } = require(`${__dirname}/../controllers/focus.controller.js`);
 const {
     protect,
@@ -15,5 +16,7 @@ const {
 router.route('/').get(protect, restrictTo('Consultar enfoques'), getFocus);
 
 router.route('/update').put(protect, restrictTo('Editar enfoques'), updateFocus);
+
+router.route('/delete/:id').delete(protect, restrictTo('Eliminar enfoques'), deleteFocus);
 
 module.exports = router
