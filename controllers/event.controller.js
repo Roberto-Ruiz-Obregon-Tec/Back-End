@@ -62,6 +62,12 @@ exports.createEvent = catchAsync(async (req, res, next) => {
 exports.getFilteredEvents = async (req, res, next) => {
     try {
         let query = Event.find();
+
+        if (req.query.eventName) {
+            const nameRegex = new RegExp(req.query.eventName, 'i');
+            query = query.find({ name: nameRegex });
+        }
+
         const features = new APIFeatures(query, req.query)
             .filter()
             .sort()
@@ -73,7 +79,7 @@ exports.getFilteredEvents = async (req, res, next) => {
         res.status(200).json({
             status: 'success',
             results: events.length,
-            data: { events },
+            data: { events} ,
         });
     } catch (err) {
         next(err);
