@@ -204,6 +204,11 @@ const services = [
     },
 
     {
+        "_id" : "S051",
+        "name" : "Consultar usuarios inscritos a un curso"
+    },
+
+    {
         "_id": "S052",
         "name": "Eliminar enfoques"
     },
