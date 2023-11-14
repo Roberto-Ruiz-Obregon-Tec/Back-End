@@ -87,18 +87,18 @@ exports.getMyCourses = catchAsync(async (req, res, next) => {
         }
         
         else {
-            const userCoursesFeatures = new APIFeatures(UserCourse.find({},{},{User: user.id}), req.query)
+            const userCoursesFeatures = new APIFeatures(UserCourse.find({},{},{user: user.id}), req.query)
             .filter()
             .sort()
             .limitFields()
             .paginate();
 
             const userCourses = await userCoursesFeatures.query;
-
+            
             courses = []
 
             for(let i = 0; i < userCourses.length; i++) {
-                courseID = userCourses[i].toObject().Course
+                courseID = userCourses[i].toObject().course
                 
                 const features = new APIFeatures(Course.findOne({ _id: courseID}), req.query)
                     .filter()
