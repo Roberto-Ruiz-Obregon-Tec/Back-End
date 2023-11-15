@@ -15,7 +15,6 @@ const {
     restrictTo,
 } = require(`${__dirname}/../controllers/authentication.controller.js`);
 const fileParser = require('../utils/multipartParser');
-const { getFilteredEvents } = require('../controllers/event.controller');
 
 router
     .route('/')
