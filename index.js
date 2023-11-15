@@ -26,7 +26,6 @@ mongoose
         useCreateIndex: true,
         useFindAndModify: true,
         useUnifiedTopology: true,
-        dbName: 'test',
     })
     .then((con) => {
         console.log('Connection to DB successful');
