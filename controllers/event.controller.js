@@ -9,7 +9,6 @@ const mongoose = require('mongoose')
 
 exports.getAllEvents = factory.getAll(Event);
 exports.getEvent = factory.getOne(Event);
-exports.updateEvent = factory.updateOne(Event);
 
 exports.deleteEvent = catchAsync (async (req, res, next) => {
     const missingError = new AppError('No se recibio nignuna id', 404); // Defino un error en caso de que no se mande el id del evento a eliminar
@@ -28,6 +27,7 @@ exports.deleteEvent = catchAsync (async (req, res, next) => {
         status: 'success',
     });
 });
+
 
 exports.createEvent = catchAsync(async (req, res, next) => {
     const error = new AppError('No existe informacion del evento', 404); // Defino un error en caso de que no se mande la informacion
@@ -57,3 +57,49 @@ exports.createEvent = catchAsync(async (req, res, next) => {
         status: 'success',
     });
 });
+
+
+exports.updateEvent = catchAsync(async (req, res, next) => {
+    const missingError = new AppError('No se recibio nignuna id', 404); // Defino un error en caso de que no se mande el id del evento a eliminar
+    const validationError = new AppError('id no valida', 404); // Defino un error en caso de que no se mande el id del evento a eliminar
+
+    if (req.body._id === undefined || req.body._id === null) return next(missingError); // Si no existe id en el body mandamos error
+
+    const {_id, focus, ...restBody} = req.body;
+
+    if (!(mongoose.isValidObjectId(_id))) return next(validationError); // se valida el id
+
+    const preEvent = await Event.findOne({_id: _id}); // Se busca el evento
+
+    const keys = Object.keys(preEvent._doc); // Se obtienen las llaves del body
+
+    // Se actualizan los valores del evento
+    keys.forEach(key => { 
+        preEvent[key] = restBody[key] || preEvent[key];
+    });
+
+    await preEvent.save(); // Se guarda el evento
+    await EventFocus.deleteMany({event: _id}); // Se eliminan los enfoques asociados al evento
+
+    // Si hay focus en el request
+    if (focus !== undefined || focus === null){ 
+        const allFocus = await Focus.find()
+
+        focus.forEach(async (f) => {
+            let currentFocus = allFocus.find(jsonFocus => jsonFocus.name == f); // Busco si algun focus ya esta en al base de datos
+
+            if (currentFocus === undefined || currentFocus === null){ // Si no esta
+                currentFocus = await Focus.create({name: f}); // Creamos el focus
+            }
+
+            await EventFocus.create({focus: currentFocus._id, event: preEvent._id, }) // Relacionamos el evento con el focus
+        });
+    }
+
+    res.status(200).json({
+        status: 'success'
+    });
+
+});
+
+

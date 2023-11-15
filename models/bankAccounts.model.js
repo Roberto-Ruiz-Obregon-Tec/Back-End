@@ -17,7 +17,8 @@ const bankAccountSchema = new mongoose.Schema(
             type: String,
             required: [true, 'Ingresa el nombre del propietario de la cuenta']
         }
-    }, { timestamps: true }
+    }, { timestamps: true, versionKey: false  }
+    
 )
 
 module.exports = mongoose.model('BankAccount', bankAccountSchema)

@@ -9,7 +9,9 @@ const {
     updateCourse,
     deleteCourse,
     inscriptionByCourse,
-    updateRating
+    updateRating,
+    getUsers,
+    createCourseComment
 } = require(`${__dirname}/../controllers/course.controller.js`);
 
 const {
@@ -18,6 +20,17 @@ const {
     // RBAC: Verificar que el servicio esté asociado al rol del usuario
     restrictTo,
 } = require(`${__dirname}/../controllers/authentication.controller.js`);
+
+
+
+router
+    .route('/users/:id')
+    .get(
+        protect,
+        restrictTo('Consultar usuarios inscritos a un curso'),
+        getUsers
+
+    )
 
 //Ruta para updatear Rating
 router
@@ -69,5 +82,14 @@ router
         restrictTo('Eliminar cursos'), 
         deleteCourse
     );
+
+
+router
+    .route('/comment/create')
+    .post(
+        protect,
+        restrictTo('Crear comentarios'),
+        createCourseComment
+    )
 
 module.exports = router;

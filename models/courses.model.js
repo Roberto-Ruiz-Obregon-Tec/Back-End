@@ -80,6 +80,14 @@ const courseSchema =  new mongoose.Schema(
                 validator: (value) => value >= 0,
             },
         },
+
+        remaining: {
+            type: Number,
+            default: 0,
+            validate: {
+                validator: (value) => value >= 0,
+            },
+        },
         
         rating: {
             type: Number,

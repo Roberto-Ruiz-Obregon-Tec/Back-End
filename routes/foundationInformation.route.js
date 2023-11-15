@@ -13,10 +13,8 @@ const {
 } = require(`${__dirname}/../controllers/authentication.controller.js`);
 
 //Protect: only logged user can access information
-router.use(protect);
-router.route('/').get(getAllfoundationInformation);
-router.use(protect, restrictTo("Editar InfoRRO"))
-router.route('/update').put(updatefoundationInformation);
+router.route('/').get(protect, getAllfoundationInformation);
+router.route('/update').put(protect, restrictTo("Editar InfoRRO"), updatefoundationInformation);
 
 
 

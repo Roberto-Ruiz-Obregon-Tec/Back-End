@@ -3,7 +3,6 @@ const router = express.Router();
 const scholarshipController = require('../controllers/scholarships.controller');
 const { protect, restrictTo } = require('../controllers/authentication.controller');
 
-
 const {
     getAllScholarship,
     getScholarship,
@@ -20,7 +19,7 @@ router.route('/')
     )
     .post(
         protect,
-        restrictTo('Admin'), 
+        restrictTo('Crear becas'), 
         createScholarship
     );
 
@@ -32,12 +31,12 @@ router.route('/')
     )
     .patch(
         protect,
-        restrictTo('Admin'), 
+        restrictTo('Editar becas'), 
         updateScholarship
     )
     .delete(
         protect, 
-        restrictTo('Admin'), 
+        restrictTo('Eliminar becas'), 
         deleteScholarship
     );
 
