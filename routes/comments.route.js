@@ -4,6 +4,7 @@ const router = express.Router();
 
 const {
     deleteComment,
+    updateCommentStatus
 } = require(`${__dirname}/../controllers/comments.controller.js`);
 const {
     protect,
@@ -12,5 +13,7 @@ const {
 
 router.use(protect, restrictTo('Eliminar un comentario'));
 router.route('/delete/:id').delete(deleteComment);
+
+router.route('/update-status').post(protect, restrictTo('Aprobar comentarios'), updateCommentStatus);
 
 module.exports = router;
