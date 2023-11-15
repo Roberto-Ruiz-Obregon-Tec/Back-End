@@ -13,14 +13,15 @@ const { FieldPath } = require('firebase-admin/firestore');
 
 exports.getAllComments = catchAsync(async (req, res, next) => {
     const validationError = new AppError('id no valida', 404); // Defino un error en caso de que no se mande el filtro de field correcto
-    const field = req.query.field || null;
+    const field = req.query.field || null; // Filtro por campo
 
-
+    // Obtengo todos los comentarios de los cursos
     const courseComments = await CommentCourse.find({}).populate('course', 'name').populate({
         path: "comment",
         select: "comment",
         match: { status: {$eq: "Pendiente"}}})
-
+    
+    // Obtengo todos los comentarios de las publicaciones
     const publicationComments =  await CommentPublication.find({}).populate('publication', 'title').populate({
         path: "comment",
         select: "comment",
@@ -29,19 +30,22 @@ exports.getAllComments = catchAsync(async (req, res, next) => {
     let data = {}
     let results = 0
 
-
+    // Eliminar comentarios en status no pendientes
     for (let i = courseComments.length - 1 ; i >= 0; i--){
          if (courseComments[i].comment === null){
             courseComments.splice(i, 1)
         }
     }
 
+    // Eliminar comentarios en status no pendientes
     for (let i = publicationComments.length - 1 ; i >= 0; i--){
          if (publicationComments[i].comment === null){
             publicationComments.splice(i, 1)
         }
     }
 
+
+    // Filtros por curso o publicaciones
     if (field === null) {
         data = {'cursos' : courseComments, 'publicaciones' : publicationComments}
         results = data.cursos.length + data.publicaciones.length
