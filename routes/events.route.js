@@ -47,14 +47,6 @@ router
         updateEvent
     );
 
-//Ruta para los eventos por filtro (nombre)
-router
-    .route('/')
-    .get(
-        protect,
-        restrictTo('Consultar eventos'), // Validar servicio asociado al rol
-        getFilteredEvents
-    );
 
 // Delete event
 router.use(protect, restrictTo('Eliminar eventos'))
