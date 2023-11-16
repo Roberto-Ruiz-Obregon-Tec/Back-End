@@ -76,18 +76,7 @@ exports.getAllUsers = catchAsync(async (req, res, next) => {
 
 exports.getMyCourses = catchAsync(async (req, res, next) => {
     // Create an instance of APIFeatures for filtering, sorting, limiting, and pagination
-    const token = req.cookies.jwt;
-
-    jwt.verify(token, process.env.JWT_SECRET, async (err, user) => {
-        
-        if (err) {
-            res.status(500).json({
-                status: 'error: An error occured decoding user (JWT):'
-            });
-        }
-        
-        else {
-            const userCoursesFeatures = new APIFeatures(UserCourse.find({},{},{user: user.id}), req.query)
+    const userCoursesFeatures = new APIFeatures(UserCourse.find({user: req.client._id}), req.query)
             .filter()
             .sort()
             .limitFields()
@@ -124,6 +113,4 @@ exports.getMyCourses = catchAsync(async (req, res, next) => {
                 status: 'success',
                 data: courses,
             });
-        };
-    });
 });
