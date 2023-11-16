@@ -7,7 +7,8 @@ const {
     getAllPublications,
     updatePublication,
     createPublication,
-    deletePublication
+    deletePublication,
+    createPublicationComment
 }  = require(`${__dirname}/../controllers/publication.controller`);
 
 const {
@@ -22,6 +23,8 @@ router.route('/create').post(protect, restrictTo('Crear una publicación'), crea
 
 //Borrar publicaciones
 router.route('/delete/:id').delete(protect, restrictTo('Borrar una publicación'), deletePublication);
+
+router.route('/comment/create').post(protect, restrictTo('Crear comentarios'), createPublicationComment);
 
 
 router.route('/').get(protect, restrictTo('Consultar publicaciones'), getAllPublications);

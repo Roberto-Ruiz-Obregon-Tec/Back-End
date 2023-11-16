@@ -36,9 +36,7 @@ exports.getAllPublications = catchAsync(async (req, res, next) => {
     res.status(200).json({
         status: 'success',
         results: publications.length,
-        data: {
-            publications,
-        },
+        data: publications,
     });
 })
 
@@ -106,3 +104,22 @@ exports.deletePublication = catchAsync( async (req, res, next) => {
         status: 'success'
     });
 });
+
+
+exports.createPublicationComment = catchAsync(async (req, res, next) => {
+    const missingError = new AppError('Falta el comentario o la id de la publicacion', 404); // Defino un error en caso de que no se mande el id de la publicacion a eliminar
+
+    const user = req.client._id;
+    const {comment, publication} = req.body
+
+    if (comment === undefined || comment === null) return next(missingError)
+    if (publication === undefined || publication === null) return next(missingError)
+
+    const created_comment = await Comment.create({comment : comment, status : "Pendiente", user: user}); // Crear el comentario
+    const publicationComment = await CommentPublication.create({publication: publication, comment: created_comment._id}) // Ligar el comentario a la publicacion
+
+
+    res.status(200).json({
+        status: 'success'
+    });
+})

@@ -198,4 +198,23 @@ const services = [
         "name": "Consultar publicaciones"
     },
 
+    {
+        "_id": "S050",
+        "name": "Consultar enfoques"
+    },
+    
+    {
+        "_id" : "S051",
+        "name" : "Consultar usuarios inscritos a un curso"
+    },
+
+    {
+        "_id": "S052",
+        "name": "Eliminar enfoques"
+    },
+
+    {
+        "_id": "S053",
+        "name": "Editar enfoques"
+    },
 ]
