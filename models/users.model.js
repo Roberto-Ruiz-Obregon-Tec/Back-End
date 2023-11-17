@@ -80,6 +80,17 @@ const userSchema = new mongoose.Schema(
         },
         // The profile picture will be stored in firebase and accesed with an URL
 
+        passwordResetExpires: {
+            type: Date,
+            select: false,
+            required: false,
+        },
+        
+        passwordResetToken: {
+            type: String,
+            required: false,
+        },
+
     }, { timestamps: true }
 );
 

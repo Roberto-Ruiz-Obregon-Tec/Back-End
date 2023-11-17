@@ -21,12 +21,10 @@ const forgotPassword = async (Model, email, req, userType) => {
     }
     // 2 generate random token
     const resetToken = user.createPasswordResetToken();
-    //await user.save({ validateBeforeSave: false }); // we save the new resetToken at user
+    await user.save({ validateBeforeSave: false }); // we save the new resetToken at user
 
     // 3 send it back as an email
-    const resetURL = `${req.protocol}://${req.get(
-        'host'
-    )}/api/retrievePassword/${userType}/${resetToken}`;
+    const resetURL = `${req.protocol}://${req.get('host')}/v1/user/resetpassword/${resetToken}`;
 
     // si falla queremos eliminar la token
     try {
@@ -36,7 +34,7 @@ const forgotPassword = async (Model, email, req, userType) => {
         user.passwordResetToken = undefined;
         await user.save({ validateBeforeSave: false });
         throw new AppError(
-            err,
+            'Hemos tenido problemas enviando el correo. Por favor, intenta de nuevo más tarde.',
             500
         );
     }
@@ -58,6 +56,8 @@ const resetPassword = async (token, Model, password, passwordConfirm) => {
         passwordResetToken: hashedToken,
         passwordResetExpires: { $gte: Date.now() },
     });
+
+    console.log(hashedToken)
 
     // 2 if token has not expired and there is user set new password
     if (!user) throw new AppError('Token expirado o correo incorrecto', 400);
