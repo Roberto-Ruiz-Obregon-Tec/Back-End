@@ -16,8 +16,6 @@ const { request } = require('express');
 const { populate } = require('../models/inscriptions.model');
 const { user } = require('firebase-functions/v1/auth');
 
-exports.updateCourse = factory.updateOne(Course);
-
 exports.getAllCourses = catchAsync(async (req, res, next) => {
     const data = [] // Documentos a retornar
     let reqFocus = req.body.focus || [] // Filtros de focus (en caso de no existir, lista vacía)
@@ -31,8 +29,25 @@ exports.getAllCourses = catchAsync(async (req, res, next) => {
     const documents = await features.query; // Cursos que cumplen con los filtros de los params del URL
 
     const courseFocus = await CourseFocus.find().populate("focus"); // Registros de los focus asociados a los cursos
+    const courseComments = await CommentCourse.find().populate("comment").populate([
+        { 
+          path: 'comment', 
+          populate: [{ path: 'user' }] 
+        }
+      ]); // Registros de los comentarios asociados a los cursos
 
     for(let i = 0; i < documents.length; i++) { // Iteramos sobre cada curso
+        // 1. Comentarios asociados
+        let comments = courseComments.filter(comment => comment.course.toString() == documents[i]._id.toString() && comment.comment.status == 'Aprobado');
+        let approvedComments = [];
+
+        comments.forEach( c => { // Agarramos únicamente los comentarios
+            approvedComments.push({"comment": c.comment.comment, "user": c.comment.user.firstName + " " + c.comment.user.lastName});
+        });
+
+        documents[i]._doc = {...documents[i]._doc, "comments": approvedComments}; // Guardamos los comentarios que han sido aprobados
+
+        // 2. Focus asociados
         let filter = (reqFocus.length == 0)?true:false // Para verificar si cumple con los filtros de focus
         const cFocus = courseFocus.filter(focusInfo => focusInfo.course.toString() == documents[i]._id.toString()); // Obtenemos los focus asociados
         
@@ -62,6 +77,22 @@ exports.getCourse = catchAsync(async (req, res, next) => {
         .paginate();
 
     const document = await features.query; // Información del curso especificado en los params del URL
+
+    const courseComments = await CommentCourse.find({course: document[0]._id}, {comment:1}).populate("comment").populate([
+        { 
+          path: 'comment', 
+          populate: [{ path: 'user' }] 
+        }
+      ]); // Comentarios asociados
+    let approvedComments = [];
+
+    courseComments.forEach( c => { // Agarramos únicamente los comentarios
+        if(c.comment.status == 'Aprobado') {
+            approvedComments.push({"comment": c.comment.comment, "user": c.comment.user.firstName + " " + c.comment.user.lastName});
+        }
+    });
+
+    document[0]._doc = {...document[0]._doc, "comments": approvedComments}; // Guardamos los comentarios que han sido aprobados
 
     if(document.length > 0) { // Si hay un documento...
         const cFocus = await CourseFocus.find({course: document[0]._id}, {focus:1}).populate("focus"); // Obtenemos los focus asociados
@@ -145,6 +176,49 @@ exports.inscriptionByCourse = catchAsync(async (req, res, next) => {
         data: {
             documents: inscriptions,
         },
+    });
+});
+
+exports.updateCourse = catchAsync(async (req, res, next) => {
+    const error = new AppError('No existe un curso con ese ID', 404);
+    const {_id, focus, ...courseInfo} = req.body;
+
+    if(!mongoose.isValidObjectId(_id)) return next(error);
+
+    const prevCourse = await Course.findOne({"_id": _id}); // Si no se encuentra el curso
+    if(!prevCourse) return next(error); // Se retorna un mensaje de error
+
+    const keys = Object.keys(prevCourse._doc);
+
+    for(key of keys){ // Iteramos sobre las llaves del objeto
+        prevCourse[key] = courseInfo[key] || prevCourse[key]; // Se actualizan los atributos recibidos
+    }
+
+    await prevCourse.save(); // Se guardan los cambios
+    
+    if(focus) { // Si hay cambios en los focus
+        await CourseFocus.deleteMany({course: _id}); // Borramos las relaciones existentes
+
+        const focusRecords = await Focus.find(); // Obtenemos los focus ya registrados
+
+        for(const focusName of focus) { // Para cada focus del update
+            let match = focusRecords.find(record => record.name == focusName); // Verificamos si está registrado
+
+            if(!match) { // Si no existe, se crea
+                match = await Focus.create({
+                    "name": focusName
+                });
+            }
+
+            await CourseFocus.create({ // Se crea la relación
+                "course": _id,
+                "focus": match._id
+            });
+        }
+    }
+
+    res.status(200).json({
+        status: 'success'
     });
 });
 
@@ -239,3 +313,44 @@ exports.updateRating = catchAsync(async (req, res, next) => {
         },
     });
 });
+
+
+exports.getUsers = catchAsync(async (req, res, next) => {
+    const missingError = new AppError('No se recibio nignuna id', 404); // Defino un error en caso de que no se mande el id del programa a eliminar
+    const validationError = new AppError('id no valida', 404); // Defino un error en caso de que no se mande el id del programa a eliminar
+
+
+    if (req.params.id === undefined || req.params.id === null) return next(missingError); // Si no existe id en los params mandamos error
+
+    const id = req.params.id
+
+    if (!(mongoose.isValidObjectId(id))) return next(validationError); // Si el id no es valido, mandamos error
+
+
+    const users = await UserCourse.find({course: id}, {_id: 0, course: 0}).populate('user', '-password')
+
+
+    res.status(200).json({
+        status: 'success',
+        results: users.length,
+        data: users,
+    })
+})
+
+exports.createCourseComment = catchAsync(async (req, res, next) => {
+    const missingError = new AppError('Falta el comentario o la id del curso', 404); // Defino un error en caso de que no se mande el id de la publicacion a eliminar
+
+    const user = req.client._id;
+    const {comment, course} = req.body
+
+    if (comment === undefined || comment === null) return next(missingError)
+    if (course === undefined || course === null) return next(missingError)
+
+    const created_comment = await Comment.create({comment : comment, status : "Pendiente", user: user}); // Creamos el comentario
+    const courseComment = await CommentCourse.create({course: course, comment: created_comment._id}) // Ligamos el comentario al curso
+
+
+    res.status(200).json({
+        status: 'success'
+    });
+})

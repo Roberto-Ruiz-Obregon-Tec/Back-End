@@ -7,7 +7,7 @@ const { htmlToText } = require('html-to-text');
 const { google } = require('googleapis');
 const OAuth2 = google.auth.OAuth2;
 
-dotenv.config({ path: './config.env' });
+dotenv.config();
 
 /* The above code is creating a class called Email. The constructor is taking in two parameters, user
 and url. The constructor is also setting the to, firstName, url, and from properties. The

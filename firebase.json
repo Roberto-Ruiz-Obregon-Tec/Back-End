@@ -1,7 +1,7 @@
 {
   "functions": [
     {
-      "name": "robertoruizapi",
+      "name": "api",
       "source": ".",
       "codebase": "default",
       "ignore": [
