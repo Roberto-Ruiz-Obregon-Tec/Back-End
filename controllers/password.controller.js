@@ -63,7 +63,6 @@ const resetPassword = async (token, Model, password, passwordConfirm) => {
     if (password !== passwordConfirm) throw new AppError('Las contraseñas no coinciden', 400);
 
     user.password = password;
-    user.passwordConfirm = passwordConfirm;
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
 
