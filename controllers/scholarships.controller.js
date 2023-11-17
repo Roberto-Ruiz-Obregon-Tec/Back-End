@@ -5,6 +5,8 @@ const APIFeatures = require(`../utils/apiFeatures`);
 const mongoose = require('mongoose');
 const scholarships = require('../models/scholarships.model');
 const factory = require('./handlerFactory.controller');
+const Focus = require('../models/focus.model')
+const ScholarshipFocus = require('../models/scholarshipFocus.model')
 
 // read Scholarships
 exports.getScholarships = factory.getAll(scholarships);
