@@ -21,7 +21,7 @@ const forgotPassword = async (Model, email, req, userType) => {
     }
     // 2 generate random token
     const resetToken = user.createPasswordResetToken();
-    await user.save({ validateBeforeSave: false }); // we save the new resetToken at user
+    //await user.save({ validateBeforeSave: false }); // we save the new resetToken at user
 
     // 3 send it back as an email
     const resetURL = `${req.protocol}://${req.get(
@@ -36,7 +36,7 @@ const forgotPassword = async (Model, email, req, userType) => {
         user.passwordResetToken = undefined;
         await user.save({ validateBeforeSave: false });
         throw new AppError(
-            'Hubo un error enviando el correo de confirmación. Intenta de nuevo',
+            err,
             500
         );
     }

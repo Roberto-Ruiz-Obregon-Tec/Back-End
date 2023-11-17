@@ -29,7 +29,7 @@ module.exports = class Email {
      */
     constructor(user, url, course = {}, image = '', message = '') {
         this.to = user.email;
-        this.firstName = user.name.split(' ')[0];
+        this.firstName = user.firstName;
         this.url = url;
         this.course = course;
         this.image = image;
@@ -89,6 +89,9 @@ module.exports = class Email {
                 clientSecret: process.env.OAUTH_CLIENT_SECRET,
                 accessToken: accessToken, //access token variable we defined earlier
                 refreshToken: process.env.OAUTH_REFRESH_TOKEN,
+            },
+            tls: {
+                rejectUnauthorized: false,
             },
         });
     }

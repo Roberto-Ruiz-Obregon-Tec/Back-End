@@ -7,6 +7,7 @@ const UserRol = require('../models/userRol.model');
 const UserFocus = require('../models/userFocus.model');
 const Focus = require('../models/focus.model');
 const Rol = require('../models/rols.model'); 
+const crypto = require('crypto');
 
 exports.getAllUsers = factory.getAll(User);
 exports.getUser = factory.getOne(User, ['topics']);
