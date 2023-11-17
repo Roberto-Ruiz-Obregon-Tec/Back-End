@@ -147,7 +147,7 @@ module.exports = class Email {
     async sendPasswordReset() {
         await this.send(
             'passwordReset',
-            'Recuperar contraseña (válido por solo 10 minutos)'
+            'Recuperar contraseña (válido por solo 24 horas)'
         );
     }
 
