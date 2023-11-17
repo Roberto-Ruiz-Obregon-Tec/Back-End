@@ -57,8 +57,6 @@ const resetPassword = async (token, Model, password, passwordConfirm) => {
         passwordResetExpires: { $gte: Date.now() },
     });
 
-    console.log(hashedToken)
-
     // 2 if token has not expired and there is user set new password
     if (!user) throw new AppError('Token expirado o correo incorrecto', 400);
     // 3 update changedPasswordAt property for the user
