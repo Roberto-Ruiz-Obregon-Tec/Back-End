@@ -36,9 +36,7 @@ exports.getAllPublications = catchAsync(async (req, res, next) => {
     res.status(200).json({
         status: 'success',
         results: publications.length,
-        data: {
-            publications,
-        },
+        data: publications,
     });
 })
 

@@ -32,3 +32,8 @@ exports.getCertification = catchAsync(async (req, res) => {
         data: documents,
     });
 })
+
+exports.createCertification = factory.createOne(certifications);
+exports.updateCertification = factory.updateOne(certifications);
+exports.deleteCertification = factory.deleteOne(certifications);
+
