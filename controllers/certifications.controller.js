@@ -1,6 +1,7 @@
 const certifications = require('../models/certifications.model');
 const catchAsync = require('../utils/catchAsync');
 const APIFeatures = require('../utils/apiFeatures');
+const factory = require('../controllers/handlerFactory.controller');
 
 exports.getAllCertifications = catchAsync(async (req, res) => {
     const partialName = req.query.name; // Get the partial name from the query parameter
