@@ -91,3 +91,26 @@ exports.deleteComment = catchAsync (async (req, res, next) => {
         status: 'success',
     });
 });
+
+exports.updateCommentStatus = catchAsync (async (req, res, next) => {
+    const error = new AppError('No existe un comentario con ese ID', 404);
+    const {_id, status} = req.body;
+
+    if(!mongoose.isValidObjectId(_id)) return next(error);
+
+    const comment = await Comments.findOne({"_id": _id}); // Si no se encuentra el comentario
+    if(!comment) return next(error); // Se retorna un mensaje de error
+
+    if(['Aprobado', 'Pendiente'].includes(status)) {
+        comment.status = status; // Se asigna el status recibido
+        await comment.save();
+    } else if(status == 'Rechazado') { // Al ser rechazado, se borran los registros asociados
+        await CommentCourse.deleteMany({comment: _id});
+        await CommentPublication.deleteMany({comment: _id});
+        await Comments.deleteOne({"_id": _id});
+    }
+
+    res.status(200).json({
+        status: 'success',
+    });
+});
