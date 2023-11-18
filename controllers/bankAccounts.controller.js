@@ -69,3 +69,21 @@ exports.updateBankAccount = catchAsync(async(req, res, next) => {
         status: 'success',
     });
 });
+
+/* A function that allows admins to delete bank Accounts */
+exports.deleteBankAccount = catchAsync (async (req, res, next) => {
+    const bankAccountId = req.body._id;
+
+    /*Deletes the account*/
+    const deletedBankAccount = await bankAccounts.findOneAndDelete({ _id: bankAccountId });
+
+    if(!deletedBankAccount) {
+        return next(new AppError('Cuenta bancaria no encontrada', 404));
+    }
+
+    res.status(200).json({
+        status: 'success', 
+    })
+
+});
+
