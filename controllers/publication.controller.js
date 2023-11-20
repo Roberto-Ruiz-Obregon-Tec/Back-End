@@ -15,17 +15,21 @@ exports.getAllPublications = catchAsync(async (req, res, next) => {
         .paginate();
     
     const publications = await publicationFeatures.query;
-    const publicationsComments = await CommentPublication.find().populate('comment');
+    const publicationsComments = await CommentPublication.find().populate('comment').populate([
+        { 
+          path: 'comment', 
+          populate: [{ path: 'user' }] 
+        }
+      ]);
 
     // Iterar por las publicaciones para concatenar los comentarios asociados a cada una 
     for (let i = 0; i < publications.length; i++) {
         const commentList = [];
- 
         // Proceso para asociar los comentarios que estan asociados a la publicacion actual
 
         const mapComments = publicationsComments.map(pc => {
             if (publications[i]._id.toString() === pc.publication.toString() && pc.comment.status === 'Aprobado') {
-                commentList.push(pc.comment.comment);
+                commentList.push({"comment" : pc.comment.comment, "user": pc.comment.user.firstName + " " + pc.comment.user.lastName});
             }
         })
 
