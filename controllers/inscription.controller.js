@@ -34,16 +34,16 @@ exports.updateInscription = catchAsync(async (req, res, next) => {
     const statusError = new AppError('Debes elegir entre Aprobado o Rechazado', 404);
     const {inscriptionId, status} = req.body
 
-    if (inscriptionId === undefined || status === undefined){
+    if (inscriptionId === undefined || status === undefined){ // Si no hay estatus o id de la inscripcion
         return next(missingError)
     }
 
-    if (status === 'Aprobado'){
+    if (status === 'Aprobado'){ // SI es aprobado, el curso se liga al usuario
         const inscripcion = Inscription.findOne({_id : inscriptionId});
         await UserCourse.create({course: inscripcion.course.id, user : inscripcion.user.id})
         await Inscription.deleteOne({_id : inscriptionId})
 
-    } else if (status === 'Rechazado'){
+    } else if (status === 'Rechazado'){ // Si es rechazado, la inscripcion se borra
         await Inscription.deleteOne({_id : inscriptionId})
     } else {
         return next(statusError)
