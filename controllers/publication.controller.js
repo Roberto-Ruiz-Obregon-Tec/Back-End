@@ -15,17 +15,21 @@ exports.getAllPublications = catchAsync(async (req, res, next) => {
         .paginate();
     
     const publications = await publicationFeatures.query;
-    const publicationsComments = await CommentPublication.find().populate('comment');
+    const publicationsComments = await CommentPublication.find().populate('comment').populate([
+        { 
+          path: 'comment', 
+          populate: [{ path: 'user' }] 
+        }
+      ]);
 
     // Iterar por las publicaciones para concatenar los comentarios asociados a cada una 
     for (let i = 0; i < publications.length; i++) {
         const commentList = [];
- 
         // Proceso para asociar los comentarios que estan asociados a la publicacion actual
 
         const mapComments = publicationsComments.map(pc => {
             if (publications[i]._id.toString() === pc.publication.toString() && pc.comment.status === 'Aprobado') {
-                commentList.push(pc.comment.comment);
+                commentList.push({"comment" : pc.comment.comment, "user": pc.comment.user.firstName + " " + pc.comment.user.lastName});
             }
         })
 
@@ -36,9 +40,46 @@ exports.getAllPublications = catchAsync(async (req, res, next) => {
     res.status(200).json({
         status: 'success',
         results: publications.length,
-        data: {
-            publications,
-        },
+        data: publications,
+    });
+})
+
+exports.getPublication = catchAsync(async (req, res, next) => {
+    const error = new AppError('No hay una publicación asociada a ese id', 404);
+    if(!mongoose.isValidObjectId(req.params.id)) return next(error); // Mandamos un error si no es un id válido
+
+    const publicationFeatures = new APIFeatures(Publication.find({ _id: req.params.id }), req.query)
+        .filter()
+        .sort()
+        .limitFields()
+        .paginate();
+    
+    const publication = await publicationFeatures.query;
+    if(!publication) return next(error); // Mandamos un error si no hay una publicación asociada
+
+    const publicationsComments = await CommentPublication.find({publication: publication[0]._id}, {comment:1}).populate('comment').populate([
+        { 
+          path: 'comment', 
+          populate: [{ path: 'user' }] 
+        }
+    ]);
+
+    let commentList = [];
+
+    // Proceso para asociar los comentarios que estan asociados a la publicacion actual
+    publicationsComments.forEach( p => {
+        if(p.comment.status == 'Aprobado') {
+            commentList.push({"comment": p.comment.comment, "user": p.comment.user.firstName + " " + p.comment.user.lastName});
+        }
+    });
+
+    publication[0]._doc = {...publication[0]._doc, "comments": commentList}; // Guardamos los comentarios que han sido aprobados
+
+    // Send the filtered user data as a response
+    res.status(200).json({
+        status: 'success',
+        results: publication.length,
+        data: publication,
     });
 })
 

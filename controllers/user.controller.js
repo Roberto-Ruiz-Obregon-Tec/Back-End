@@ -12,6 +12,7 @@ const { ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken');
 const Course = require('../models/courses.model');
 const CourseFocus = require('../models/courseFocus.model');
+const crypto = require('crypto');
 
 exports.getAllUsers = factory.getAll(User);
 exports.getUser = factory.getOne(User, ['topics']);

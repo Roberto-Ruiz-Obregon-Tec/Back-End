@@ -5,6 +5,7 @@ const router = express.Router();
 // Importar controladores necesarios
 const {
     getAllPublications,
+    getPublication,
     updatePublication,
     createPublication,
     deletePublication,
@@ -28,5 +29,6 @@ router.route('/comment/create').post(protect, restrictTo('Crear comentarios'), c
 
 
 router.route('/').get(protect, restrictTo('Consultar publicaciones'), getAllPublications);
+router.route('/:id').get(protect, restrictTo('Consultar publicaciones'), getPublication);
 
 module.exports = router; // Se exporta el router con las rutas definidas

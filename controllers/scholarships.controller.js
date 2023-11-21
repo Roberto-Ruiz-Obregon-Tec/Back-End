@@ -3,36 +3,14 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const APIFeatures = require(`../utils/apiFeatures`);
 const mongoose = require('mongoose');
-const Focus = require('../models/focus.model');
 const scholarships = require('../models/scholarships.model');
-const ScholarshipFocus = require('../models/scholarshipFocus.model');
+const factory = require('./handlerFactory.controller');
+const Focus = require('../models/focus.model')
+const ScholarshipFocus = require('../models/scholarshipFocus.model')
 
-// read scholarships
-exports.getScholarships = catchAsync(async (req, res, next) => {
-    let filter = {};
-    let query = scholarships.find(filter).select('name sector description organization');
-    
-    const features = new APIFeatures(query, req.query)
-        .filter()
-        .sort()
-        .paginate();
-    
-    const becas = await features.query;
+// read Scholarships
+exports.getScholarships = factory.getAll(scholarships);
 
-    // Ios only
-    if(req.headers["user-platform"] == 'ios')
-        return res.status(200).json({
-            status: 'success',
-            results: becas.length,
-            data: becas,
-        });
-
-    res.status(200).json({
-        status: 'success',
-        results: becas.length,
-        data: { becas },
-    });
-});
 
 exports.createScholarship = catchAsync(async (req, res, next) => {
     const error = new AppError('No hay datos para crear la beca', 404);
@@ -41,7 +19,7 @@ exports.createScholarship = catchAsync(async (req, res, next) => {
     if(scholarshipInfo === undefined) return next(error); // En caso de no recibir datos para crear una beca, manda un error
 
     const newScholarship = await scholarships.create(scholarshipInfo);
-    
+
     if(focus) { 
         const focusRecords = await Focus.find(); // Obtenemos los focus ya registrados
 
@@ -82,7 +60,7 @@ exports.updateScholarship = catchAsync(async (req, res, next) => {
     }
 
     await prevScholarship.save(); // Se guardan los cambios
-    
+
     if(focus) { // Si hay cambios en los focus
         await ScholarshipFocus.deleteMany({scholarship: _id}); // Borramos las relaciones existentes
 
