@@ -40,7 +40,6 @@ exports.updateInscription = catchAsync(async (req, res, next) => {
 
     if (status === 'Aprobado'){ // SI es aprobado, el curso se liga al usuario
         const inscripcion = await Inscription.findOne({_id : inscriptionId});
-        console.log(inscripcion)
         await UserCourse.create({course: inscripcion.course, user : inscripcion.user})
         await Inscription.deleteOne({_id : inscriptionId})
 
