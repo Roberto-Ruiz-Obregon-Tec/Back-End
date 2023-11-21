@@ -1,6 +1,7 @@
 const factory = require('./handlerFactory.controller');
 const Inscription = require('../models/inscriptions.model');
 const Course = require('../models/courses.model');
+const UserCourse = require('../models/userCourse.model')
 const catchAsync = require('../utils/catchAsync');
 const Email = require('../utils/email');
 const AppError = require('../utils/appError');
@@ -27,6 +28,32 @@ exports.deleteInscription = factory.deleteOne(Inscription);
  *  It first extracts the 'courseId' field, this field is necessary to
  * complete the inscription, alse it checks different areas
 */
+
+exports.updateInscription = catchAsync(async (req, res, next) => {
+    const missingError = new AppError('Falta algun parametro', 404);
+    const statusError = new AppError('Debes elegir entre Aprobado o Rechazado', 404);
+    const {inscriptionId, status} = req.body
+
+    if (inscriptionId === undefined || status === undefined){
+        return next(missingError)
+    }
+
+    if (status === 'Aprobado'){
+        const inscripcion = Inscription.findOne({_id : inscriptionId});
+        await UserCourse.create({course: inscripcion.course.id, user : inscripcion.user.id})
+        await Inscription.deleteOne({_id : inscriptionId})
+
+    } else if (status === 'Rechazado'){
+        await Inscription.deleteOne({_id : inscriptionId})
+    } else {
+        return next(statusError)
+    }
+
+    res.status(200).json({
+        status: 'success'
+    });
+})
+
 exports.inscribeTo = catchAsync(async (req, res, next) => {
     const courseId = req.body.courseId;
     if (!courseId) {
