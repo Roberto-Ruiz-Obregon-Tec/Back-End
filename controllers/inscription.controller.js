@@ -9,7 +9,7 @@ const AppError = require('../utils/appError');
 exports.getAllInscriptions = catchAsync(async (req, res, next) => {
     // Obtenemos las inscripciones ligadas a los usuarios y cursos para que el administrador pueda aprobarlas o rechazarlas 
     const inscriptions = await Inscription.find({status: "Pendiente"}, {status: 0})
-        .populate('user', {firstName: 1, lastName: 1})
+        .populate('user', {firstName: 1, lastName: 1, email: 1})
         .populate('course', {name: 1})
 
     
