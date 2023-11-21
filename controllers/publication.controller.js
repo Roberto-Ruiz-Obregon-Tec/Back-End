@@ -44,6 +44,45 @@ exports.getAllPublications = catchAsync(async (req, res, next) => {
     });
 })
 
+exports.getPublication = catchAsync(async (req, res, next) => {
+    const error = new AppError('No hay una publicación asociada a ese id', 404);
+    if(!mongoose.isValidObjectId(req.params.id)) return next(error); // Mandamos un error si no es un id válido
+
+    const publicationFeatures = new APIFeatures(Publication.find({ _id: req.params.id }), req.query)
+        .filter()
+        .sort()
+        .limitFields()
+        .paginate();
+    
+    const publication = await publicationFeatures.query;
+    if(!publication) return next(error); // Mandamos un error si no hay una publicación asociada
+
+    const publicationsComments = await CommentPublication.find({publication: publication[0]._id}, {comment:1}).populate('comment').populate([
+        { 
+          path: 'comment', 
+          populate: [{ path: 'user' }] 
+        }
+    ]);
+
+    let commentList = [];
+
+    // Proceso para asociar los comentarios que estan asociados a la publicacion actual
+    publicationsComments.forEach( p => {
+        if(p.comment.status == 'Aprobado') {
+            commentList.push({"comment": p.comment.comment, "user": p.comment.user.firstName + " " + p.comment.user.lastName});
+        }
+    });
+
+    publication[0]._doc = {...publication[0]._doc, "comments": commentList}; // Guardamos los comentarios que han sido aprobados
+
+    // Send the filtered user data as a response
+    res.status(200).json({
+        status: 'success',
+        results: publication.length,
+        data: publication,
+    });
+})
+
 exports.updatePublication = catchAsync(async (req, res, next) => {
     const error = new AppError('No existe una publicación con ese ID', 404);
     const {_id, likes, ...publicationInfo} = req.body; // Aislamos los likes para que no puedan editarse
