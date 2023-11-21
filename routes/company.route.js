@@ -4,6 +4,7 @@ const router = express.Router();
 
 const {
     getAllCompanies,
+    createCompany,
     deleteCompany,
     updateCompany,
 } = require(`${__dirname}/../controllers/company.controller.js`);
@@ -19,6 +20,8 @@ router.route('/').get(
     restrictTo('Consultar empresas'), // Validar servicio asociado al rol
     getAllCompanies 
 );
+
+router.route('/create').post(protect, restrictTo('Editar catálogo de empresas ESR'), createCompany);
 
 router.route('/delete/:id').delete(protect, restrictTo('Dar de baja empresas del catálogo ESR'), deleteCompany);
 

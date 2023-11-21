@@ -46,6 +46,54 @@ exports.getAllCompanies = catchAsync(async (req, res, next) => {
     });
 });
 
+exports.createCompany = catchAsync(async (req, res, next) => {
+    const error = new AppError('No hay datos para registrar a la empresa', 404);
+    const {certifications, focus, ...companyInfo} = req.body;
+
+    if(companyInfo === undefined) return next(error); // En caso de no recibir datos para crear la empresa, manda un error
+
+    const newCompany = await company.create(companyInfo);
+    
+    // Si hay focus en el request
+    if (focus){ 
+        const allFocus = await Focus.find()
+
+        focus.forEach(async (f) => {
+            let currentFocus = allFocus.find(jsonFocus => jsonFocus.name == f); // Busco si algun focus ya esta en al base de datos
+
+            if (!currentFocus){ // Si no esta
+                currentFocus = await Focus.create({name: f}); // Creamos el focus
+            }
+
+            await CompanyFocus.create({company: newCompany._id, focus: currentFocus._id, }) // Relacionamos a la empresa con el focus
+        });
+    }
+
+    // Si hay certification en el request
+    if (certifications){ 
+        const allCertifications = await Certification.find()
+
+        certifications.forEach(async (certificationData) => {
+            const { name, description, adquisitionDate } = certificationData;
+    
+            let currentCertifications = allCertifications.find(jsonCertifications => jsonCertifications.name == name);
+    
+            if (!currentCertifications) {
+                currentCertifications = await Certification.create({
+                    name,
+                    description,
+                    adquisitionDate: new Date(adquisitionDate), // Convertir la fecha a objeto Date
+                });
+            }
+    
+            await companyCertification.create({company: newCompany._id, certification: currentCertifications._id });
+        });
+    }
+
+    res.status(200).json({
+        status: 'success'
+    });
+});
 
 exports.deleteCompany = catchAsync (async (req, res, next) => {
     const missingError = new AppError('No se recibio nignuna id', 404); // Defino un error en caso de que no se mande el id del evento a eliminar
