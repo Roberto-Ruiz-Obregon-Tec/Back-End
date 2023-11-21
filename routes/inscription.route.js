@@ -7,6 +7,7 @@ const {
     getAllInscriptions,
     deleteInscription,
     inscribeTo,
+    updateInscription,
     myInscriptions,
 } = require(`${__dirname}/../controllers/inscription.controller.js`);
 const {
@@ -14,12 +15,8 @@ const {
     restrictTo,
 } = require(`${__dirname}/../controllers/authentication.controller.js`);
 
-router.use(protect);
-router.route('/inscribeTo').post(restrictTo('User'), inscribeTo);
-router.route('/myInscriptions').get(restrictTo('User'), myInscriptions);
 
-router.use(restrictTo('Admin'));
 router.route('/').get(getAllInscriptions).post(createInscription);
-router.route('/:id').get(getInscription).delete(deleteInscription);
+router.route('/update').put(protect, restrictTo('Aceptar o rechazar comprobantes de pago'), updateInscription);
 
 module.exports = router;
