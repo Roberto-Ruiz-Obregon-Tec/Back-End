@@ -38,12 +38,14 @@ exports.updateInscription = catchAsync(async (req, res, next) => {
         return next(missingError)
     }
 
+    const inscripcion = await Inscription.findOne({_id : inscriptionId});
+    const course = await Course.findOne({_id : inscripcion.course})
     if (status === 'Aprobado'){ // SI es aprobado, el curso se liga al usuario
-        const inscripcion = await Inscription.findOne({_id : inscriptionId});
         await UserCourse.create({course: inscripcion.course, user : inscripcion.user})
         await Inscription.deleteOne({_id : inscriptionId})
 
     } else if (status === 'Rechazado'){ // Si es rechazado, la inscripcion se borra
+        await Course.findOneAndUpdate({_id : inscripcion.course}, {remaining: course.remaining + 1})
         await Inscription.deleteOne({_id : inscriptionId})
     } else {
         return next(statusError)
