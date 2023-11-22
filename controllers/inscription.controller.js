@@ -42,7 +42,7 @@ exports.createInscription = catchAsync(async (req, res, next) => {
     const userId = req.client.id
     const {courseId, voucher} = req.body;
 
-
+})
 
 exports.updateInscription = catchAsync(async (req, res, next) => {
     const missingError = new AppError('Falta algun parametro', 404);
