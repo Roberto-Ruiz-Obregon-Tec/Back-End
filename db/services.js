@@ -217,4 +217,8 @@ const services = [
         "_id": "S053",
         "name": "Editar enfoques"
     },
+    {
+        "_id": "S054",
+        "name": "Consultar comprobantes de pago"
+    }
 ]

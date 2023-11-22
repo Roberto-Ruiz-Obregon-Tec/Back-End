@@ -7,14 +7,20 @@ const Email = require('../utils/email');
 const AppError = require('../utils/appError');
 
 /*Function that retrieves all course inscriptions */
-exports.getAllInscriptions = factory.getAll(Inscription, [
-    { path: 'user', select: 'email name postalCode' },
-    {
-        path: 'course',
-        select: 'courseName teachers modality description',
-        populate: 'topics',
-    },
-]);
+exports.getAllInscriptions = catchAsync(async (req, res, next) => {
+    // Obtenemos las inscripciones ligadas a los usuarios y cursos para que el administrador pueda aprobarlas o rechazarlas 
+    const inscriptions = await Inscription.find({status: "Pendiente"}, {status: 0})
+        .populate('user', {firstName: 1, lastName: 1, email: 1})
+        .populate('course', {name: 1})
+
+    
+
+    res.status(200).json({
+        status: 'success',
+        results: inscriptions.length,
+        data: inscriptions,
+    });
+})
 
 exports.getInscription = factory.getOne(Inscription, ['user', 'course']);
 

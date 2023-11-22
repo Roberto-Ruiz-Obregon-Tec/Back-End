@@ -16,7 +16,13 @@ const {
 } = require(`${__dirname}/../controllers/authentication.controller.js`);
 
 
-router.route('/').get(getAllInscriptions).post(createInscription);
+
+router.route('/').post(createInscription);
 router.route('/update').put(protect, restrictTo('Aceptar o rechazar comprobantes de pago'), updateInscription);
+
+
+router.route('/').get(protect, restrictTo('Consultar comprobantes de pago'),getAllInscriptions)
+router.route('/:id').get(getInscription).delete(deleteInscription);
+
 
 module.exports = router;
