@@ -41,38 +41,6 @@ exports.createInscription = catchAsync(async (req, res, next) => {
     const userId = req.client.id
     const {courseId, voucher} = req.body;
 
-})
-
-exports.updateInscription = catchAsync(async (req, res, next) => {
-    const missingError = new AppError('Falta algun parametro', 404);
-    const statusError = new AppError('Debes elegir entre Aprobado o Rechazado', 404);
-    const {inscriptionId, status} = req.body
-
-    if (inscriptionId === undefined || status === undefined){ // Si no hay estatus o id de la inscripcion
-        return next(missingError)
-    }
-
-    const inscripcion = await Inscription.findOne({_id : inscriptionId});
-    const course = await Course.findOne({_id : inscripcion.course})
-    if (status === 'Aprobado'){ // SI es aprobado, el curso se liga al usuario
-        await UserCourse.create({course: inscripcion.course, user : inscripcion.user})
-        await Inscription.deleteOne({_id : inscriptionId})
-
-    } else if (status === 'Rechazado'){ // Si es rechazado, la inscripcion se borra
-        await Course.findOneAndUpdate({_id : inscripcion.course}, {remaining: course.remaining + 1})
-        await Inscription.deleteOne({_id : inscriptionId})
-    } else {
-        return next(statusError)
-    }
-
-    res.status(200).json({
-        status: 'success'
-    });
-})
-
-exports.inscribeTo = catchAsync(async (req, res, next) => {
-    const courseId = req.body.courseId;
-
     if (!courseId) {
         return next(missingCourse);
     }
@@ -137,3 +105,31 @@ exports.inscribeTo = catchAsync(async (req, res, next) => {
         status: 'success'
     });
 });
+
+
+exports.updateInscription = catchAsync(async (req, res, next) => {
+    const missingError = new AppError('Falta algun parametro', 404);
+    const statusError = new AppError('Debes elegir entre Aprobado o Rechazado', 404);
+    const {inscriptionId, status} = req.body
+
+    if (inscriptionId === undefined || status === undefined){ // Si no hay estatus o id de la inscripcion
+        return next(missingError)
+    }
+
+    const inscripcion = await Inscription.findOne({_id : inscriptionId});
+    const course = await Course.findOne({_id : inscripcion.course})
+    if (status === 'Aprobado'){ // SI es aprobado, el curso se liga al usuario
+        await UserCourse.create({course: inscripcion.course, user : inscripcion.user})
+        await Inscription.deleteOne({_id : inscriptionId})
+
+    } else if (status === 'Rechazado'){ // Si es rechazado, la inscripcion se borra
+        await Course.findOneAndUpdate({_id : inscripcion.course}, {remaining: course.remaining + 1})
+        await Inscription.deleteOne({_id : inscriptionId})
+    } else {
+        return next(statusError)
+    }
+
+    res.status(200).json({
+        status: 'success'
+    });
+})
