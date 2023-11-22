@@ -48,7 +48,7 @@ exports.getAllCompanies = catchAsync(async (req, res, next) => {
 
         companies[i] = {...companies[i], "focus": companyFocus}; // Agregamos los enfoques correspondientes
 
-        if (!certif_filter && focus_filter) companies.splice(i, 1); // Si no coincide con los filtros, la quitamos de la lista
+        if (!certif_filter || !focus_filter) companies.splice(i, 1); // Si no coincide con los filtros, la quitamos de la lista
     }
 
 
