@@ -24,7 +24,6 @@ exports.getAllInscriptions = catchAsync(async (req, res, next) => {
 
 exports.getInscription = factory.getOne(Inscription, ['user', 'course']);
 
-exports.deleteInscription = factory.deleteOne(Inscription);
 
 /**
  *  A function that request to inscribe a user to a course. 
@@ -136,32 +135,5 @@ exports.inscribeTo = catchAsync(async (req, res, next) => {
 
     res.status(200).json({
         status: 'success'
-    });
-});
-
-/** 
-* It first searches for inscriptions belonging to the user making the request,
-* and then populates referenced fields for each course. 
-* It also sorts the courses by most recent
-*/ 
-exports.myInscriptions = catchAsync(async (req, res, next) => {
-    const inscriptions = await Inscription.find({
-        user: req.user._id,
-    })
-        .populate(['course'])
-        .sort({ updatedAt: -1 }); // most recent courses first
-
-    // Ios only
-    if(req.headers["user-platform"] == 'ios')
-    return res.status(200).json({
-        status: 'success',
-        results: inscriptions.length,
-        data: inscriptions,
-    });
-
-    res.status(200).json({
-        status: 'success',
-        results: inscriptions.length,
-        data: { document: inscriptions },
     });
 });
