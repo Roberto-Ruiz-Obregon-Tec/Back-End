@@ -1,6 +1,7 @@
 const factory = require('./handlerFactory.controller');
 const Inscription = require('../models/inscriptions.model');
 const Course = require('../models/courses.model');
+const UserCourse = require('../models/userCourse.model')
 const catchAsync = require('../utils/catchAsync');
 const Email = require('../utils/email');
 const AppError = require('../utils/appError');
@@ -17,9 +18,6 @@ exports.getAllInscriptions = factory.getAll(Inscription, [
 
 exports.getInscription = factory.getOne(Inscription, ['user', 'course']);
 
-// TODO: CREATE CUSTOM MIDDLEWARE TO TAKE INTO ACCOUNT BUSINESS RULES
-// 1 reduce or add to capacity of course
-exports.createInscription = factory.createOne(Inscription);
 exports.deleteInscription = factory.deleteOne(Inscription);
 
 /**
@@ -27,92 +25,78 @@ exports.deleteInscription = factory.deleteOne(Inscription);
  *  It first extracts the 'courseId' field, this field is necessary to
  * complete the inscription, alse it checks different areas
 */
-exports.inscribeTo = catchAsync(async (req, res, next) => {
-    const courseId = req.body.courseId;
+exports.createInscription = catchAsync(async (req, res, next) => {
+    const missingCourse = new AppError('Error con el curso', 404);
+    const missingVoucher = new AppError('Falta el comprobante de pago', 404);
+    const invalidDate = new AppError('La fecha del curso ya paso', 404);
+    const capacityError = new AppError('Ya no hay capacidad para este curso', 404);
+    const inscriptionError = new AppError('Ya te habias inscrito a este curso antes', 404);
+
+    const userId = req.client.id
+    const {courseId, voucher} = req.body;
+
     if (!courseId) {
-        return next(
-            new AppError(
-                'Envía la clave del curso para poderte inscribir.',
-                400
-            )
-        );
+        return next(missingCourse);
     }
 
     const course = await Course.findById(courseId);
+
     if (!course) {
-        return next(
-            new AppError('No se encontró ningún curso con esta clave.', 404)
-        );
+        return next(missingCourse);
     }
 
-    if (course.cost > 0) {
-        return next(
-            new AppError(
-                'Necesitas pagar por este curso! Inicia tu proceso de pago.',
-                400
-            )
-        );
+    if (course.cost > 0 && !voucher) {
+        return next(missingVoucher);
     }
 
     if (course.startDate < Date.now()) {
-        return next(
-            new AppError(
-                'Este curso ya ha iniciado, no puedes inscribirte.',
-                400
-            )
-        );
+        return next(invalidDate);
     }
 
-    if (course.capacity == 0) {
-        return next(
-            new AppError('Ya no hay espacio disponible en este curso.', 400)
-        );
+    if (Number.parseInt(course.remaining) <= 0) {
+        return next(capacityError);
     }
 
-    // Check if this user has inscribed to this course
-    const inscription = await Inscription.find({
-        course: courseId,
-        user: req.user._id,
-    });
-    if (inscription.length > 0) {
-        return next(new AppError('Ya te has inscrito a este curso.', 400));
+    const inscription = await Inscription.findOne({user: req.client.id, course: courseId});
+   
+    if (inscription) {
+        return next(inscriptionError);
     }
 
     // Update course capacity
-    course.capacity = course.capacity - 1;
-    await course.save();
+    await Course.updateOne({_id : courseId}, {remaining : course.remaining - 1});
 
-    await Inscription.create({
-        course: courseId,
-        user: req.user._id,
-    });
-
-    try {
-        await new Email(
-            req.user,
-            process.env.LANDING_URL,
-            course
-        ).sendInscriptonAlert();
-    } catch (error) {
-        return next(
-            new AppError(
-                'Hemos tenido problemas enviando un correo de confirmación.',
-                500
-            )
-        );
+    if (course.cost > 0){
+        await Inscription.create({user: userId, course: courseId, status: 'Pendiente', voucher: voucher});
+    } else {
+        await UserCourse({user: userId, course: courseId})
     }
+   
+    
+    // try {
+    //     await new Email(
+    //         req.client,
+    //         process.env.LANDING_URL,
+    //         course
+    //     ).sendInscriptonAlert();
+    // } catch (error) {
+    //     return next(
+    //         new AppError(
+    //             'Hemos tenido problemas enviando un correo de confirmación.',
+    //             500
+    //         )
+    //     );
+    // }
 
     // Ios only
     if(req.headers["user-platform"] == 'ios')
         return res.status(200).json({
-            status: 'success',
-            data: course,
+            status: 'success'
         });
 
 
     res.status(200).json({
-        status: 'success',
-        data: { document: course },
+        status: 'success'
     });
 });
 

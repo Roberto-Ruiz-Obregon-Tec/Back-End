@@ -15,11 +15,12 @@ const {
 } = require(`${__dirname}/../controllers/authentication.controller.js`);
 
 router.use(protect);
-router.route('/inscribeTo').post(restrictTo('User'), inscribeTo);
+//router.route('/inscribeTo').post(restrictTo('User'), inscribeTo);
 router.route('/myInscriptions').get(restrictTo('User'), myInscriptions);
-
+router.route('/create').post(protect, restrictTo('Inscribirme a un curso'), createInscription)
 router.use(restrictTo('Admin'));
 router.route('/').get(getAllInscriptions).post(createInscription);
 router.route('/:id').get(getInscription).delete(deleteInscription);
+
 
 module.exports = router;
