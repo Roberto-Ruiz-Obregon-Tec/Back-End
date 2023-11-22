@@ -16,8 +16,10 @@ const {
 } = require(`${__dirname}/../controllers/authentication.controller.js`);
 
 
+router.use(protect);
+router.route('/myInscriptions').get(restrictTo('User'), myInscriptions);
+router.route('/create').post(protect, restrictTo('Inscribirme a un curso'), createInscription)
 
-router.route('/').post(createInscription);
 router.route('/update').put(protect, restrictTo('Aceptar o rechazar comprobantes de pago'), updateInscription);
 
 
