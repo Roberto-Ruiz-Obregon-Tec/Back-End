@@ -7,14 +7,20 @@ const Email = require('../utils/email');
 const AppError = require('../utils/appError');
 
 /*Function that retrieves all course inscriptions */
-exports.getAllInscriptions = factory.getAll(Inscription, [
-    { path: 'user', select: 'email name postalCode' },
-    {
-        path: 'course',
-        select: 'courseName teachers modality description',
-        populate: 'topics',
-    },
-]);
+exports.getAllInscriptions = catchAsync(async (req, res, next) => {
+    // Obtenemos las inscripciones ligadas a los usuarios y cursos para que el administrador pueda aprobarlas o rechazarlas 
+    const inscriptions = await Inscription.find({status: "Pendiente"}, {status: 0})
+        .populate('user', {firstName: 1, lastName: 1, email: 1})
+        .populate('course', {name: 1})
+
+    
+
+    res.status(200).json({
+        status: 'success',
+        results: inscriptions.length,
+        data: inscriptions,
+    });
+})
 
 exports.getInscription = factory.getOne(Inscription, ['user', 'course']);
 
@@ -25,6 +31,7 @@ exports.deleteInscription = factory.deleteOne(Inscription);
  *  It first extracts the 'courseId' field, this field is necessary to
  * complete the inscription, alse it checks different areas
 */
+
 exports.createInscription = catchAsync(async (req, res, next) => {
     const missingCourse = new AppError('Error con el curso', 404);
     const missingVoucher = new AppError('Falta el comprobante de pago', 404);
@@ -34,6 +41,38 @@ exports.createInscription = catchAsync(async (req, res, next) => {
 
     const userId = req.client.id
     const {courseId, voucher} = req.body;
+
+
+
+exports.updateInscription = catchAsync(async (req, res, next) => {
+    const missingError = new AppError('Falta algun parametro', 404);
+    const statusError = new AppError('Debes elegir entre Aprobado o Rechazado', 404);
+    const {inscriptionId, status} = req.body
+
+    if (inscriptionId === undefined || status === undefined){ // Si no hay estatus o id de la inscripcion
+        return next(missingError)
+    }
+
+    const inscripcion = await Inscription.findOne({_id : inscriptionId});
+    const course = await Course.findOne({_id : inscripcion.course})
+    if (status === 'Aprobado'){ // SI es aprobado, el curso se liga al usuario
+        await UserCourse.create({course: inscripcion.course, user : inscripcion.user})
+        await Inscription.deleteOne({_id : inscriptionId})
+
+    } else if (status === 'Rechazado'){ // Si es rechazado, la inscripcion se borra
+        await Course.findOneAndUpdate({_id : inscripcion.course}, {remaining: course.remaining + 1})
+        await Inscription.deleteOne({_id : inscriptionId})
+    } else {
+        return next(statusError)
+    }
+
+    res.status(200).json({
+        status: 'success'
+    });
+})
+
+exports.inscribeTo = catchAsync(async (req, res, next) => {
+    const courseId = req.body.courseId;
 
     if (!courseId) {
         return next(missingCourse);
