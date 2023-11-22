@@ -69,7 +69,7 @@ exports.createInscription = catchAsync(async (req, res, next) => {
     if (course.cost > 0){
         await Inscription.create({user: userId, course: courseId, status: 'Pendiente', voucher: voucher});
     } else {
-        await UserCourse({user: userId, course: courseId})
+        await UserCourse.create({user: userId, course: courseId})
     }
    
     
