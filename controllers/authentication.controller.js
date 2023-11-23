@@ -285,14 +285,14 @@ exports.logout = (req, res, next) => {
 /* Setting the user id to the params id. */
 exports.getMe = catchAsync(async (req, res, next) => {
     // Using this route before getOne lets us leverage the already created endpoint.
-    let userActive = req.rol == 'Administrador' ? req.admin : req.user;
-    req.params.id = userActive._id;
+
+    req.params.id = req.client._id;
     next();
 });
 
 /* Setting the user id to the params id. */
 exports.getMyCourses = catchAsync(async (req, res, next) => {
-    const userId = req.user._id;
+    const userId = req.client._id;
 
     const results = await Inscription.aggregate([
         {
@@ -345,13 +345,15 @@ exports.editMe = catchAsync(async (req, res, next) => {
         );
     }
 
-    let userActive = req.rol == 'Administrador' ? req.admin : req.user;
     // 2 Update document
-    const user = await User.findByIdAndUpdate(userActive._id, req.body, {
+    const user = await User.findByIdAndUpdate(req.client._id, req.body, {
         // queremos que regrese el viejo
         new: true,
         runValidators: true,
     });
+
+    // Remove password from the response
+    user.password = undefined;
 
     // Ios only
     if(req.headers["user-platform"] == 'ios')

@@ -17,12 +17,13 @@ const inscriptionSchema = new mongoose.Schema(
 
         status: {
             type: String,
+            enum: ['Aprobado', 'Rechazado', 'Pendiente'],
             required: [true, 'Campo de status necesario'],
         },
         
         voucher: {
             type: String,
-            required: [true, 'Campo de comprobante necesario'],
+            required: false
         }
     }, { timestamps: true }
 );
