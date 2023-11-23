@@ -58,36 +58,31 @@ exports.createCompany = catchAsync(async (req, res, next) => {
     if (focus){ 
         const allFocus = await Focus.find()
 
-        focus.forEach(async (f) => {
-            let currentFocus = allFocus.find(jsonFocus => jsonFocus.name == f); // Busco si algun focus ya esta en al base de datos
+        for(f of focus) {
+            let currentFocus = allFocus.find(jsonFocus => jsonFocus.name == f); // Busco si algun focus ya esta en la base de datos
 
             if (!currentFocus){ // Si no esta
                 currentFocus = await Focus.create({name: f}); // Creamos el focus
             }
 
             await CompanyFocus.create({company: newCompany._id, focus: currentFocus._id, }) // Relacionamos a la empresa con el focus
-        });
+        }
     }
 
-    // Si hay certification en el request
+    // Si hay certificaciones en el request
     if (certifications){ 
-        const allCertifications = await Certification.find()
-
-        certifications.forEach(async (certificationData) => {
+        // Para cada una se crea un nuevo registro
+        for(var certificationData of certifications) {
             const { name, description, adquisitionDate } = certificationData;
-    
-            let currentCertifications = allCertifications.find(jsonCertifications => jsonCertifications.name == name);
-    
-            if (!currentCertifications) {
-                currentCertifications = await Certification.create({
-                    name,
-                    description,
-                    adquisitionDate: new Date(adquisitionDate), // Convertir la fecha a objeto Date
-                });
-            }
-    
-            await companyCertification.create({company: newCompany._id, certification: currentCertifications._id });
-        });
+
+            const currentCertification = await Certification.create({ // Con la info completa se crea el registro
+                name: name,
+                description: description,
+                adquisitionDate: new Date(adquisitionDate), // Convertir la fecha a objeto Date
+            });
+
+            await companyCertification.create({company: newCompany._id, certification: currentCertification._id }); // La certificación se asocia a la compañía
+        }
     }
 
     res.status(200).json({

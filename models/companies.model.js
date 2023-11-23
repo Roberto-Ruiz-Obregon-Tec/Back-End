@@ -11,6 +11,7 @@ const companySchema = new mongoose.Schema(
         name: {
             type: String,
             required: [true, 'Ingresa el nombre de la empresa'],
+            unique: [true, 'La empresa ingresada ya ha sido registrada'],
         },
         
         description: {
