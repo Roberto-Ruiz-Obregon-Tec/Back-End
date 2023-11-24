@@ -9,6 +9,7 @@ const {
     getAllUsers,
     updateUser,
     deleteUser,
+    getMyCourses
 } = require(`${__dirname}/../controllers/user.controller.js`);
 
 // Importing controllers for authentication and password management
@@ -20,8 +21,7 @@ const {
     restrictTo,
     getMe,
     editMe,
-    deleteMe,
-    getMyCourses,
+    deleteMe
 } = require(`${__dirname}/../controllers/authentication.controller.js`);
 const {
     forgotPasswordUser,
@@ -35,22 +35,22 @@ router.post('/forgotpassword', forgotPasswordUser); // Request to reset a forgot
 router.patch('/resetpassword/:id', resetPasswordUser); // Resetting the user's password
 
 // Middleware to protect routes (requires authentication)
-router.use('/auth', protect);
-router.get('/auth/me', getMe, getUser); // Get user's own profile
-router.get('/auth/mycourses', getMyCourses); // Get user's courses
-router.patch('/auth/updateme', editMe); // Update user's own information
-router.get('/auth/deleteme', deleteMe); // Delete user's own account
-router.get('/auth/logout', logout); // User logout
-
+router.route('/auth/me').get(protect, getMe, getUser); //Get user's own profile
+router.route('/auth/updateme').patch(protect, editMe); // Update user's own information
+router.route('/auth/deleteme').get(protect, deleteMe); // Delete user's own account
+router.route('/auth/logout').get(protect, logout); // User logout
+router.route('/mycourses').get(protect, getMyCourses); // Get user's courses
 
 // Routes for managing user data
 router.route('/').get(protect, restrictTo('Consultar usuarios'), getAllUsers).post(createUser); // Get all users or create a new user
 // - GET: Retrieve a list of all users
 // - POST: Create a new user
 
-router.route('/:id').get(getUser).patch(updateUser).delete(deleteUser); // Get, update, or delete a specific user by ID
+router.route('/:id').get(protect, getUser).patch(updateUser).delete(deleteUser); // Get, update, or delete a specific user by ID
 // - GET: Retrieve a specific user by ID
 // - PATCH: Update a specific user by ID
 // - DELETE: Delete a specific user by ID
+
+
 
 module.exports = router; // Export the router with defined routes
