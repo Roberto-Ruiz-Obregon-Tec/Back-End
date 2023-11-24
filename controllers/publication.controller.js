@@ -23,7 +23,6 @@ exports.getAllPublications = catchAsync(async (req, res, next) => {
         }
       ]);
 
-    const rol = req.rolId
     const user = req.client.id
 
     const userPublications = await UserPublication.find().populate('user')
@@ -94,7 +93,24 @@ exports.getPublication = catchAsync(async (req, res, next) => {
         }
     });
 
-    publication[0]._doc = {...publication[0]._doc, "comments": commentList}; // Guardamos los comentarios que han sido aprobados
+    publication[0] = {...publication[0]._doc, "comments": commentList}; // Guardamos los comentarios que han sido aprobados
+
+    const user = req.client.id
+
+    const userPublications = await UserPublication.find().populate('user')
+
+    if (userPublications.length > 0 ){
+        console.log()
+        const flag = userPublications.find(up => up.user._id.toString() === user.toString() && publication[0]._id.toString() == up.publication.toString());
+
+        if (flag !== undefined && flag != null) {
+            publication[0] = {...publication[0], "liked" : true}
+        } else {
+            publication[0] = {...publication[0], "liked" : false}
+        }
+    } else {
+        publication[0] = {...publication[0], "liked" : false}
+        }
 
     // Send the filtered user data as a response
     res.status(200).json({
