@@ -51,6 +51,13 @@ exports.getAllCompanies = catchAsync(async (req, res, next) => {
         if (!certif_filter || !focus_filter) companies.splice(i, 1); // Si no coincide con los filtros, la quitamos de la lista
     }
 
+    // Ios only
+    if(req.headers["user-platform"] == 'ios')
+    return res.status(200).json({
+        status: 'success',
+        results: companies.length,
+        data: companies,
+    });
 
     res.status(200).json({
         status: 'success',
