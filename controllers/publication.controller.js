@@ -199,10 +199,9 @@ exports.likePublication = catchAsync(async (req, res, next) => {
 
     const toUpdatePublication = await Publication.findOne({_id : publication})
 
-    await Publication.findOneAndUpdate({_id : publication}, {likes : toUpdatePublication.likes + 1})
-
     if (flag === undefined || flag === null) { 
         await UserPublication.create({user: user, publication : publication}) // Agregarla a publicaciones likeadas
+        await Publication.findOneAndUpdate({_id : publication}, {likes : toUpdatePublication.likes + 1})
     } else { // Borrarla de publicaciones likeadas
         await UserPublication.deleteOne({ 
             $and: [
@@ -210,6 +209,7 @@ exports.likePublication = catchAsync(async (req, res, next) => {
                 {publication : publication}
             ]
         })
+        await Publication.findOneAndUpdate({_id : publication}, {likes : toUpdatePublication.likes - 1})
     }
 
     res.status(200).json({
