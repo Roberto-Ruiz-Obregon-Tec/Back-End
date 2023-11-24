@@ -41,7 +41,6 @@ exports.getAllPublications = catchAsync(async (req, res, next) => {
 
        publications[i] = {...publications[i]._doc, "comments" : commentList}
 
-       if (rol === 'R001') {
         if (userPublications.length > 0 ){
             console.log()
             const flag = userPublications.find(up => up.user._id.toString() === user.toString() && publications[i]._id.toString() == up.publication.toString());
@@ -54,9 +53,9 @@ exports.getAllPublications = catchAsync(async (req, res, next) => {
         } else {
             publications[i] = {...publications[i], "liked" : false}
             }
+            
+        
         }
-       
-    }
 
     // Send the filtered user data as a response
     res.status(200).json({
