@@ -3,8 +3,9 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const mongoose = require('mongoose');
 const Publication = require('../models/publications.model');
-const CommentPublication = require('../models/commentPublication.model')
-const Comment = require('../models/comments.model')
+const CommentPublication = require('../models/commentPublication.model');
+const UserPublication = require('../models/userPublication.model');
+const Comment = require('../models/comments.model');
 const APIFeatures = require(`../utils/apiFeatures`);
 
 exports.getAllPublications = catchAsync(async (req, res, next) => {
@@ -22,6 +23,11 @@ exports.getAllPublications = catchAsync(async (req, res, next) => {
         }
       ]);
 
+    const rol = req.rolId
+    const user = req.client.id
+
+    const userPublications = await UserPublication.find().populate('user')
+
     // Iterar por las publicaciones para concatenar los comentarios asociados a cada una 
     for (let i = 0; i < publications.length; i++) {
         const commentList = [];
@@ -34,6 +40,22 @@ exports.getAllPublications = catchAsync(async (req, res, next) => {
         })
 
        publications[i] = {...publications[i]._doc, "comments" : commentList}
+
+       if (rol === 'R001') {
+        if (userPublications.length > 0 ){
+            console.log()
+            const flag = userPublications.find(up => up.user._id.toString() === user.toString() && publications[i]._id.toString() == up.publication.toString());
+
+            if (flag !== undefined && flag != null) {
+                publications[i] = {...publications[i], "liked" : true}
+            } else {
+                publications[i] = {...publications[i], "liked" : false}
+            }
+        } else {
+            publications[i] = {...publications[i], "liked" : false}
+            }
+        }
+       
     }
 
     // Send the filtered user data as a response
@@ -165,4 +187,30 @@ exports.createPublicationComment = catchAsync(async (req, res, next) => {
     res.status(200).json({
         status: 'success'
     });
+})
+
+exports.likePublication = catchAsync(async (req, res, next) => {
+    const user = req.client.id
+    const publication = req.body.publication
+
+    const userPublications = await UserPublication.find().populate('publication').populate('user');
+
+    // Checar si el usuario ya tenia la publicacion como "likeada"
+    const flag = userPublications.find(up => up.user._id.toString() === user.toString() && up.publication._id == publication);
+
+    if (flag === undefined || flag === null) { 
+        await UserPublication.create({user: user, publication : publication}) // Agregarla a publicaciones likeadas
+    } else { // Borrarla de publicaciones likeadas
+        await UserPublication.deleteOne({ 
+            $and: [
+                {user : user},
+                {publication : publication}
+            ]
+        })
+    }
+
+    res.status(200).json({
+        status: 'success'
+    });
+
 })
