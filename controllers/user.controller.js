@@ -77,41 +77,38 @@ exports.getAllUsers = catchAsync(async (req, res, next) => {
 
 exports.getMyCourses = catchAsync(async (req, res, next) => {
     // Create an instance of APIFeatures for filtering, sorting, limiting, and pagination
-    const userCoursesFeatures = new APIFeatures(UserCourse.find({user: req.client._id}), req.query)
+    const userCoursesFeatures = new APIFeatures(UserCourse.find({user: req.client._id},{_id:1, course:1}).populate("course"), req.query)
             .filter()
             .sort()
             .limitFields()
             .paginate();
 
-            const userCourses = await userCoursesFeatures.query;
+    const userCourses = await userCoursesFeatures.query;
+    
+    const courseFocusFeatures = new APIFeatures(CourseFocus.find().populate("focus"), req.query)
+            .filter()
+            .sort()
+            .limitFields()
+            .paginate();
+
+    const courseFocus = await courseFocusFeatures.query;
+
+    for(let i = 0; i < userCourses.length; i++) {
+
+        let focusList = []
+
+        courseFocus.map(f => {
             
-            courses = []
-
-            for(let i = 0; i < userCourses.length; i++) {
-                courseID = userCourses[i].toObject().course
-                
-                const features = new APIFeatures(Course.findOne({ _id: courseID}), req.query)
-                    .filter()
-                    .sort()
-                    .limitFields()
-                    .paginate();
-
-                const document = await features.query; // Información del curso especificado en los params del URL
-
-                if(document.length > 0) { // Si hay un documento...
-                    const cFocus = await CourseFocus.find({course: document[0]._id}, {focus:1}).populate("focus"); // Obtenemos los focus asociados
-
-                    let focus = []
-                    if(cFocus.length > 0) cFocus.forEach( f => { focus.push(f.focus.name) }) // Si existen focus asociados, almacenamos su nombre
-
-                    document[0] = {...document[0]._doc, "focus": focus}
-                }
-                
-                courses.push(document[0])
+            if (f.course.toString() === userCourses[i]._id.toString()) { // Agregamos el enfoque al usuario
+                focusList.push(f.focus.name);
             }
+        });
+        
+        userCourses[i] = { ...userCourses[i]._doc, "focus": focusList}; // Agregamos la lsita de focus        
+    }
 
-            res.status(200).json({
-                status: 'success',
-                data: courses,
-            });
+    res.status(200).json({
+        status: 'success',
+        data: userCourses,
+    });
 });
