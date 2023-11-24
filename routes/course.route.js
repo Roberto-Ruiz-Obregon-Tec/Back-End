@@ -36,8 +36,8 @@ router
 router
     .route('/updateRating')
     .put(
-        protect,
-        restrictTo('Consultar cursos'),
+        //protect,
+        //restrictTo('Consultar cursos'),
         updateRating
     );
 
