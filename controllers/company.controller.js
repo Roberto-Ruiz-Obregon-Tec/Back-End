@@ -10,20 +10,33 @@ const mongoose = require('mongoose')
 
 exports.getAllCompanies = catchAsync(async (req, res, next) => {
     const req_certifications = req.body.certifications || []; // Filtros por certificación
+    const req_focus = req.body.focus || []; // Filtros por enfoque
 
     const companiesFeatures = new APIFeatures(company.find({}), req.query);
     const companies = await companiesFeatures.query;
 
     const certifications = await companyCertification.find().populate('certification'); // Obtenemos las certificaciones registradas
+    const focus = await CompanyFocus.find().populate('focus'); // Obtenemos los enfoques registrados
 
     for(let i = companies.length - 1; i >= 0; i--){
         const companyCertifications = [];
-        let filter = (req_certifications.length === 0)? true:false; // Para verificar si cumple con los filtros
+        const companyFocus = [];
+
+        // Para verificar si cumple con los filtros
+        let certif_filter = (req_certifications.length === 0)? true:false; 
+        let focus_filter = (req_focus.length === 0)? true:false; 
 
         const mapCertifications = certifications.map((c) => { // Agregamos al documento de empresa las certificaciones que tiene
             if(c.company.toString() == companies[i]._id.toString()) {
                 companyCertifications.push(c.certification.name)
-                filter = (req_certifications.includes(c.certification.name))? true : filter;
+                certif_filter = (req_certifications.includes(c.certification.name))? true : certif_filter;
+            }
+        })
+
+        const mapFocus = focus.map((f) => { // Agregamos al documento de empresa los enfoques que tiene
+            if(f.company.toString() == companies[i]._id.toString()) {
+                companyFocus.push(f.focus.name)
+                focus_filter = (req_focus.includes(f.focus.name))? true : focus_filter;
             }
         })
 
@@ -33,7 +46,9 @@ exports.getAllCompanies = catchAsync(async (req, res, next) => {
             companies[i] = {...companies[i]._doc, "certifications": companyCertifications};
         }
 
-        if (!filter) companies.splice(i, 1); // Si no coincide con el filtro, la quitamos de la lista
+        companies[i] = {...companies[i], "focus": companyFocus}; // Agregamos los enfoques correspondientes
+
+        if (!certif_filter || !focus_filter) companies.splice(i, 1); // Si no coincide con los filtros, la quitamos de la lista
     }
 
 
