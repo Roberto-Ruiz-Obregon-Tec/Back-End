@@ -197,8 +197,11 @@ exports.likePublication = catchAsync(async (req, res, next) => {
     // Checar si el usuario ya tenia la publicacion como "likeada"
     const flag = userPublications.find(up => up.user._id.toString() === user.toString() && up.publication._id == publication);
 
+    const toUpdatePublication = await Publication.findOne({_id : publication})
+
     if (flag === undefined || flag === null) { 
         await UserPublication.create({user: user, publication : publication}) // Agregarla a publicaciones likeadas
+        await Publication.findOneAndUpdate({_id : publication}, {likes : toUpdatePublication.likes + 1})
     } else { // Borrarla de publicaciones likeadas
         await UserPublication.deleteOne({ 
             $and: [
@@ -206,6 +209,7 @@ exports.likePublication = catchAsync(async (req, res, next) => {
                 {publication : publication}
             ]
         })
+        await Publication.findOneAndUpdate({_id : publication}, {likes : toUpdatePublication.likes - 1})
     }
 
     res.status(200).json({
