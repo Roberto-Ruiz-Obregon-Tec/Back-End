@@ -104,7 +104,7 @@ exports.getMyCourses = catchAsync(async (req, res, next) => {
             }
         });
         
-        userCourses[i] = { ...userCourses[i]._doc, "focus": focusList}; // Agregamos la lsita de focus        
+        userCourses[i] = {  ...userCourses[i]._doc.course._doc, "focus": focusList}; // Agregamos la lsita de focus        
     }
 
     res.status(200).json({
