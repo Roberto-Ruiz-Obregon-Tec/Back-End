@@ -16,6 +16,15 @@ const bankAccountSchema = new mongoose.Schema(
         propietary: {
             type: String,
             required: [true, 'Ingresa el nombre del propietario de la cuenta']
+        },
+
+        bankImage: {
+            type: String,
+            required: [true, 'Ingresa la imagen del banco'],
+            validate: {
+                validator: (value) =>
+                    /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(value),
+            },
         }
     }, { timestamps: true, versionKey: false  }
     
