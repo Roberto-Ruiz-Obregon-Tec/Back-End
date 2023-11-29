@@ -8,8 +8,42 @@ const factory = require('./handlerFactory.controller');
 const Focus = require('../models/focus.model')
 const ScholarshipFocus = require('../models/scholarshipFocus.model')
 
-// read Scholarships
-exports.getScholarships = factory.getAll(scholarships);
+exports.getScholarships = catchAsync(async (req, res, next) => {
+    const data = [] // Documentos a retornar
+    let reqFocus = req.body.focus || [] // Filtros de focus (en caso de no existir, lista vacía)
+    
+    const features = new APIFeatures(scholarships.find(), req.query)
+        .filter()
+        .sort()
+        .limitFields()
+        .paginate();
+
+    const documents = await features.query; // Becas que cumplen con los filtros de los params del URL
+
+    const scholarshipFocus = await ScholarshipFocus.find().populate("focus"); // Registros de los focus asociados a las becas
+
+    for(let i = 0; i < documents.length; i++) { // Iteramos sobre cada beca
+        // Focus asociados
+        let filter = (reqFocus.length == 0)?true:false // Para verificar si cumple con los filtros de focus
+        const sFocus = scholarshipFocus.filter(focusInfo => focusInfo.scholarship.toString() == documents[i]._id.toString()); // Obtenemos los focus asociados
+        
+        let focus = []
+        if(sFocus.length > 0) { // Si existen focus asociados entonces...
+            sFocus.forEach( f => { 
+                focus.push(f.focus.name) // Almacenamos el nombre
+                filter = (reqFocus.includes(f.focus.name))?true:filter // Seguimos verificando si hay coincidencias de filtros
+            })
+        }
+
+        if(filter) data.push({...documents[i]._doc, "focus": focus}) // Si coincide con algún focus solicitado se almacena
+    }
+
+    res.status(200).json({
+        status: 'success',
+        results: data.length,
+        data: {"documents": data},
+    });
+});
 
 
 exports.createScholarship = catchAsync(async (req, res, next) => {

@@ -7,8 +7,37 @@ const APIFeatures = require('../utils/apiFeatures');
 const AppError = require('../utils/appError');
 const mongoose = require('mongoose')
 
-exports.getAllEvents = factory.getAll(Event);
-exports.getEvent = factory.getOne(Event);
+exports.updateEvent = factory.updateOne(Event);
+
+exports.getAllEvents = catchAsync(async (req, res, next) => { //Get all events
+    const PartialName = req.query.name; // Get the partial name from the query param
+
+    const regexPattern = new RegExp(PartialName, 'i'); // Create a regex to search for the partial name
+
+    const documents = await Event.find({ eventName: regexPattern }); // Find all documents that match the regex
+
+    res.status(200).json({
+        status: 'success',
+        results: documents.length,
+        data: documents,
+        
+    });
+});
+
+exports.getEvent = catchAsync(async (req, res, next) => { // Get one event
+    const features = new APIFeatures(Event.findOne({_id: req.params.id}), req.query)
+        .filter()
+        .sort()
+        .limitFields()
+        .paginate();
+
+    const document = await features.query;
+
+    res.status(200).json({
+        status: 'success',
+        data: document,
+    });
+});
 
 exports.deleteEvent = catchAsync (async (req, res, next) => {
     const missingError = new AppError('No se recibio nignuna id', 404); // Defino un error en caso de que no se mande el id del evento a eliminar
@@ -101,5 +130,4 @@ exports.updateEvent = catchAsync(async (req, res, next) => {
     });
 
 });
-
 

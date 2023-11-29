@@ -40,12 +40,15 @@ router
         getEvent
     );
 
-router.route(protect, restrictTo('Editar eventos'), '/update')
+router.route('/update')
     .put(
+        protect, 
+        restrictTo('Editar eventos'),
         fileParser,
         filesController.formatEventImage,
         updateEvent
     );
+
 
 // Delete event
 router.route('/delete/:id').delete(protect, restrictTo('Eliminar eventos'), deleteEvent);

@@ -5,8 +5,13 @@ const factory = require('./handlerFactory.controller');
 const User = require('../models/users.model');
 const UserRol = require('../models/userRol.model');
 const UserFocus = require('../models/userFocus.model');
-const Focus = require('../models/focus.model');
-const Rol = require('../models/rols.model'); 
+const Focus = require('../models/focus.model'); // Reference to the Focus model
+const Rol = require('../models/rols.model'); // Reference to the Rol model
+const UserCourse = require('../models/userCourse.model');
+const { ObjectId } = require('mongodb');
+const jwt = require('jsonwebtoken');
+const Course = require('../models/courses.model');
+const CourseFocus = require('../models/courseFocus.model');
 const crypto = require('crypto');
 
 exports.getAllUsers = factory.getAll(User);
@@ -67,5 +72,43 @@ exports.getAllUsers = catchAsync(async (req, res, next) => {
         data: {
             users,
         },
+    });
+});
+
+exports.getMyCourses = catchAsync(async (req, res, next) => {
+    // Create an instance of APIFeatures for filtering, sorting, limiting, and pagination
+    const userCoursesFeatures = new APIFeatures(UserCourse.find({user: req.client._id},{_id:1, course:1}).populate("course"), req.query)
+            .filter()
+            .sort()
+            .limitFields()
+            .paginate();
+
+    const userCourses = await userCoursesFeatures.query;
+    
+    const courseFocusFeatures = new APIFeatures(CourseFocus.find().populate("focus"), req.query)
+            .filter()
+            .sort()
+            .limitFields()
+            .paginate();
+
+    const courseFocus = await courseFocusFeatures.query;
+
+    for(let i = 0; i < userCourses.length; i++) {
+
+        let focusList = []
+
+        courseFocus.map(f => {
+            
+            if (f.course.toString() === userCourses[i]._id.toString()) { // Agregamos el enfoque al usuario
+                focusList.push(f.focus.name);
+            }
+        });
+        
+        userCourses[i] = {  ...userCourses[i]._doc.course._doc, "focus": focusList}; // Agregamos la lsita de focus        
+    }
+
+    res.status(200).json({
+        status: 'success',
+        data: userCourses,
     });
 });

@@ -217,4 +217,18 @@ const services = [
         "_id": "S053",
         "name": "Editar enfoques"
     },
+    {
+        "_id": "S054",
+        "name": "Consultar comprobantes de pago"
+    },
+
+    {
+        "_id": "S055",
+        "name": "Inscribirme a un curso"
+    },
+
+    {
+        "_id": "S056",
+        "name": "Dar me gusta"
+    }
 ]
