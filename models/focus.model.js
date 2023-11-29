@@ -5,7 +5,8 @@ const focusSchema = new mongoose.Schema(
     {
         name: {
             type: String,
-            required: [true, 'Ingresa el nombre del enfoque']
+            required: [true, 'Ingresa el nombre del enfoque'],
+            unique: [true, 'El focus ingresado ya ha sido registrado'],
         }
     }, {timestamps: true}
 );

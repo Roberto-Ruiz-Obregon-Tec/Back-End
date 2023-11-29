@@ -34,7 +34,7 @@ exports.updateFocus = catchAsync(async (req, res, next) => {
 
     if(name) { // En caso de haber recibido un nombre
         prevFocus.name = name; // Se actualiza
-        prevFocus.save(); // Se guardan los cambios
+        await prevFocus.save(); // Se guardan los cambios
     }
 
     res.status(200).json({

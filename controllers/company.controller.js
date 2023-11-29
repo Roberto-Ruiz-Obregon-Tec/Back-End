@@ -68,6 +68,49 @@ exports.getAllCompanies = catchAsync(async (req, res, next) => {
     });
 });
 
+exports.createCompany = catchAsync(async (req, res, next) => {
+    const error = new AppError('No hay datos para registrar a la empresa', 404);
+    const {certifications, focus, ...companyInfo} = req.body;
+
+    if(companyInfo === undefined) return next(error); // En caso de no recibir datos para crear la empresa, manda un error
+
+    const newCompany = await company.create(companyInfo);
+    
+    // Si hay focus en el request
+    if (focus){ 
+        const allFocus = await Focus.find()
+
+        for(f of focus) {
+            let currentFocus = allFocus.find(jsonFocus => jsonFocus.name == f); // Busco si algun focus ya esta en la base de datos
+
+            if (!currentFocus){ // Si no esta
+                currentFocus = await Focus.create({name: f}); // Creamos el focus
+            }
+
+            await CompanyFocus.create({company: newCompany._id, focus: currentFocus._id, }) // Relacionamos a la empresa con el focus
+        }
+    }
+
+    // Si hay certificaciones en el request
+    if (certifications){ 
+        // Para cada una se crea un nuevo registro
+        for(var certificationData of certifications) {
+            const { name, description, adquisitionDate } = certificationData;
+
+            const currentCertification = await Certification.create({ // Con la info completa se crea el registro
+                name: name,
+                description: description,
+                adquisitionDate: new Date(adquisitionDate), // Convertir la fecha a objeto Date
+            });
+
+            await companyCertification.create({company: newCompany._id, certification: currentCertification._id }); // La certificación se asocia a la compañía
+        }
+    }
+
+    res.status(200).json({
+        status: 'success'
+    });
+});
 
 exports.deleteCompany = catchAsync (async (req, res, next) => {
     const missingError = new AppError('No se recibio nignuna id', 404); // Defino un error en caso de que no se mande el id del evento a eliminar

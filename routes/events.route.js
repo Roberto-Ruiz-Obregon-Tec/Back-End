@@ -49,6 +49,7 @@ router.route('/update')
         updateEvent
     );
 
+
 // Delete event
 router.route('/delete/:id').delete(protect, restrictTo('Eliminar eventos'), deleteEvent);
 
