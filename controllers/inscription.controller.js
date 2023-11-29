@@ -69,6 +69,12 @@ exports.createInscription = catchAsync(async (req, res, next) => {
         return next(inscriptionError);
     }
 
+    const userCourse = await UserCourse.findOne({user: req.client.id, course: courseId});
+   
+    if (userCourse) {
+        return next(inscriptionError);
+    }
+
     // Update course capacity
     await Course.updateOne({_id : courseId}, {remaining : course.remaining - 1});
 

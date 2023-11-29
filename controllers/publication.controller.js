@@ -8,6 +8,16 @@ const UserPublication = require('../models/userPublication.model');
 const Comment = require('../models/comments.model');
 const APIFeatures = require(`../utils/apiFeatures`);
 
+function compareByDate(a, b) {
+    if (a.createdAt > b.createdAt) {
+        return -1;
+    }
+    if (b.createdAt > a.createdAt) {
+        return 1;
+    }
+    return 0;
+  }
+
 exports.getAllPublications = catchAsync(async (req, res, next) => {
     const publicationFeatures = new APIFeatures(Publication.find(), req.query)
         .filter()
@@ -16,7 +26,7 @@ exports.getAllPublications = catchAsync(async (req, res, next) => {
         .paginate();
     
     const publications = await publicationFeatures.query;
-    const publicationsComments = await CommentPublication.find().populate('comment').populate([
+    const publicationsComments = await CommentPublication.find().populate("comment").populate([
         { 
           path: 'comment', 
           populate: [{ path: 'user' }] 
@@ -34,14 +44,14 @@ exports.getAllPublications = catchAsync(async (req, res, next) => {
 
         const mapComments = publicationsComments.map(pc => {
             if (publications[i]._id.toString() === pc.publication.toString() && pc.comment.status === 'Aprobado') {
-                commentList.push({"comment" : pc.comment.comment, "user": pc.comment.user.firstName + " " + pc.comment.user.lastName});
+                commentList.push({"comment" : pc.comment.comment, "user": pc.comment.user.firstName + " " + pc.comment.user.lastName, "createdAt" :  pc.comment.createdAt});
             }
         })
-
-       publications[i] = {...publications[i]._doc, "comments" : commentList}
+        
+       const sortedCommentList = commentList.sort(compareByDate)
+       publications[i] = {...publications[i]._doc, "comments" : sortedCommentList}
 
         if (userPublications.length > 0 ){
-            console.log()
             const flag = userPublications.find(up => up.user._id.toString() === user.toString() && publications[i]._id.toString() == up.publication.toString());
 
             if (flag !== undefined && flag != null) {
@@ -100,7 +110,6 @@ exports.getPublication = catchAsync(async (req, res, next) => {
     const userPublications = await UserPublication.find().populate('user')
 
     if (userPublications.length > 0 ){
-        console.log()
         const flag = userPublications.find(up => up.user._id.toString() === user.toString() && publication[0]._id.toString() == up.publication.toString());
 
         if (flag !== undefined && flag != null) {
