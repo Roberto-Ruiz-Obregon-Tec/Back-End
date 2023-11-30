@@ -16,6 +16,16 @@ const { request } = require('express');
 const { populate } = require('../models/inscriptions.model');
 const { user } = require('firebase-functions/v1/auth');
 
+function compareByDate(a, b) {
+    if (a.createdAt > b.createdAt) {
+        return -1;
+    }
+    if (b.createdAt > a.createdAt) {
+        return 1;
+    }
+    return 0;
+}
+
 exports.getAllCourses = catchAsync(async (req, res, next) => {
     const data = [] // Documentos a retornar
     let reqFocus = req.body.focus || [] // Filtros de focus (en caso de no existir, lista vacía)
@@ -42,10 +52,12 @@ exports.getAllCourses = catchAsync(async (req, res, next) => {
         let approvedComments = [];
 
         comments.forEach( c => { // Agarramos únicamente los comentarios
-            approvedComments.push({"comment": c.comment.comment, "user": c.comment.user.firstName + " " + c.comment.user.lastName});
+            approvedComments.push({"comment": c.comment.comment, "user": c.comment.user.firstName + " " + c.comment.user.lastName, "createdAt" :  c.comment.createdAt});
         });
+        
+        const sortedCommentList = approvedComments.sort(compareByDate)
 
-        documents[i]._doc = {...documents[i]._doc, "comments": approvedComments}; // Guardamos los comentarios que han sido aprobados
+        documents[i]._doc = {...documents[i]._doc, "comments": sortedCommentList}; // Guardamos los comentarios que han sido aprobados
 
         // 2. Focus asociados
         let filter = (reqFocus.length == 0)?true:false // Para verificar si cumple con los filtros de focus
