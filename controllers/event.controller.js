@@ -19,7 +19,7 @@ exports.getAllEvents = catchAsync(async (req, res, next) => { //Get all events
     res.status(200).json({
         status: 'success',
         results: documents.length,
-        data: documents,
+        data: {"documents" : documents},
         
     });
 });
@@ -35,7 +35,7 @@ exports.getEvent = catchAsync(async (req, res, next) => { // Get one event
 
     res.status(200).json({
         status: 'success',
-        data: document,
+        data: {"documents" : documents},
     });
 });
 
