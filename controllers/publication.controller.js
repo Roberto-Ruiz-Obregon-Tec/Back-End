@@ -16,7 +16,7 @@ function compareByDate(a, b) {
         return 1;
     }
     return 0;
-  }
+}
 
 exports.getAllPublications = catchAsync(async (req, res, next) => {
     const publicationFeatures = new APIFeatures(Publication.find(), req.query)
