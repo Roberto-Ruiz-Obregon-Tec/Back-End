@@ -27,10 +27,10 @@ exports.getAllBankAccounts = catchAsync(async (req, res, next) => {
 
 /* A function that allows admins to create new Bank Accounts */
 exports.createBankAccount = catchAsync(async (req, res, next) => {
-    const { bank, accountNumber, propietary } = req.body;
+    const { bank, accountNumber, propietary, bankImage } = req.body;
 
     // Validate data entry
-    if (!bank || !accountNumber || !propietary) {
+    if (!bank || !accountNumber || !propietary || !bankImage) {
         return next(new AppError('Todos los campos son obligatorios.', 400));
     }
 
@@ -39,6 +39,7 @@ exports.createBankAccount = catchAsync(async (req, res, next) => {
         bank,
         accountNumber,
         propietary,
+        bankImage
     });
 
     res.status(200).json({
