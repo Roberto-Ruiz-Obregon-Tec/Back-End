@@ -21,7 +21,7 @@ router.use(protect);
 router
     .route('/startPayment')
     .post(
-        restrictTo('User'),
+        restrictTo('Inscribirme a un curso'),
         fileParser,
         filesController.formatPaymentImage,
         startPayment

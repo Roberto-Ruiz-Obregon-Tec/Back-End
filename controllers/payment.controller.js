@@ -25,6 +25,7 @@ exports.createPayment = factory.createOne(Payment);
  */
 exports.startPayment = catchAsync(async (req, res, next) => {
     const course = await Course.findById(req.body.courseId);
+    console.log(course)
     if (!course) {
         return next(
             new AppError('No se encontró ningún curso con esta clave.', 404)
@@ -58,7 +59,7 @@ exports.startPayment = catchAsync(async (req, res, next) => {
     // Check if this user has started payment process to this course
     const existingPayment = await Payment.find({
         course: course._id,
-        user: req.user._id,
+        user: req.client._id,
         // if there is a payment process pending or the user has been accepted they should not be able to start a new process
         status: {
             $in: ['Pendiente', 'Aceptado'],
@@ -73,27 +74,29 @@ exports.startPayment = catchAsync(async (req, res, next) => {
         );
     }
 
-    // Update course capacity
-    course.capacity = course.capacity - 1;
-    await course.save();
     const payment = await Payment.create({
         course: course._id,
-        user: req.user._id,
+        user: req.client._id,
         billImageURL: req.body.billImageURL,
     });
 
-    // Send payment notification email
+
+    // Update course capacity
+    course.capacity = course.capacity - 1;
+    await course.save();
     payment.populate(['user', 'course']);
-    try {
-        await new Email(req.user, '', course).sendPaymentStartedAlert();
-    } catch (error) {
-        return next(
-            new AppError(
-                'Hemos tenido problemas enviando un correo de confirmación.',
-                500
-            )
-        );
-    }
+    // Send payment notification email
+    // TODO: setup email again
+    // try {
+    //     await new Email(req.client, '', course).sendPaymentStartedAlert();
+    // } catch (error) {
+    //     return next(
+    //         new AppError(
+    //             'Hemos tenido problemas enviando un correo de confirmación.',
+    //             500
+    //         )
+    //     );
+    // }
 
     // Ios only
     if(req.headers["user-platform"] == 'ios')

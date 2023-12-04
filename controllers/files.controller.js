@@ -5,8 +5,8 @@ const AppError = require('../utils/appError');
 const { format } = require('util');
 
 const firebase = require('../config/db'); // reference to our db
-require('firebase/storage'); // must be required for this to work
-const storage = firebase.storage().ref(); // create a reference to storage
+const { getStorage, ref, getDownloadURL, uploadBytesResumable } = require('firebase/storage'); // must be required for this to work
+const storage = getStorage();
 global.XMLHttpRequest = require('xhr2');
 const limits = {
 files: 1, // allow only 1 file per request
@@ -35,14 +35,15 @@ const uploadImage = async (file, resource) => {
     // Format the filename
     const timestamp = Date.now();
     const name = originalname.split('.')[0];
-    const type = originalname.split('.')[1];
-    const fileName = `${name}_${resource}_${timestamp}.${type}`;
+    //const type = originalname.split('.')[1];
+    //const fileName = `${name}_${resource}_${timestamp}.${type}`;
+    const fileName = `payment_receipts/${name}_${resource}_${timestamp}.jpeg`;
     // Step 1. Create reference for file name in cloud storage
-    const imageRef = storage.child(fileName);
+    const storageRef = await ref(storage, fileName);
     // Step 2. Upload the file in the bucket storage
-    const snapshot = await imageRef.put(buffer);
+    const snapshot = await uploadBytesResumable(storageRef, buffer, { contentType: 'image/jpeg' });
     // Step 3. Grab the public url
-    const downloadURL = await snapshot.ref.getDownloadURL();
+    const downloadURL = await getDownloadURL(snapshot.ref);
 
     return downloadURL;
 };
